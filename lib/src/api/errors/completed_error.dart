@@ -1,0 +1,1 @@
+class ObservableDisposedError extends Error {}
