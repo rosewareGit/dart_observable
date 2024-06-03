@@ -1,5 +1,5 @@
-import '../../../dart_observable.dart';
-import '../../core/rx/num/rx_double.dart';
+import '../../../../dart_observable.dart';
+import '../../../core/rx/num/rx_double.dart';
 
 abstract class RxDouble implements Rx<double> {
   factory RxDouble(

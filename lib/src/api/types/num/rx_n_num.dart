@@ -1,5 +1,5 @@
 import '../../../../../dart_observable.dart';
-import '../../core/rx/num/rx_n_num.dart';
+import '../../../core/rx/num/rx_n_num.dart';
 
 abstract class RxnNum implements Rxn<num> {
   factory RxnNum({

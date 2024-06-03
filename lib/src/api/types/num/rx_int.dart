@@ -1,5 +1,5 @@
-import '../../../dart_observable.dart';
-import '../../core/rx/num/rx_int.dart';
+import '../../../../dart_observable.dart';
+import '../../../core/rx/num/rx_int.dart';
 
 abstract class RxInt implements Rx<int> {
   factory RxInt(
