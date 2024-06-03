@@ -2,25 +2,18 @@ import '../../../../../dart_observable.dart';
 import '../../_impl.dart';
 
 class OperatorTransform<T, T2> extends RxImpl<T2> {
-  OperatorTransform(
-    super.value, {
-    required this.source,
-    required this.handler,
-  });
-
   final Observable<T> source;
   final void Function(
     Observable<T> source,
     Emitter<T2> emit,
   ) handler;
-
   Disposable? _listener;
 
-  @override
-  void onInit() {
-    super.onInit();
-    source.addDisposeWorker(() => dispose());
-  }
+  OperatorTransform(
+    super.value, {
+    required this.source,
+    required this.handler,
+  });
 
   @override
   void onActive() {
@@ -34,9 +27,10 @@ class OperatorTransform<T, T2> extends RxImpl<T2> {
     _stopListener();
   }
 
-  void _stopListener() {
-    _listener?.dispose();
-    _listener = null;
+  @override
+  void onInit() {
+    super.onInit();
+    source.addDisposeWorker(() => dispose());
   }
 
   void _initListener() {
@@ -58,5 +52,10 @@ class OperatorTransform<T, T2> extends RxImpl<T2> {
         dispatchError(error: error, stack: stack);
       },
     );
+  }
+
+  void _stopListener() {
+    _listener?.dispose();
+    _listener = null;
   }
 }

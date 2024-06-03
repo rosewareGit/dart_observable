@@ -4,18 +4,26 @@ import '../result.dart';
 class ObservableSetFromCollections<E, F> extends RxSetResultImpl<E, F> {
   final Iterable<ObservableSetResultUpdater<E, F, dynamic>> observables;
   final FactorySet<E>? factory;
+  final List<Disposable> _listeners = <Disposable>[];
 
   ObservableSetFromCollections({
     required this.observables,
     this.factory,
   }) : super(factory: factory);
 
-  final List<Disposable> _listeners = <Disposable>[];
-
   @override
   void onActive() {
     super.onActive();
     _startCollect();
+  }
+
+  @override
+  Future<void> onInactive() async {
+    await super.onInactive();
+    for (final Disposable listener in _listeners) {
+      await listener.dispose();
+    }
+    _listeners.clear();
   }
 
   @override
@@ -30,15 +38,6 @@ class ObservableSetFromCollections<E, F> extends RxSetResultImpl<E, F> {
         }
       });
     }
-  }
-
-  @override
-  Future<void> onInactive() async {
-    await super.onInactive();
-    for (final Disposable listener in _listeners) {
-      await listener.dispose();
-    }
-    _listeners.clear();
   }
 
   void _startCollect() {

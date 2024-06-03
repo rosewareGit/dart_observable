@@ -29,12 +29,14 @@ sealed class ObservableListResultChange<E, F> {
   }
 }
 
-class ObservableListResultChangeUndefined<E, F> extends ObservableListResultChange<E, F> {
-  final List<E> removedItems;
+class ObservableListResultChangeData<E, F> extends ObservableListResultChange<E, F> {
+  final ObservableListChange<E> change;
+  final UnmodifiableListView<E> data;
 
-  ObservableListResultChangeUndefined({
-    final List<E>? removedItems,
-  }) : removedItems = removedItems ?? <E>[];
+  ObservableListResultChangeData({
+    required this.change,
+    required this.data,
+  });
 }
 
 class ObservableListResultChangeFailure<E, F> extends ObservableListResultChange<E, F> {
@@ -47,14 +49,12 @@ class ObservableListResultChangeFailure<E, F> extends ObservableListResultChange
   }) : removedItems = removedItems ?? <E>[];
 }
 
-class ObservableListResultChangeData<E, F> extends ObservableListResultChange<E, F> {
-  final ObservableListChange<E> change;
-  final UnmodifiableListView<E> data;
+class ObservableListResultChangeUndefined<E, F> extends ObservableListResultChange<E, F> {
+  final List<E> removedItems;
 
-  ObservableListResultChangeData({
-    required this.change,
-    required this.data,
-  });
+  ObservableListResultChangeUndefined({
+    final List<E>? removedItems,
+  }) : removedItems = removedItems ?? <E>[];
 }
 
 sealed class ObservableListResultState<E, F> implements CollectionState<E, ObservableListResultChange<E, F>> {
@@ -99,8 +99,10 @@ sealed class ObservableListResultState<E, F> implements CollectionState<E, Obser
   }
 }
 
-abstract class ObservableListResultStateUndefined<E, F> extends ObservableListResultState<E, F> {
-  List<E> get removedItems;
+abstract class ObservableListResultStateData<E, F> extends ObservableListResultState<E, F> {
+  ObservableListChange<E> get change;
+
+  UnmodifiableListView<E> get data;
 }
 
 abstract class ObservableListResultStateFailure<E, F> extends ObservableListResultState<E, F> {
@@ -109,8 +111,6 @@ abstract class ObservableListResultStateFailure<E, F> extends ObservableListResu
   List<E> get removedItems;
 }
 
-abstract class ObservableListResultStateData<E, F> extends ObservableListResultState<E, F> {
-  UnmodifiableListView<E> get data;
-
-  ObservableListChange<E> get change;
+abstract class ObservableListResultStateUndefined<E, F> extends ObservableListResultState<E, F> {
+  List<E> get removedItems;
 }

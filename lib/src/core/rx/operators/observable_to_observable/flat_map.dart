@@ -17,12 +17,6 @@ class OperatorFlatMap<T, T2> extends RxImpl<T2> {
   }) : super(mapper(source).value);
 
   @override
-  void onInit() {
-    super.onInit();
-    source.addDisposeWorker(() => dispose());
-  }
-
-  @override
   void onActive() {
     super.onActive();
     _initListener();
@@ -32,6 +26,20 @@ class OperatorFlatMap<T, T2> extends RxImpl<T2> {
   Future<void> onInactive() async {
     await super.onInactive();
     await _cancelListener();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    source.addDisposeWorker(() => dispose());
+  }
+
+  Future<void> _cancelListener() async {
+    _listener?.dispose();
+    _intermediateListener?.dispose();
+    _listener = null;
+    _intermediateListener = null;
+    _activeRxIntermediate = null;
   }
 
   void _initListener() {
@@ -58,13 +66,5 @@ class OperatorFlatMap<T, T2> extends RxImpl<T2> {
         }
       },
     );
-  }
-
-  Future<void> _cancelListener() async {
-    _listener?.dispose();
-    _intermediateListener?.dispose();
-    _listener = null;
-    _intermediateListener = null;
-    _activeRxIntermediate = null;
   }
 }

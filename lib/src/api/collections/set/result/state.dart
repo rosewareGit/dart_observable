@@ -91,6 +91,13 @@ class ObservableSetResultChangeUndefined<E, F> extends ObservableSetResultChange
 sealed class ObservableSetResultState<E, F> extends CollectionState<E, ObservableSetResultChange<E, F>> {
   ObservableSetResultState();
 
+  factory ObservableSetResultState.data({
+    required final Set<E> data,
+    required final ObservableSetChange<E> change,
+  }) {
+    return RxSetResultStateData<E, F>(data, change);
+  }
+
   factory ObservableSetResultState.failure(
     final F failure, {
     final Set<E>? removedItems,
@@ -102,13 +109,6 @@ sealed class ObservableSetResultState<E, F> extends CollectionState<E, Observabl
     final Set<E>? removedItems,
   }) {
     return RxSetResultStateUndefined<E, F>(removedItems: removedItems ?? <E>{});
-  }
-
-  factory ObservableSetResultState.data({
-    required final Set<E> data,
-    required final ObservableSetChange<E> change,
-  }) {
-    return RxSetResultStateData<E, F>(data, change);
   }
 
   R fold<R>({

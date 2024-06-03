@@ -7,6 +7,30 @@ sealed class SnapshotResult<T, F> {
 
   factory SnapshotResult.undefined() = _SnapshotResultUndefined<T, F>;
 
+  F? get failure {
+    return fold(
+      onSuccess: (final _) => null,
+      onUndefined: () => null,
+      onFailure: (final F failure) => failure,
+    );
+  }
+
+  bool get isUndefined {
+    return fold(
+      onSuccess: (final _) => false,
+      onUndefined: () => true,
+      onFailure: (final _) => false,
+    );
+  }
+
+  T? get success {
+    return fold(
+      onSuccess: (final T data) => data,
+      onUndefined: () => null,
+      onFailure: (final _) => null,
+    );
+  }
+
   R fold<R>({
     required final R Function(T data) onSuccess,
     required final R Function() onUndefined,
@@ -41,30 +65,6 @@ sealed class SnapshotResult<T, F> {
         break;
     }
   }
-
-  bool get isUndefined {
-    return fold(
-      onSuccess: (final _) => false,
-      onUndefined: () => true,
-      onFailure: (final _) => false,
-    );
-  }
-
-  T? get success {
-    return fold(
-      onSuccess: (final T data) => data,
-      onUndefined: () => null,
-      onFailure: (final _) => null,
-    );
-  }
-
-  F? get failure {
-    return fold(
-      onSuccess: (final _) => null,
-      onUndefined: () => null,
-      onFailure: (final F failure) => failure,
-    );
-  }
 }
 
 class _SnapshotResultData<T, F> extends SnapshotResult<T, F> {
@@ -73,12 +73,12 @@ class _SnapshotResultData<T, F> extends SnapshotResult<T, F> {
   _SnapshotResultData(this.data);
 
   @override
+  int get hashCode => data.hashCode;
+
+  @override
   bool operator ==(final Object other) {
     return other is _SnapshotResultData<T, F> && other.data == data;
   }
-
-  @override
-  int get hashCode => data.hashCode;
 }
 
 class _SnapshotResultFailure<T, F> extends SnapshotResult<T, F> {
@@ -88,20 +88,20 @@ class _SnapshotResultFailure<T, F> extends SnapshotResult<T, F> {
   _SnapshotResultFailure(this.failure);
 
   @override
+  int get hashCode => failure.hashCode;
+
+  @override
   bool operator ==(final Object other) {
     return other is _SnapshotResultFailure<T, F> && other.failure == failure;
   }
-
-  @override
-  int get hashCode => failure.hashCode;
 }
 
 class _SnapshotResultUndefined<T, F> extends SnapshotResult<T, F> {
   @override
+  int get hashCode => 0;
+
+  @override
   bool operator ==(final Object other) {
     return other is _SnapshotResultUndefined<T, F>;
   }
-
-  @override
-  int get hashCode => 0;
 }

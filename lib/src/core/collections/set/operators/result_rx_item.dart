@@ -24,6 +24,12 @@ class OperatorObservableSetResultRxItem<E, F> extends RxnImpl<E> {
         );
 
   @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
+
+  @override
   Future<void> onInactive() async {
     await super.onInactive();
     _cancelListener();
@@ -35,12 +41,6 @@ class OperatorObservableSetResultRxItem<E, F> extends RxnImpl<E> {
       return dispose();
     });
     super.onInit();
-  }
-
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
   }
 
   void _cancelListener() {

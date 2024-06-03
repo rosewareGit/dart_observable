@@ -184,6 +184,11 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
     );
   }
 
+  @override
+  List<V> toList() {
+    return _value._map.values.toList();
+  }
+
   ObservableMap<K, V> _doFilter(
     final bool Function(K key, V value) predicate,
     final FactoryMap<K, V>? factory,
@@ -260,11 +265,6 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
         );
       },
     );
-  }
-
-  @override
-  List<V> toList() {
-    return _value._map.values.toList();
   }
 }
 

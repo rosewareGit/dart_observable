@@ -39,6 +39,12 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   })  : _factory = factory ?? _defaultMapFactory(),
         super(state);
 
+  RxMapResultImpl.state(
+    final ObservableMapResultState<K, V, F> state, {
+    final Map<K, V> Function(Map<K, V>? items)? factory,
+  })  : _factory = factory ?? _defaultMapFactory(),
+        super(state);
+
   RxMapResultImpl.success(
     final Map<K, V> data, {
     final Map<K, V> Function(Map<K, V>? items)? factory,
@@ -54,12 +60,6 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
         super(
           _MutableStateUndefined<K, V, F>(<K, V>{}),
         );
-
-  RxMapResultImpl.state(
-    final ObservableMapResultState<K, V, F> state, {
-    final Map<K, V> Function(Map<K, V>? items)? factory,
-  })  : _factory = factory ?? _defaultMapFactory(),
-        super(state);
 
   @override
   set failure(final F error) {
@@ -386,6 +386,12 @@ class _MutableStateData<K, V, F> extends ObservableMapResultStateData<K, V, F> {
   }
 
   @override
+  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeData<K, V, F>(
+        change: dataChange,
+        data: data,
+      );
+
+  @override
   bool operator ==(final Object other) {
     if (identical(this, other)) return true;
 
@@ -399,12 +405,6 @@ class _MutableStateData<K, V, F> extends ObservableMapResultStateData<K, V, F> {
       data: data,
     );
   }
-
-  @override
-  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeData<K, V, F>(
-        change: dataChange,
-        data: data,
-      );
 }
 
 class _MutableStateFailure<K, V, F> extends ObservableMapResultStateFailure<K, V, F> {
@@ -422,6 +422,12 @@ class _MutableStateFailure<K, V, F> extends ObservableMapResultStateFailure<K, V
   }
 
   @override
+  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeFailure<K, V, F>(
+        failure: failure,
+        removedItems: removedItems,
+      );
+
+  @override
   bool operator ==(final Object other) {
     if (identical(this, other)) return true;
 
@@ -435,12 +441,6 @@ class _MutableStateFailure<K, V, F> extends ObservableMapResultStateFailure<K, V
       removedItems: removedItems,
     );
   }
-
-  @override
-  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeFailure<K, V, F>(
-        failure: failure,
-        removedItems: removedItems,
-      );
 }
 
 class _MutableStateUndefined<K, V, F> extends ObservableMapResultStateUndefined<K, V, F> {
@@ -455,6 +455,11 @@ class _MutableStateUndefined<K, V, F> extends ObservableMapResultStateUndefined<
   }
 
   @override
+  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeUndefined<K, V, F>(
+        removedItems: removedItems,
+      );
+
+  @override
   bool operator ==(final Object other) {
     if (identical(this, other)) return true;
 
@@ -465,9 +470,4 @@ class _MutableStateUndefined<K, V, F> extends ObservableMapResultStateUndefined<
   ObservableMapResultChange<K, V, F> asChange() {
     return ObservableMapResultChangeUndefined<K, V, F>(removedItems: removedItems);
   }
-
-  @override
-  ObservableMapResultChange<K, V, F> get lastChange => ObservableMapResultChangeUndefined<K, V, F>(
-        removedItems: removedItems,
-      );
 }

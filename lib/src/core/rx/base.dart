@@ -267,7 +267,7 @@ abstract class RxBase<T>
     final bool hadListeners = _listeners.isNotEmpty;
     _subscriptionAdd(listener);
 
-    if(hadListeners == false) {
+    if (hadListeners == false) {
       _dispatchActive();
     }
 

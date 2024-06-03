@@ -4,6 +4,9 @@ import '../../../../../dart_observable.dart';
 import '../map.dart';
 
 class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
+  final Stream<ObservableMapUpdateAction<K, V>> stream;
+  StreamSubscription<ObservableMapUpdateAction<K, V>>? _subscription;
+
   ObservableMapFromStream({
     required this.stream,
     final Map<K, V>? initial,
@@ -12,9 +15,6 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
           initial: initial,
           factory: factory,
         );
-
-  final Stream<ObservableMapUpdateAction<K, V>> stream;
-  StreamSubscription<ObservableMapUpdateAction<K, V>>? _subscription;
 
   @override
   void onActive() {

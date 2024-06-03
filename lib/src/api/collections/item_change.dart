@@ -8,13 +8,13 @@ class ObservableItemChange<E> {
   });
 
   @override
+  int get hashCode => oldValue.hashCode ^ newValue.hashCode;
+
+  @override
   bool operator ==(final Object other) {
     if (identical(this, other)) return true;
     if (other.runtimeType != runtimeType) return false;
     final ObservableItemChange<E> typedOther = other as ObservableItemChange<E>;
     return typedOther.oldValue == oldValue && typedOther.newValue == newValue;
   }
-
-  @override
-  int get hashCode => oldValue.hashCode ^ newValue.hashCode;
 }

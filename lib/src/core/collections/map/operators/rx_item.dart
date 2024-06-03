@@ -15,6 +15,12 @@ class OperatorObservableMapRxItem<K, V> extends RxnImpl<V> {
         );
 
   @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
+
+  @override
   Future<void> onInactive() async {
     await super.onInactive();
     _cancelListener();
@@ -26,12 +32,6 @@ class OperatorObservableMapRxItem<K, V> extends RxnImpl<V> {
       return dispose();
     });
     super.onInit();
-  }
-
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
   }
 
   void _cancelListener() {

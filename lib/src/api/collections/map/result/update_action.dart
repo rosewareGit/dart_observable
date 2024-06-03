@@ -27,26 +27,14 @@ sealed class ObservableMapResultUpdateAction<K, V, F> extends ObservableCollecti
   }
 }
 
-class ObservableMapResultUpdateActionUndefined<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
-  ObservableMapResultUpdateActionUndefined();
-}
-
-class ObservableMapResultUpdateActionFailure<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
-  ObservableMapResultUpdateActionFailure({
-    required this.failure,
-  });
-
-  final F failure;
-}
-
 class ObservableMapResultUpdateActionData<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
+  final Map<K, V> addItems;
+
+  final Iterable<K> removeItems;
   ObservableMapResultUpdateActionData({
     required this.removeItems,
     required this.addItems,
   });
-
-  final Map<K, V> addItems;
-  final Iterable<K> removeItems;
 
   bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
 
@@ -57,4 +45,16 @@ class ObservableMapResultUpdateActionData<K, V, F> extends ObservableMapResultUp
       removeItems: removeItems,
     );
   }
+}
+
+class ObservableMapResultUpdateActionFailure<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
+  final F failure;
+
+  ObservableMapResultUpdateActionFailure({
+    required this.failure,
+  });
+}
+
+class ObservableMapResultUpdateActionUndefined<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
+  ObservableMapResultUpdateActionUndefined();
 }

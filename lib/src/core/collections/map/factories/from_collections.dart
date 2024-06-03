@@ -4,18 +4,26 @@ import '../result.dart';
 class ObservableMapFromCollections<K, V, F> extends RxMapResultImpl<K, V, F> {
   final Iterable<ObservableMapResultUpdater<K, V, F, dynamic>> observables;
   final FactoryMap<K, V>? factory;
+  final List<Disposable> _listeners = <Disposable>[];
 
   ObservableMapFromCollections({
     required this.observables,
     this.factory,
   }) : super(factory: factory);
 
-  final List<Disposable> _listeners = <Disposable>[];
-
   @override
   void onActive() {
     super.onActive();
     _startCollect();
+  }
+
+  @override
+  Future<void> onInactive() async {
+    await super.onInactive();
+    for (final Disposable listener in _listeners) {
+      await listener.dispose();
+    }
+    _listeners.clear();
   }
 
   @override
@@ -30,15 +38,6 @@ class ObservableMapFromCollections<K, V, F> extends RxMapResultImpl<K, V, F> {
         }
       });
     }
-  }
-
-  @override
-  Future<void> onInactive() async {
-    await super.onInactive();
-    for (final Disposable listener in _listeners) {
-      await listener.dispose();
-    }
-    _listeners.clear();
   }
 
   void _startCollect() {

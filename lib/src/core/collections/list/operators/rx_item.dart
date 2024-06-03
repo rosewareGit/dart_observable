@@ -17,6 +17,12 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
         );
 
   @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
+
+  @override
   Future<void> onInactive() async {
     await super.onInactive();
     _cancelListener();
@@ -30,15 +36,16 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
     super.onInit();
   }
 
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
-  }
-
   void _cancelListener() {
     _listener?.dispose();
     _listener = null;
+  }
+
+  void _handleInitialState() {
+    final E? initial = source.value.listView.length > index ? source.value.listView[index] : null;
+    if (initial != null) {
+      value = initial;
+    }
   }
 
   void _initListener() {
@@ -71,12 +78,5 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
         }
       },
     );
-  }
-
-  void _handleInitialState() {
-    final E? initial = source.value.listView.length > index ? source.value.listView[index] : null;
-    if (initial != null) {
-      value = initial;
-    }
   }
 }

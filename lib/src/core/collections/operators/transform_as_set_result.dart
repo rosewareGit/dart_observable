@@ -12,11 +12,19 @@ class OperatorCollectionsTransformAsSetResult<E, E2, F, C, T extends CollectionS
 
   Disposable? _listener;
 
+  late final List<C> _bufferedChanges = <C>[];
+
   OperatorCollectionsTransformAsSetResult({
     required this.source,
     required this.transformFn,
     final Set<E2> Function(Iterable<E2>? items)? factory,
   }) : super(factory: factory);
+
+  @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
 
   @override
   void onInit() {
@@ -27,18 +35,10 @@ class OperatorCollectionsTransformAsSetResult<E, E2, F, C, T extends CollectionS
     super.onInit();
   }
 
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
-  }
-
   Future<void> _cancelListener() async {
     await _listener?.dispose();
     _listener = null;
   }
-
-  late final List<C> _bufferedChanges = <C>[];
 
   void _initListener() {
     if (_listener != null) {

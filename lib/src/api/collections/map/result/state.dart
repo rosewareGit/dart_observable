@@ -3,6 +3,35 @@ import 'dart:collection';
 import '../../../../../dart_observable.dart';
 
 sealed class ObservableMapResultChange<K, V, F> {
+  ObservableMapResultUpdateAction<K, V, F> get asAction {
+    return fold(
+      onUndefined: (_) => ObservableMapResultUpdateActionUndefined<K, V, F>(),
+      onFailure: (final F failure, final Map<K, V> removedItems) => ObservableMapResultUpdateActionFailure<K, V, F>(
+        failure: failure,
+      ),
+      onSuccess: (final UnmodifiableMapView<K, V> data, final ObservableMapChange<K, V> change) =>
+          ObservableMapResultUpdateActionData<K, V, F>(
+        removeItems: change.removed.keys,
+        addItems: data,
+      ),
+    );
+  }
+
+  R fold<R>({
+    required final R Function(Map<K, V> removedItems) onUndefined,
+    required final R Function(F failure, Map<K, V> removedItems) onFailure,
+    required final R Function(UnmodifiableMapView<K, V> data, ObservableMapChange<K, V> change) onSuccess,
+  }) {
+    switch (this) {
+      case final ObservableMapResultChangeUndefined<K, V, F> undefined:
+        return onUndefined(undefined.removedItems);
+      case final ObservableMapResultChangeFailure<K, V, F> failure:
+        return onFailure(failure.failure, failure.removedItems);
+      case final ObservableMapResultChangeData<K, V, F> data:
+        return onSuccess(data.data, data.change);
+    }
+  }
+
   void when({
     final void Function(Map<K, V> removedItems)? onUndefined,
     final void Function(F failure, Map<K, V> removedItems)? onFailure,
@@ -25,35 +54,6 @@ sealed class ObservableMapResultChange<K, V, F> {
         }
         break;
     }
-  }
-
-  R fold<R>({
-    required final R Function(Map<K, V> removedItems) onUndefined,
-    required final R Function(F failure, Map<K, V> removedItems) onFailure,
-    required final R Function(UnmodifiableMapView<K, V> data, ObservableMapChange<K, V> change) onSuccess,
-  }) {
-    switch (this) {
-      case final ObservableMapResultChangeUndefined<K, V, F> undefined:
-        return onUndefined(undefined.removedItems);
-      case final ObservableMapResultChangeFailure<K, V, F> failure:
-        return onFailure(failure.failure, failure.removedItems);
-      case final ObservableMapResultChangeData<K, V, F> data:
-        return onSuccess(data.data, data.change);
-    }
-  }
-
-  ObservableMapResultUpdateAction<K, V, F> get asAction {
-    return fold(
-      onUndefined: (_) => ObservableMapResultUpdateActionUndefined<K, V, F>(),
-      onFailure: (final F failure, final Map<K, V> removedItems) => ObservableMapResultUpdateActionFailure<K, V, F>(
-        failure: failure,
-      ),
-      onSuccess: (final UnmodifiableMapView<K, V> data, final ObservableMapChange<K, V> change) =>
-          ObservableMapResultUpdateActionData<K, V, F>(
-        removeItems: change.removed.keys,
-        addItems: data,
-      ),
-    );
   }
 }
 

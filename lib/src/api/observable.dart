@@ -3,8 +3,8 @@ import 'dart:async';
 import '../../dart_observable.dart';
 
 typedef Emitter<T> = void Function(T value);
-typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FactoryMap<K, V> = Map<K, V> Function(Map<K, V>? items);
+typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FutureWorker = FutureOr<void> Function();
 
 abstract interface class Observable<T> {

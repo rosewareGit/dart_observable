@@ -36,8 +36,6 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
     );
   }
 
-  void applyAction(final ObservableMapUpdateAction<K, V> action);
-
   set data(final Map<K, V> value);
 
   operator []=(final K key, final V value);
@@ -45,6 +43,8 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
   void add(final K key, final V value);
 
   void addAll(final Map<K, V> other);
+
+  void applyAction(final ObservableMapUpdateAction<K, V> action);
 
   void clear();
 

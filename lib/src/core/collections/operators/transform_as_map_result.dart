@@ -17,6 +17,12 @@ class OperatorCollectionsTransformAsMapResult<E, C, T extends CollectionState<E,
   }) : super(factory: factory);
 
   @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
+
+  @override
   Future<void> onInactive() async {
     await super.onInactive();
     _cancelListener();
@@ -28,12 +34,6 @@ class OperatorCollectionsTransformAsMapResult<E, C, T extends CollectionState<E,
       return dispose();
     });
     super.onInit();
-  }
-
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
   }
 
   void _cancelListener() {

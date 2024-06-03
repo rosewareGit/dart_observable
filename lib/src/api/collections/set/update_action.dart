@@ -2,14 +2,13 @@ import '../update_action.dart';
 import 'change.dart';
 
 class ObservableSetUpdateAction<E> extends ObservableCollectionUpdateAction {
+  final Set<E> addItems;
+  final Set<E> removeItems;
+
   ObservableSetUpdateAction({
     required this.removeItems,
     required this.addItems,
   });
-
-
-  final Set<E> addItems;
-  final Set<E> removeItems;
 
   bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
 

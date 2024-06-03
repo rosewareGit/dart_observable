@@ -11,16 +11,6 @@ abstract interface class ObservableN<T> implements Observable<T?> {
     );
   }
 
-  factory ObservableN.fromStream({
-    required final Stream<T?> stream,
-    final bool distinct = true,
-  }) {
-    return Rxn<T>.fromStream(
-      stream: stream,
-      distinct: distinct,
-    );
-  }
-
   factory ObservableN.fromFuture({
     final Future<T>? future,
     final Future<T> Function()? futureProvider,
@@ -29,6 +19,16 @@ abstract interface class ObservableN<T> implements Observable<T?> {
     return Rxn<T>.fromFuture(
       future: future,
       futureProvider: futureProvider,
+      distinct: distinct,
+    );
+  }
+
+  factory ObservableN.fromStream({
+    required final Stream<T?> stream,
+    final bool distinct = true,
+  }) {
+    return Rxn<T>.fromStream(
+      stream: stream,
       distinct: distinct,
     );
   }

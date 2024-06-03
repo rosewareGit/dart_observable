@@ -7,13 +7,16 @@ class RxSetState<E> extends ObservableSetState<E> {
 
   final ObservableSetChange<E> change;
 
+  RxSetState(final Set<E> set, this.change) : data = set;
+
   RxSetState.initial(final Set<E> initial)
       : data = initial,
         change = ObservableSetChange<E>(
           added: initial,
         );
 
-  RxSetState(final Set<E> set, this.change) : data = set;
+  @override
+  ObservableSetChange<E> get lastChange => change;
 
   @override
   UnmodifiableSetView<E> get setView => UnmodifiableSetView<E>(data);
@@ -22,7 +25,4 @@ class RxSetState<E> extends ObservableSetState<E> {
   ObservableSetChange<E> asChange() {
     return ObservableSetChange<E>(added: data);
   }
-
-  @override
-  ObservableSetChange<E> get lastChange => change;
 }

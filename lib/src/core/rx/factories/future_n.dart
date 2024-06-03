@@ -1,6 +1,9 @@
 import '../_impl.dart';
 
 class FutureObservableN<T> extends RxnImpl<T> {
+  final Future<T?>? future;
+  final Future<T?> Function()? futureProvider;
+
   FutureObservableN({
     this.future,
     this.futureProvider,
@@ -9,9 +12,6 @@ class FutureObservableN<T> extends RxnImpl<T> {
   }) : super(
           distinct: distinct,
         );
-
-  final Future<T?>? future;
-  final Future<T?> Function()? futureProvider;
 
   @override
   void onActive() {

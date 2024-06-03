@@ -27,26 +27,14 @@ sealed class ObservableSetResultUpdateAction<E, F> extends ObservableCollectionU
   }
 }
 
-class ObservableSetResultUpdateActionUndefined<E, F> extends ObservableSetResultUpdateAction<E, F> {
-  ObservableSetResultUpdateActionUndefined();
-}
-
-class ObservableSetResultUpdateActionFailure<E, F> extends ObservableSetResultUpdateAction<E, F> {
-  ObservableSetResultUpdateActionFailure({
-    required this.failure,
-  });
-
-  final F failure;
-}
-
 class ObservableSetResultUpdateActionData<E, F> extends ObservableSetResultUpdateAction<E, F> {
+  final Set<E> addItems;
+  final Set<E> removeItems;
+
   ObservableSetResultUpdateActionData({
     required this.removeItems,
     required this.addItems,
   });
-
-  final Set<E> addItems;
-  final Set<E> removeItems;
 
   bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
 
@@ -57,4 +45,16 @@ class ObservableSetResultUpdateActionData<E, F> extends ObservableSetResultUpdat
       removeItems: removeItems,
     );
   }
+}
+
+class ObservableSetResultUpdateActionFailure<E, F> extends ObservableSetResultUpdateAction<E, F> {
+  final F failure;
+
+  ObservableSetResultUpdateActionFailure({
+    required this.failure,
+  });
+}
+
+class ObservableSetResultUpdateActionUndefined<E, F> extends ObservableSetResultUpdateAction<E, F> {
+  ObservableSetResultUpdateActionUndefined();
 }

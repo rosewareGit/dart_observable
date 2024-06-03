@@ -3,6 +3,11 @@ import 'dart:async';
 import '../../../dart_observable.dart';
 
 class ObservableListener<T> implements Disposable {
+  final FutureOr<void> Function(ObservableListener<T> disposable) _disposer;
+  final void Function(Observable<T> source)? _onChange;
+  final void Function(dynamic error, StackTrace stack)? _onError;
+  final Zone _zone;
+
   ObservableListener({
     required final FutureOr<void> Function(ObservableListener<T> disposable) disposer,
     final void Function(Observable<T> source)? onChange,
@@ -23,14 +28,9 @@ class ObservableListener<T> implements Disposable {
         _onChange = _registerHandler<T>(_zone, onChange),
         _onError = _registerErrorHandler(_zone, onError);
 
-  final FutureOr<void> Function(ObservableListener<T> disposable) _disposer;
-  final void Function(Observable<T> source)? _onChange;
-  final void Function(dynamic error, StackTrace stack)? _onError;
-  final Zone _zone;
-
   @override
   Future<void> dispose() async {
-   await _disposer(this);
+    await _disposer(this);
   }
 
   void notify(final Observable<T> source) {

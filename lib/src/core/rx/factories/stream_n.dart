@@ -3,6 +3,9 @@ import 'dart:async';
 import '../_impl.dart';
 
 class StreamObservableN<T> extends RxnImpl<T> {
+  final Stream<T?> stream;
+  StreamSubscription<T?>? _subscription;
+
   StreamObservableN({
     required this.stream,
     final bool lazy = true,
@@ -10,9 +13,6 @@ class StreamObservableN<T> extends RxnImpl<T> {
   }) : super(
           distinct: distinct,
         );
-
-  final Stream<T?> stream;
-  StreamSubscription<T?>? _subscription;
 
   @override
   void onActive() {

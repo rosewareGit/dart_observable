@@ -5,7 +5,7 @@ sealed class ObservableListResultUpdateAction<E, F> extends ObservableCollection
   void when({
     final void Function()? onUndefined,
     final void Function(F failure)? onFailure,
-    final void Function(ObservableListResultUpdateActionData<E,F> data)? onData,
+    final void Function(ObservableListResultUpdateActionData<E, F> data)? onData,
   }) {
     switch (this) {
       case ObservableListResultUpdateActionUndefined<E, F> _:
@@ -27,27 +27,7 @@ sealed class ObservableListResultUpdateAction<E, F> extends ObservableCollection
   }
 }
 
-class ObservableListResultUpdateActionUndefined<E, F> extends ObservableListResultUpdateAction<E, F> {
-  ObservableListResultUpdateActionUndefined();
-}
-
-class ObservableListResultUpdateActionFailure<E, F> extends ObservableListResultUpdateAction<E, F> {
-  ObservableListResultUpdateActionFailure({
-    required this.failure,
-  });
-
-  final F failure;
-}
-
 class ObservableListResultUpdateActionData<E, F> extends ObservableListResultUpdateAction<E, F> {
-  ObservableListResultUpdateActionData({
-    final Set<int>? removeItems,
-    final Map<int, E>? updateItemAtPosition,
-    final List<MapEntry<int?, Iterable<E>>>? addItems,
-  })  : removeItems = removeItems ?? <int>{},
-        updateItemAtPosition = updateItemAtPosition ?? <int, E>{},
-        insertItemAtPosition = addItems ?? <MapEntry<int?, Iterable<E>>>[];
-
   // Contains the items to add to the list at the given position.
   // If the position is null, the item is added at the end of the list.
   final List<MapEntry<int?, Iterable<E>>> insertItemAtPosition;
@@ -57,6 +37,14 @@ class ObservableListResultUpdateActionData<E, F> extends ObservableListResultUpd
 
   // Contains the indexes to be removed from the list.
   final Set<int> removeItems;
+
+  ObservableListResultUpdateActionData({
+    final Set<int>? removeItems,
+    final Map<int, E>? updateItemAtPosition,
+    final List<MapEntry<int?, Iterable<E>>>? addItems,
+  })  : removeItems = removeItems ?? <int>{},
+        updateItemAtPosition = updateItemAtPosition ?? <int, E>{},
+        insertItemAtPosition = addItems ?? <MapEntry<int?, Iterable<E>>>[];
 
   bool get isEmpty => removeItems.isEmpty && insertItemAtPosition.isEmpty && updateItemAtPosition.isEmpty;
 
@@ -71,4 +59,16 @@ class ObservableListResultUpdateActionData<E, F> extends ObservableListResultUpd
     // TODO
     return ObservableListChange();
   }
+}
+
+class ObservableListResultUpdateActionFailure<E, F> extends ObservableListResultUpdateAction<E, F> {
+  final F failure;
+
+  ObservableListResultUpdateActionFailure({
+    required this.failure,
+  });
+}
+
+class ObservableListResultUpdateActionUndefined<E, F> extends ObservableListResultUpdateAction<E, F> {
+  ObservableListResultUpdateActionUndefined();
 }

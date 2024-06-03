@@ -25,12 +25,6 @@ class OperatorFlatMapAsSetResult<T, T2, F> extends RxSetResultImpl<T2, F> {
         );
 
   @override
-  void onInit() {
-    super.onInit();
-    source.addDisposeWorker(() => dispose());
-  }
-
-  @override
   void onActive() {
     super.onActive();
     _initListener();
@@ -40,6 +34,20 @@ class OperatorFlatMapAsSetResult<T, T2, F> extends RxSetResultImpl<T2, F> {
   Future<void> onInactive() async {
     await super.onInactive();
     await _cancelListener();
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    source.addDisposeWorker(() => dispose());
+  }
+
+  Future<void> _cancelListener() async {
+    _listener?.dispose();
+    _intermediateListener?.dispose();
+    _listener = null;
+    _intermediateListener = null;
+    _activeRxIntermediate = null;
   }
 
   void _initListener() {
@@ -76,13 +84,5 @@ class OperatorFlatMapAsSetResult<T, T2, F> extends RxSetResultImpl<T2, F> {
         }
       },
     );
-  }
-
-  Future<void> _cancelListener() async {
-    _listener?.dispose();
-    _intermediateListener?.dispose();
-    _listener = null;
-    _intermediateListener = null;
-    _activeRxIntermediate = null;
   }
 }

@@ -4,8 +4,8 @@ import '../_impl.dart';
 
 class StreamObservable<T> extends RxImpl<T> {
   final Stream<T> stream;
-
   StreamSubscription<T>? _subscription;
+
   StreamObservable({
     required this.stream,
     required final T initial,

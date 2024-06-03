@@ -1,14 +1,12 @@
 class ObservableSetChange<E> {
+  final Set<E> added;
+  final Set<E> removed;
+
   ObservableSetChange({
     final Set<E>? added,
     final Set<E>? removed,
   })  : added = added ?? <E>{},
         removed = removed ?? <E>{};
-
-  final Set<E> added;
-  final Set<E> removed;
-
-  bool get isEmpty => added.isEmpty && removed.isEmpty;
 
   factory ObservableSetChange.fromDiff(
     final Set<E> previous,
@@ -22,6 +20,8 @@ class ObservableSetChange<E> {
       removed: removed,
     );
   }
+
+  bool get isEmpty => added.isEmpty && removed.isEmpty;
 
   static ObservableSetChange<E> fromAction<E>({
     required final Set<E> sourceToUpdate,

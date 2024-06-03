@@ -8,7 +8,6 @@ class OperatorCollectionsFlatMapAsSet<E, E2, C, T extends CollectionState<E, C>>
   Disposable? _listener;
 
   final Map<E, ObservableSet<E2>> _activeObservables = <E, ObservableSet<E2>>{};
-
   final Map<E, Disposable> _activeObservablesDisposables = <E, Disposable>{};
 
   OperatorCollectionsFlatMapAsSet({

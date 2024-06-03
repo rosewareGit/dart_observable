@@ -1,12 +1,6 @@
 import '../../../dart_observable.dart';
 
 class DartObservableGlobalMetrics {
-  factory DartObservableGlobalMetrics() {
-    return _instance;
-  }
-
-  DartObservableGlobalMetrics._();
-
   static final DartObservableGlobalMetrics _instance = DartObservableGlobalMetrics._();
 
   late final RxMap<String, List<DateTime>> _rxNotifies = RxMap<String, List<DateTime>>();
@@ -16,9 +10,18 @@ class DartObservableGlobalMetrics {
 
   final Set<String> _ignoredPaths = <String>{};
 
+  factory DartObservableGlobalMetrics() {
+    return _instance;
+  }
+
+  DartObservableGlobalMetrics._();
+
   ObservableMap<String, List<DateTime>> get rxActives => _rxActives;
+
   ObservableMap<String, List<DateTime>> get rxDisposes => _rxDisposes;
+
   ObservableMap<String, List<DateTime>> get rxInactives => _rxInactives;
+
   ObservableMap<String, List<DateTime>> get rxNotifies => _rxNotifies;
 
   void clearAll() {
@@ -98,11 +101,11 @@ class DartObservableGlobalMetrics {
 
   bool shouldIgnore(final Observable<dynamic> source) {
     final String debugName = source.debugName;
-      for (final String ignoredPath in _ignoredPaths) {
-        if (debugName.contains(ignoredPath)) {
-          return true;
-        }
+    for (final String ignoredPath in _ignoredPaths) {
+      if (debugName.contains(ignoredPath)) {
+        return true;
       }
+    }
 
     return debugName.contains('package:dart_observable/src/api/log/global_metrics.dart');
   }

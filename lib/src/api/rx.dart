@@ -18,6 +18,18 @@ abstract interface class Rx<T> implements Observable<T> {
     );
   }
 
+  factory Rx.combineLatest({
+    required final Iterable<Observable<dynamic>> observables,
+    required final T Function() combiner,
+    final bool distinct = true,
+  }) {
+    return ObservableCombineLatestN<T>(
+      observables: observables,
+      combiner: combiner,
+      distinct: distinct,
+    );
+  }
+
   factory Rx.fromFuture({
     required final T initial,
     final Future<T>? future,
@@ -40,18 +52,6 @@ abstract interface class Rx<T> implements Observable<T> {
     return StreamObservable<T>(
       stream: stream,
       initial: initial,
-      distinct: distinct,
-    );
-  }
-
-  factory Rx.combineLatest({
-    required final Iterable<Observable<dynamic>> observables,
-    required final T Function() combiner,
-    final bool distinct = true,
-  }) {
-    return ObservableCombineLatestN<T>(
-      observables: observables,
-      combiner: combiner,
       distinct: distinct,
     );
   }

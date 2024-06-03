@@ -9,11 +9,19 @@ class OperatorCollectionsTransformAsMap<E, C, T extends CollectionState<E, C>, K
 
   Disposable? _listener;
 
+  late final List<C> _bufferedChanges = <C>[];
+
   OperatorCollectionsTransformAsMap({
     required this.source,
     required this.transformFn,
     final FactoryMap<K, V>? factory,
   }) : super(factory: factory);
+
+  @override
+  void onActive() {
+    super.onActive();
+    _initListener();
+  }
 
   @override
   void onInit() {
@@ -24,18 +32,10 @@ class OperatorCollectionsTransformAsMap<E, C, T extends CollectionState<E, C>, K
     super.onInit();
   }
 
-  @override
-  void onActive() {
-    super.onActive();
-    _initListener();
-  }
-
   Future<void> _cancelListener() async {
     await _listener?.dispose();
     _listener = null;
   }
-
-  late final List<C> _bufferedChanges = <C>[];
 
   void _initListener() {
     if (_listener != null) {

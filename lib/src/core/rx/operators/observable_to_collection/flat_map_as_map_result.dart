@@ -17,12 +17,6 @@ class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
   }) : super.state(mapper(source).value);
 
   @override
-  void onInit() {
-    super.onInit();
-    source.addDisposeWorker(() => dispose());
-  }
-
-  @override
   void onActive() {
     super.onActive();
     _initListener();
@@ -34,8 +28,22 @@ class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
     await _cancelListener();
   }
 
+  @override
+  void onInit() {
+    super.onInit();
+    source.addDisposeWorker(() => dispose());
+  }
+
+  Future<void> _cancelListener() async {
+    _listener?.dispose();
+    _intermediateListener?.dispose();
+    _listener = null;
+    _intermediateListener = null;
+    _activeRxIntermediate = null;
+  }
+
   void _initListener() {
-    if(_listener != null) {
+    if (_listener != null) {
       return;
     }
 
@@ -68,13 +76,5 @@ class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
         }
       },
     );
-  }
-
-  Future<void> _cancelListener() async {
-    _listener?.dispose();
-    _intermediateListener?.dispose();
-    _listener = null;
-    _intermediateListener = null;
-    _activeRxIntermediate = null;
   }
 }

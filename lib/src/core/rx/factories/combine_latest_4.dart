@@ -2,6 +2,13 @@ import '../../../../dart_observable.dart';
 import '../_impl.dart';
 
 class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
+  final Observable<T1> observable1;
+  final Observable<T2> observable2;
+  final Observable<T3> observable3;
+  final Observable<T4> observable4;
+  final R Function(T1 value1, T2 value2, T3 value3, T4 value4) combiner;
+  final List<Disposable> _listeners = <Disposable>[];
+
   ObservableCombineWith4({
     required this.observable1,
     required this.observable2,
@@ -14,14 +21,6 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
           distinct: distinct,
         );
 
-  final Observable<T1> observable1;
-  final Observable<T2> observable2;
-  final Observable<T3> observable3;
-  final Observable<T4> observable4;
-  final R Function(T1 value1, T2 value2, T3 value3, T4 value4) combiner;
-
-  final List<Disposable> _listeners = <Disposable>[];
-
   @override
   void onActive() {
     super.onActive();
@@ -33,7 +32,12 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
     super.onInit();
     // When all disposed, dispose this
     int disposeCount = 0;
-    for (final Observable<dynamic> observable in <Observable<dynamic>>[observable1, observable2, observable3, observable4]) {
+    for (final Observable<dynamic> observable in <Observable<dynamic>>[
+      observable1,
+      observable2,
+      observable3,
+      observable4
+    ]) {
       observable.addDisposeWorker(() {
         disposeCount++;
         if (disposeCount == 4) {
@@ -41,6 +45,19 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
         }
       });
     }
+  }
+
+  void _initListener<T>(final Observable<T> observable) {
+    _listeners.add(
+      observable.listen(
+        onChange: (final _) {
+          value = combiner(observable1.value, observable2.value, observable3.value, observable4.value);
+        },
+        onError: (final dynamic error, final StackTrace stack) {
+          dispatchError(error: error, stack: stack);
+        },
+      ),
+    );
   }
 
   void _startCollect() {
@@ -60,18 +77,5 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
         await listener.dispose();
       }
     });
-  }
-
-  void _initListener<T>(final Observable<T> observable) {
-    _listeners.add(
-      observable.listen(
-        onChange: (final _) {
-          value = combiner(observable1.value, observable2.value, observable3.value, observable4.value);
-        },
-        onError: (final dynamic error, final StackTrace stack) {
-          dispatchError(error: error, stack: stack);
-        },
-      ),
-    );
   }
 }

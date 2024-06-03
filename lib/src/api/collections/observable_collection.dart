@@ -1,23 +1,23 @@
 import '../../../dart_observable.dart';
 
 export 'item_change.dart';
-export 'map/observable.dart';
-export 'map/rx.dart';
 export 'map/change.dart';
+export 'map/observable.dart';
 export 'map/result/observable.dart';
 export 'map/result/rx.dart';
 export 'map/result/state.dart';
+export 'map/rx.dart';
 export 'map/state.dart';
 
 abstract interface class ObservableCollection<E, C, T extends CollectionState<E, C>> implements Observable<T> {
-  ObservableSet<E2> flatMapCollectionAsSet<E2>({
-    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableSet<E2>> Function(C change) sourceProvider,
-    final Set<E2> Function(Iterable<E2>? items)? factory,
-  });
-
   ObservableMap<K, V> flatMapCollectionAsMap<K, V>({
     required final ObservableCollectionFlatMapUpdate<E, K, ObservableMap<K, V>> Function(C change) sourceProvider,
     final FactoryMap<K, V>? factory,
+  });
+
+  ObservableSet<E2> flatMapCollectionAsSet<E2>({
+    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableSet<E2>> Function(C change) sourceProvider,
+    final Set<E2> Function(Iterable<E2>? items)? factory,
   });
 
   ObservableMap<K, V> transformCollectionAsMap<K, V>({

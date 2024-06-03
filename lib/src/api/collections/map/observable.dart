@@ -25,7 +25,6 @@ abstract interface class ObservableMap<K, V>
 
   V? operator [](final K key);
 
-
   bool containsKey(final K key);
 
   ObservableMap<K, V> filterObservableMapAsMap(

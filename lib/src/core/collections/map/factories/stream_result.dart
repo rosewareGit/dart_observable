@@ -4,15 +4,16 @@ import '../../../../../dart_observable.dart';
 import '../result.dart';
 
 class ObservableMapResultFromStream<K, V, F> extends RxMapResultImpl<K, V, F> {
+  final Stream<ObservableMapResultUpdateAction<K, V, F>> stream;
+  final F Function(Object error)? onError;
+
+  StreamSubscription<ObservableMapResultUpdateAction<K, V, F>>? _subscription;
+
   ObservableMapResultFromStream({
     required this.stream,
     this.onError,
     final Map<K, V> Function(Map<K, V>? items)? factory,
   }) : super(factory: factory);
-
-  final Stream<ObservableMapResultUpdateAction<K, V, F>> stream;
-  final F Function(Object error)? onError;
-  StreamSubscription<ObservableMapResultUpdateAction<K, V, F>>? _subscription;
 
   @override
   void onActive() {

@@ -2,6 +2,10 @@ import '../../../../dart_observable.dart';
 import '../_impl.dart';
 
 class ObservableCombineLatestN<T> extends RxImpl<T> {
+  final Iterable<Observable<dynamic>> observables;
+  final T Function() combiner;
+  final List<Disposable> _listeners = <Disposable>[];
+
   ObservableCombineLatestN({
     required this.observables,
     required this.combiner,
@@ -10,11 +14,6 @@ class ObservableCombineLatestN<T> extends RxImpl<T> {
           combiner(),
           distinct: distinct,
         );
-
-  final Iterable<Observable<dynamic>> observables;
-  final T Function() combiner;
-
-  final List<Disposable> _listeners = <Disposable>[];
 
   @override
   void onActive() {

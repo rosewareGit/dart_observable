@@ -9,11 +9,11 @@ import 'operators/transform_as_set_result.dart';
 mixin ObservableCollectionBase<E, C, T extends CollectionState<E, C>> on Observable<T>
     implements ObservableCollection<E, C, T> {
   @override
-  ObservableSet<E2> flatMapCollectionAsSet<E2>({
-    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableSet<E2>> Function(C change) sourceProvider,
-    final Set<E2> Function(Iterable<E2>? items)? factory,
+  ObservableMap<K, V> flatMapCollectionAsMap<K, V>({
+    required final ObservableCollectionFlatMapUpdate<E, K, ObservableMap<K, V>> Function(C change) sourceProvider,
+    final FactoryMap<K, V>? factory,
   }) {
-    return OperatorCollectionsFlatMapAsSet<E, E2, C, T>(
+    return OperatorCollectionsFlatMapAsMap<E, K, V, C, T>(
       source: this,
       sourceProvider: sourceProvider,
       factory: factory,
@@ -21,11 +21,11 @@ mixin ObservableCollectionBase<E, C, T extends CollectionState<E, C>> on Observa
   }
 
   @override
-  ObservableMap<K, V> flatMapCollectionAsMap<K, V>({
-    required final ObservableCollectionFlatMapUpdate<E, K, ObservableMap<K, V>> Function(C change) sourceProvider,
-    final FactoryMap<K, V>? factory,
+  ObservableSet<E2> flatMapCollectionAsSet<E2>({
+    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableSet<E2>> Function(C change) sourceProvider,
+    final Set<E2> Function(Iterable<E2>? items)? factory,
   }) {
-    return OperatorCollectionsFlatMapAsMap<E, K, V, C, T>(
+    return OperatorCollectionsFlatMapAsSet<E, E2, C, T>(
       source: this,
       sourceProvider: sourceProvider,
       factory: factory,

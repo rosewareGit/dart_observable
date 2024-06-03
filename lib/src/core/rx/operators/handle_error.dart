@@ -17,6 +17,12 @@ mixin OperatorHandleError<T> implements Observable<T> {
 }
 
 class _HandleErrorOperator<T> extends RxImpl<T> {
+  final Observable<T> source;
+
+  final void Function(dynamic error, Emitter<T> emitter) handler;
+  final bool Function(dynamic error)? predicate;
+  Disposable? _listener;
+
   _HandleErrorOperator({
     required this.source,
     required this.handler,
@@ -26,33 +32,6 @@ class _HandleErrorOperator<T> extends RxImpl<T> {
           initial,
           distinct: source.distinct,
         );
-
-  final Observable<T> source;
-  final void Function(dynamic error, Emitter<T> emitter) handler;
-  final bool Function(dynamic error)? predicate;
-
-  Disposable? _listener;
-
-  void _handleError(final dynamic error, final StackTrace stack) {
-    final bool Function(dynamic error)? predicate = this.predicate;
-    if (predicate != null && predicate(error) == false) {
-      dispatchError(error: error, stack: stack);
-      return;
-    }
-
-    handler(error, (final T value) {
-      this.value = value;
-    });
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-
-    source.addDisposeWorker(() {
-      return dispose();
-    });
-  }
 
   @override
   void onActive() {
@@ -66,6 +45,32 @@ class _HandleErrorOperator<T> extends RxImpl<T> {
     _cancelListener();
   }
 
+  @override
+  void onInit() {
+    super.onInit();
+
+    source.addDisposeWorker(() {
+      return dispose();
+    });
+  }
+
+  void _cancelListener() {
+    _listener?.dispose();
+    _listener = null;
+  }
+
+  void _handleError(final dynamic error, final StackTrace stack) {
+    final bool Function(dynamic error)? predicate = this.predicate;
+    if (predicate != null && predicate(error) == false) {
+      dispatchError(error: error, stack: stack);
+      return;
+    }
+
+    handler(error, (final T value) {
+      this.value = value;
+    });
+  }
+
   void _initListener() {
     if (_listener != null) {
       return;
@@ -77,10 +82,5 @@ class _HandleErrorOperator<T> extends RxImpl<T> {
       },
       onError: _handleError,
     );
-  }
-
-  void _cancelListener() {
-    _listener?.dispose();
-    _listener = null;
   }
 }
