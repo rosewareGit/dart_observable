@@ -77,5 +77,48 @@ void main() {
         expect(rxList.value.listView, <int>[4, 5, 3, 10]);
       });
     });
+
+    group('insert', () {
+      test('Should insert the item at the specified index', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        rxList.insert(1, 4);
+        expect(rxList[1], 4);
+        expect(rxList.value.listView, <int>[1, 4, 2, 3]);
+      });
+    });
+
+    group('insertAll', () {
+      test('Should insert all the items at the specified index', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        rxList.insertAll(1, <int>[4, 5]);
+        expect(rxList[1], 4);
+        expect(rxList[2], 5);
+        expect(rxList.value.listView, <int>[1, 4, 5, 2, 3]);
+      });
+    });
+
+    group('remove', () {
+      test('Should remove first item matches the item', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 1, 2, 3]);
+        rxList.remove(1);
+        expect(rxList.value.listView, <int>[2, 3, 1, 2, 3]);
+      });
+    });
+
+    group('removeAt', () {
+      test('Should remove the item at the specified index', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        rxList.removeAt(1);
+        expect(rxList.value.listView, <int>[1, 3]);
+      });
+    });
+
+    group('removeWhere', () {
+      test('Should remove all items that match the predicate', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 1, 2, 3]);
+        rxList.removeWhere((final int item) => item == 1);
+        expect(rxList.value.listView, <int>[2, 3, 2, 3]);
+      });
+    });
   });
 }
