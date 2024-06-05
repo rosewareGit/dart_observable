@@ -26,12 +26,10 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
 
   factory RxMap.sorted({
     required final Comparator<V> comparator,
-    required final K Function(V value) keyProvider,
     final Map<K, V>? initial,
   }) {
     return RxMapImpl<K, V>.sorted(
       comparator: comparator,
-      keyProvider: keyProvider,
       initial: initial,
     );
   }

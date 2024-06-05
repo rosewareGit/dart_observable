@@ -11,12 +11,10 @@ abstract interface class ObservableMap<K, V>
 
   factory ObservableMap.sorted({
     required final Comparator<V> comparator,
-    required final K Function(V value) keyProvider,
     final Map<K, V>? initial,
   }) {
     return RxMap<K, V>.sorted(
       comparator: comparator,
-      keyProvider: keyProvider,
       initial: initial,
     );
   }

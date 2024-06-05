@@ -14,7 +14,6 @@ void main() {
       test('Should return sorted values', () {
         final RxMap<String, TestModel> rxSortedMap = RxMap<String, TestModel>.sorted(
           comparator: (final TestModel a, final TestModel b) => a.value.compareTo(b.value),
-          keyProvider: (final TestModel value) => value.key,
         );
 
         expect(rxSortedMap.toList(), <TestModel>[]);

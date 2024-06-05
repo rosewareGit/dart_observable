@@ -2,15 +2,20 @@ import 'dart:collection';
 
 class SortedMap<K, V> implements Map<K, V> {
   final Comparator<V> _comparator;
-  final K Function(V value) _keyProvider;
+
   final Map<K, V> _map;
+  final Map<V, K> _keyMap;
   final SplayTreeSet<V> _sorted;
 
   SortedMap(
-    this._comparator,
-    this._keyProvider, {
+    this._comparator, {
     final Map<K, V>? initial,
   })  : _map = Map<K, V>.of(initial ?? <K, V>{}),
+        _keyMap = Map<V, K>.fromEntries(
+          initial == null
+              ? <MapEntry<V, K>>{}
+              : initial.entries.map((final MapEntry<K, V> entry) => MapEntry<V, K>(entry.value, entry.key)),
+        ),
         _sorted = SplayTreeSet<V>.of(
           (initial ?? <K, V>{}).values,
           _comparator,
@@ -55,7 +60,8 @@ class SortedMap<K, V> implements Map<K, V> {
 
   @override
   void addEntries(final Iterable<MapEntry<K, V>> newEntries) {
-    // TODO: implement addEntries
+    final Map<K, V> newMap = Map<K, V>.fromEntries(newEntries);
+    _insertAll(newMap);
   }
 
   bool any(final bool Function(V element) test) {
@@ -93,13 +99,19 @@ class SortedMap<K, V> implements Map<K, V> {
 
   @override
   V putIfAbsent(final K key, final V Function() ifAbsent) {
-    // TODO: implement putIfAbsent
-    throw UnimplementedError();
+    if (_map.containsKey(key)) {
+      return _map[key] as V;
+    }
+
+    final V newValue = ifAbsent();
+    _insert(key, newValue);
+    return newValue;
   }
 
   @override
   V? remove(final Object? key) {
     final V? value = _map.remove(key);
+    _keyMap.remove(value);
     if (value != null) {
       _sorted.remove(value);
     }
@@ -124,7 +136,8 @@ class SortedMap<K, V> implements Map<K, V> {
   List<V> toList({final bool growable = true}) {
     final List<V> list = <V>[];
     for (final V value in _sorted) {
-      final V? updatedItem = _map[_keyProvider(value)];
+      final K? key = _keyMap[value];
+      final V? updatedItem = _map[key];
       if (updatedItem != null) {
         list.add(updatedItem);
       } else {
@@ -140,19 +153,39 @@ class SortedMap<K, V> implements Map<K, V> {
   }
 
   @override
-  V update(final K key, final V Function(V value) update, {final V Function()? ifAbsent}) {
-    // TODO: implement update
-    throw UnimplementedError();
+  V update(
+    final K key,
+    final V Function(V value) update, {
+    final V Function()? ifAbsent,
+  }) {
+    if (_map.containsKey(key)) {
+      final V value = _map[key] as V;
+      final V updatedValue = update(value);
+      _insert(key, updatedValue);
+      return updatedValue;
+    }
+
+    if (ifAbsent != null) {
+      final V newValue = ifAbsent();
+      _insert(key, newValue);
+      return newValue;
+    }
+
+    throw StateError('Key not found: $key');
   }
 
   @override
   void updateAll(final V Function(K key, V value) update) {
-    // TODO: implement updateAll
+    for (final MapEntry<K, V> entry in _map.entries) {
+      final V updatedValue = update(entry.key, entry.value);
+      _insert(entry.key, updatedValue);
+    }
   }
 
   void _insert(final K key, final V value) {
     final V? current = _map[key];
     _map[key] = value;
+    _keyMap[value] = key;
     if (current == null) {
       _sorted.add(value);
     } else {

@@ -27,13 +27,12 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
 
   factory RxMapImpl.sorted({
     required final Comparator<V> comparator,
-    required final K Function(V value) keyProvider,
     final Map<K, V>? initial,
   }) {
     return RxMapImpl<K, V>(
       initial: initial,
       factory: (final Map<K, V>? items) {
-        return SortedMap<K, V>(comparator, keyProvider, initial: items);
+        return SortedMap<K, V>(comparator, initial: items);
       },
     );
   }
