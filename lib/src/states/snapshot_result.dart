@@ -1,3 +1,5 @@
+export 'extension/snapshot_result.dart';
+
 sealed class SnapshotResult<T, F> {
   const SnapshotResult();
 

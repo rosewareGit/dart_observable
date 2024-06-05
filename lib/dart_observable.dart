@@ -43,4 +43,6 @@ export 'src/api/types/string.dart';
 export 'src/core/collections/map/sorted_map.dart';
 export 'src/core/listeners/observable_listener.dart';
 export 'src/core/rx/base.dart';
-export 'src/snapshot_result.dart';
+export 'src/states/result.dart';
+export 'src/states/snapshot.dart';
+export 'src/states/snapshot_result.dart';
