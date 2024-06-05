@@ -1,18 +1,27 @@
 import '../../../../dart_observable.dart';
 import '../set/result.dart';
+import '_base_transform.dart';
 
 class OperatorCollectionsTransformAsSetResult<E, E2, F, C, T extends CollectionState<E, C>>
-    extends RxSetResultImpl<E2, F> {
+    extends RxSetResultImpl<E2, F>
+    with
+        BaseCollectionTransformOperator<
+            E, //
+            E2,
+            C,
+            T,
+            ObservableSetResultChange<E2, F>,
+            ObservableSetResultState<E2, F>,
+            ObservableSetResult<E2, F>,
+            ObservableSetResultUpdateAction<E2, F>> {
+  @override
   final ObservableCollection<E, C, T> source;
+  @override
   final void Function(
     ObservableSetResult<E2, F> state,
     C change,
     Emitter<ObservableSetResultUpdateAction<E2, F>> updater,
   ) transformFn;
-
-  Disposable? _listener;
-
-  late final List<C> _bufferedChanges = <C>[];
 
   OperatorCollectionsTransformAsSetResult({
     required this.source,
@@ -21,67 +30,5 @@ class OperatorCollectionsTransformAsSetResult<E, E2, F, C, T extends CollectionS
   }) : super(factory: factory);
 
   @override
-  void onActive() {
-    super.onActive();
-    _initListener();
-  }
-
-  @override
-  void onInit() {
-    source.addDisposeWorker(() async {
-      await _cancelListener();
-      return dispose();
-    });
-    super.onInit();
-  }
-
-  Future<void> _cancelListener() async {
-    await _listener?.dispose();
-    _listener = null;
-  }
-
-  void _initListener() {
-    if (_listener != null) {
-      // apply buffered changes
-      for (final C change in _bufferedChanges) {
-        transformFn(
-          this,
-          change,
-          (final ObservableSetResultUpdateAction<E2, F> action) {
-            applyAction(action);
-          },
-        );
-      }
-      _bufferedChanges.clear();
-      return;
-    }
-
-    transformFn(
-      this,
-      source.value.asChange(),
-      (final ObservableSetResultUpdateAction<E2, F> action) {
-        applyAction(action);
-      },
-    );
-
-    _listener = source.listen(
-      onChange: (final Observable<T> source) {
-        final T value = source.value;
-        final C change = value.lastChange;
-        if (state == ObservableState.inactive) {
-          // store changes to apply when active
-          _bufferedChanges.add(change);
-          return;
-        }
-
-        transformFn(
-          this,
-          value.lastChange,
-          (final ObservableSetResultUpdateAction<E2, F> action) {
-            applyAction(action);
-          },
-        );
-      },
-    );
-  }
+  ObservableSetResult<E2, F> get current => this;
 }

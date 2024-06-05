@@ -15,7 +15,7 @@ class OperatorObservableSetResultRxItem<E, F> extends RxnImpl<E> {
   }) : super(
           value: source.value.fold(
             onUndefined: () => null,
-            onFailure: (_) => null,
+            onFailure: (final _) => null,
             onSuccess: (final UnmodifiableSetView<E> data, final ObservableSetChange<E> change) {
               final E? item = data.firstWhereOrNull(predicate);
               return item;
@@ -61,7 +61,7 @@ class OperatorObservableSetResultRxItem<E, F> extends RxnImpl<E> {
           onUndefined: () {
             value = null;
           },
-          onFailure: (_) {
+          onFailure: (final _) {
             value = null;
           },
           onSuccess: (final UnmodifiableSetView<E> data, final ObservableSetChange<E> change) {

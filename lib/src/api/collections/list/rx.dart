@@ -4,7 +4,7 @@ import 'update_action.dart';
 
 abstract interface class RxList<E> implements ObservableList<E> {
   factory RxList([final Iterable<E>? initial, final List<E> Function(Iterable<E>? items)? factory]) {
-    return RxListImpl<E>(initial, factory);
+    return RxListImpl<E>(initial: initial, factory: factory);
   }
 
   void operator []=(final int index, final E value);

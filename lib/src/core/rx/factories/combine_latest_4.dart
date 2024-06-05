@@ -36,7 +36,7 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
       observable1,
       observable2,
       observable3,
-      observable4
+      observable4,
     ]) {
       observable.addDisposeWorker(() {
         disposeCount++;

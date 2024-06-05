@@ -1,6 +1,4 @@
 import '../../../../dart_observable.dart';
-import 'change.dart';
-import 'state.dart';
 
 abstract interface class ObservableList<E>
     implements ObservableCollection<E, ObservableListChange<E>, ObservableListState<E>> {

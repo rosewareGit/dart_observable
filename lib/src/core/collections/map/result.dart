@@ -3,6 +3,7 @@ import 'dart:collection';
 import '../../../../dart_observable.dart';
 import '../../rx/_impl.dart';
 import '../_base.dart';
+import '../operators/_base_transform.dart';
 import 'operators/result_rx_item.dart';
 
 part '../operators/transform_as_map_result.dart';
@@ -51,7 +52,9 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   })  : _factory = factory ?? _defaultMapFactory(),
         super(
           _MutableStateData<K, V, F>(
-              (factory ?? _defaultMapFactory()).call(data), ObservableMapChange<K, V>(added: data)),
+            (factory ?? _defaultMapFactory()).call(data),
+            ObservableMapChange<K, V>(added: data),
+          ),
         );
 
   RxMapResultImpl.undefined({
@@ -100,7 +103,6 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
 
   @override
   void operator []=(final K key, final V value) {
-    // use action
     applyAction(
       ObservableMapResultUpdateActionData<K, V, F>(
         addItems: <K, V>{key: value},
@@ -222,6 +224,7 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
     return transformCollectionAsMapResult(
       factory: factory,
       transform: (
+        final ObservableMapResult<K, V, F> state,
         final ObservableMapResultChange<K, V, F> change,
         final Emitter<ObservableMapResultUpdateAction<K, V, F>> stateUpdate,
       ) {
@@ -274,6 +277,7 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
     return transformCollectionAsMapResult(
       factory: factory,
       transform: (
+        final ObservableMapResult<K, V2, F> state,
         final ObservableMapResultChange<K, V, F> change,
         final Emitter<ObservableMapResultUpdateAction<K, V2, F>> stateUpdate,
       ) {

@@ -39,7 +39,7 @@ class ObservableCombineWith5<R, T1, T2, T3, T4, T5> extends RxImpl<R> {
       observable2,
       observable3,
       observable4,
-      observable5
+      observable5,
     ]) {
       observable.addDisposeWorker(() {
         disposeCount++;

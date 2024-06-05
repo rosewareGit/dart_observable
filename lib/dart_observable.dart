@@ -2,8 +2,15 @@ library dart_observable;
 
 export 'src/api/collections/collection_state.dart';
 export 'src/api/collections/item_change.dart';
+export 'src/api/collections/list/change.dart';
 export 'src/api/collections/list/observable.dart';
+export 'src/api/collections/list/result/observable.dart';
+export 'src/api/collections/list/result/rx.dart';
+export 'src/api/collections/list/result/state.dart';
+export 'src/api/collections/list/result/update_action.dart';
 export 'src/api/collections/list/rx.dart';
+export 'src/api/collections/list/state.dart';
+export 'src/api/collections/list/update_action.dart';
 export 'src/api/collections/map/change.dart';
 export 'src/api/collections/map/observable.dart';
 export 'src/api/collections/map/result/observable.dart';

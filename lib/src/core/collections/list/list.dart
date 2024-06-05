@@ -1,9 +1,6 @@
 import 'dart:collection';
 
 import '../../../../dart_observable.dart';
-import '../../../api/collections/list/change.dart';
-import '../../../api/collections/list/state.dart';
-import '../../../api/collections/list/update_action.dart';
 import '../../rx/_impl.dart';
 import '../_base.dart';
 import 'operators/rx_item.dart';
@@ -17,10 +14,10 @@ List<E> Function(Iterable<E>? items) _defaultListFactory<E>() {
 class RxListImpl<E> extends RxImpl<ObservableListState<E>>
     with ObservableCollectionBase<E, ObservableListChange<E>, ObservableListState<E>>
     implements RxList<E> {
-  RxListImpl([
+  RxListImpl({
     final Iterable<E>? initial,
     final List<E> Function(Iterable<E>? items)? factory,
-  ]) : super(_MutableState<E>.initial((factory ?? _defaultListFactory<E>()).call(initial)));
+  }) : super(_MutableState<E>.initial((factory ?? _defaultListFactory<E>()).call(initial)));
 
   @override
   int get length => _value._data.length;

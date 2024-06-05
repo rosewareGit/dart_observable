@@ -79,7 +79,7 @@ class OperatorObservableSetResultRxItemByPos<E, F> extends RxImpl<SnapshotResult
                 onUndefined: () {
                   value = SnapshotResult<E?, F>.success(null);
                 },
-                onFailure: (_) {
+                onFailure: (final _) {
                   value = SnapshotResult<E?, F>.success(null);
                 },
               );

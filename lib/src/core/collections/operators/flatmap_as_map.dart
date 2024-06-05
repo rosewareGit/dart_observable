@@ -8,7 +8,7 @@ class OperatorCollectionsFlatMapAsMap<E, K, V, C, T extends CollectionState<E, C
   Disposable? _listener;
 
   final Map<E, ObservableMap<K, V>> _activeObservables = <E, ObservableMap<K, V>>{};
-  final Map<E, Disposable> _activeObservablesDisposables = <E, Disposable>{};
+  final Map<E, Disposable> _activeObservableListeners = <E, Disposable>{};
 
   OperatorCollectionsFlatMapAsMap({
     required this.source,
@@ -26,13 +26,13 @@ class OperatorCollectionsFlatMapAsMap<E, K, V, C, T extends CollectionState<E, C
   void onInit() {
     super.onInit();
     source.addDisposeWorker(() {
-      return Future.wait([
-        ..._activeObservablesDisposables.values.map((final Disposable value) async {
+      return Future.wait(<Future<void>>[
+        ..._activeObservableListeners.values.map((final Disposable value) async {
           value.dispose();
         }),
         dispose(),
-      ]).then((_) {
-        _activeObservablesDisposables.clear();
+      ]).then((final _) {
+        _activeObservableListeners.clear();
         _activeObservables.clear();
       });
     });
@@ -50,14 +50,14 @@ class OperatorCollectionsFlatMapAsMap<E, K, V, C, T extends CollectionState<E, C
       if (_activeObservables.containsKey(key)) {
         removeItems.addAll(_activeObservables[key]!.value.mapView.keys);
         _activeObservables.remove(key);
-        _activeObservablesDisposables[key]?.dispose();
+        _activeObservableListeners[key]?.dispose();
       }
     }
 
     registerObservables.forEach((final E key, final ObservableMap<K, V> value) {
       addItems.addAll(value.value.mapView);
       _activeObservables[key] = value;
-      _activeObservablesDisposables[key] = value.listen(
+      _activeObservableListeners[key] = value.listen(
         onChange: (final Observable<ObservableMapState<K, V>> source) {
           final ObservableMapState<K, V> value = source.value;
           final ObservableMapChange<K, V> change = value.lastChange;

@@ -1,6 +1,4 @@
 import '../../../../../dart_observable.dart';
-import '../../../../api/collections/list/change.dart';
-import '../../../../api/collections/list/state.dart';
 import '../../../rx/_impl.dart';
 
 class OperatorObservableListRxItem<E> extends RxnImpl<E> {

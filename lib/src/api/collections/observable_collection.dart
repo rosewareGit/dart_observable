@@ -20,8 +20,27 @@ abstract interface class ObservableCollection<E, C, T extends CollectionState<E,
     final Set<E2> Function(Iterable<E2>? items)? factory,
   });
 
+  ObservableList<E2> transformCollectionAsList<E2>({
+    required final void Function(
+      ObservableList<E2> state,
+      C change,
+      Emitter<ObservableListUpdateAction<E2>> updater,
+    ) transform,
+    final FactoryList<E2>? factory,
+  });
+
+  ObservableListResult<E2, F> transformCollectionAsListResult<E2, F>({
+    required final void Function(
+      ObservableListResult<E2, F> state,
+      C change,
+      Emitter<ObservableListResultUpdateAction<E2, F>> updater,
+    ) transform,
+    final FactoryList<E2>? factory,
+  });
+
   ObservableMap<K, V> transformCollectionAsMap<K, V>({
     required final void Function(
+      ObservableMap<K, V> state,
       C change,
       Emitter<ObservableMapUpdateAction<K, V>> updater,
     ) transform,
@@ -30,6 +49,7 @@ abstract interface class ObservableCollection<E, C, T extends CollectionState<E,
 
   ObservableMapResult<K2, V2, F> transformCollectionAsMapResult<K2, V2, F>({
     required final void Function(
+      ObservableMapResult<K2, V2, F> state,
       C change,
       Emitter<ObservableMapResultUpdateAction<K2, V2, F>> updater,
     ) transform,
@@ -38,6 +58,7 @@ abstract interface class ObservableCollection<E, C, T extends CollectionState<E,
 
   ObservableSet<E2> transformCollectionAsSet<E2>({
     required final void Function(
+      ObservableSet<E2> state,
       C change,
       Emitter<ObservableSetUpdateAction<E2>> updater,
     ) transform,

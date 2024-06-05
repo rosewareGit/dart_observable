@@ -3,6 +3,7 @@ import 'dart:collection';
 import '../../../../dart_observable.dart';
 import '../../rx/_impl.dart';
 import '../_base.dart';
+import '../operators/_base_transform.dart';
 import 'operators/rx_item.dart';
 
 part '../operators/transform_as_map.dart';
@@ -196,6 +197,7 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
     return transformCollectionAsMap<K, V>(
       factory: factory,
       transform: (
+        final ObservableMap<K, V> state,
         final ObservableMapChange<K, V> change,
         final Emitter<ObservableMapUpdateAction<K, V>> updater,
       ) {
@@ -239,6 +241,7 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
     return transformCollectionAsMap<K, V2>(
       factory: factory,
       transform: (
+        final ObservableMap<K, V2> state,
         final ObservableMapChange<K, V> change,
         final Emitter<ObservableMapUpdateAction<K, V2>> updater,
       ) {

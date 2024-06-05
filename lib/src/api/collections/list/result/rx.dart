@@ -1,7 +1,17 @@
-import '../update_action.dart';
-import 'observable.dart';
+import '../../../../../dart_observable.dart';
+import '../../../../core/collections/list/result.dart';
 
 abstract interface class RxListResult<E, F> implements ObservableListResult<E, F> {
+  factory RxListResult({
+    final Iterable<E>? initial,
+    final List<E> Function(Iterable<E>? items)? factory,
+  }) {
+    return RxListResultImpl<E, F>.custom(
+      initial: initial,
+      factory: factory,
+    );
+  }
+
   set failure(final F failure);
 
   void operator []=(final int index, final E value);
@@ -10,7 +20,9 @@ abstract interface class RxListResult<E, F> implements ObservableListResult<E, F
 
   void addAll(final Iterable<E> items);
 
-  void applyAction(final ObservableListUpdateAction<E> action);
+  void applyAction(final ObservableListResultUpdateAction<E, F> action);
+
+  void clear();
 
   void insert(final int index, final E item);
 

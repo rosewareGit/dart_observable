@@ -26,12 +26,12 @@ class OperatorCollectionsFlatMapAsSet<E, E2, C, T extends CollectionState<E, C>>
   void onInit() {
     super.onInit();
     source.addDisposeWorker(() {
-      return Future.wait([
+      return Future.wait(<Future<void>>[
         ..._activeObservablesDisposables.values.map((final Disposable value) async {
           value.dispose();
         }),
         dispose(),
-      ]).then((_) {
+      ]).then((final _) {
         _activeObservablesDisposables.clear();
         _activeObservables.clear();
       });

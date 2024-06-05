@@ -1,5 +1,4 @@
 import 'package:dart_observable/dart_observable.dart';
-import 'package:dart_observable/src/api/collections/list/change.dart';
 import 'package:test/test.dart';
 
 void main() {

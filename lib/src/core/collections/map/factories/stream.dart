@@ -48,7 +48,7 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
     );
 
     addDisposeWorker(() {
-      return _subscription?.cancel().then((_) {
+      return _subscription?.cancel().then((final _) {
         _subscription = null;
       });
     });

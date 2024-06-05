@@ -5,7 +5,7 @@ import '../../../../../dart_observable.dart';
 sealed class ObservableMapResultChange<K, V, F> {
   ObservableMapResultUpdateAction<K, V, F> get asAction {
     return fold(
-      onUndefined: (_) => ObservableMapResultUpdateActionUndefined<K, V, F>(),
+      onUndefined: (final _) => ObservableMapResultUpdateActionUndefined<K, V, F>(),
       onFailure: (final F failure, final Map<K, V> removedItems) => ObservableMapResultUpdateActionFailure<K, V, F>(
         failure: failure,
       ),

@@ -24,7 +24,7 @@ class ObservableListChange<E> {
 
   factory ObservableListChange.fromRemoved(
     final List<E> state,
-    final Set<int> removeItems,
+    final Iterable<int> removeItems,
   ) {
     return _handleRemoved<E>(state, removeItems);
   }
@@ -90,7 +90,7 @@ class ObservableListChange<E> {
 
   static ObservableListChange<E> _handleRemoved<E>(
     final List<E> state,
-    final Set<int> removeItems,
+    final Iterable<int> removeItems,
   ) {
     final Map<int, E> removed = <int, E>{};
     final SplayTreeSet<int> splayReversed = SplayTreeSet<int>.of(
