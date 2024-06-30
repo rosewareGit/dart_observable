@@ -1,4 +1,5 @@
 import '../../../core/collections/list/list.dart';
+import 'change.dart';
 import 'observable.dart';
 import 'update_action.dart';
 
@@ -9,19 +10,19 @@ abstract interface class RxList<E> implements ObservableList<E> {
 
   void operator []=(final int index, final E value);
 
-  void add(final E item);
+  ObservableListChange<E>? add(final E item);
 
-  void addAll(final Iterable<E> items);
+  ObservableListChange<E>? addAll(final Iterable<E> items);
 
-  void applyAction(final ObservableListUpdateAction<E> action);
+  ObservableListChange<E>? applyAction(final ObservableListUpdateAction<E> action);
 
-  void insert(final int index, final E item);
+  ObservableListChange<E>? insert(final int index, final E item);
 
-  void insertAll(final int index, final Iterable<E> items);
+  ObservableListChange<E>? insertAll(final int index, final Iterable<E> items);
 
-  void remove(final E item);
+  ObservableListChange<E>? remove(final E item);
 
-  void removeAt(final int index);
+  ObservableListChange<E>? removeAt(final int index);
 
-  void removeWhere(final bool Function(E item) predicate);
+  ObservableListChange<E>? removeWhere(final bool Function(E item) predicate);
 }

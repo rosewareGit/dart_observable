@@ -17,7 +17,6 @@ class OperatorCollectionsTransformAsListResult<E, E2, F, C, T extends Collection
   @override
   final ObservableCollection<E, C, T> source;
 
-  @override
   final void Function(
     ObservableListResult<E2, F> state,
     C change,
@@ -32,4 +31,13 @@ class OperatorCollectionsTransformAsListResult<E, E2, F, C, T extends Collection
 
   @override
   ObservableListResult<E2, F> get current => this;
+
+  @override
+  void transformChange(
+    final ObservableListResult<E2, F> state,
+    final C change,
+    final Emitter<ObservableListResultUpdateAction<E2, F>> updater,
+  ) {
+    transformFn(state, change, updater);
+  }
 }

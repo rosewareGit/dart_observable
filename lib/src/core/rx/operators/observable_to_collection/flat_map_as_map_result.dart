@@ -4,17 +4,19 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/map/result.dart';
 
 class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
-  final ObservableMapResult<K, V, F> Function(Observable<T> source) mapper;
+  final ObservableMapResult<K, V, F> Function(Observable<T> source, FactoryMap<K, V>? factory) mapper;
   final Observable<T> source;
 
   Disposable? _intermediateListener;
   Disposable? _listener;
   ObservableMapResult<K, V, F>? _activeRxIntermediate;
+  final FactoryMap<K, V>? factory;
 
   OperatorFlatMapAaMapResult({
     required this.source,
     required this.mapper,
-  }) : super.state(mapper(source).value);
+    this.factory,
+  }) : super.state(mapper(source, factory).value, factory: factory);
 
   @override
   void onActive() {
@@ -47,7 +49,7 @@ class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
       return;
     }
 
-    final ObservableMapResult<K, V, F> rxIntermediate = mapper(source);
+    final ObservableMapResult<K, V, F> rxIntermediate = mapper(source, factory);
     _activeRxIntermediate = rxIntermediate;
 
     final ObservableMapResultChange<K, V, F> initialChange = rxIntermediate.value.asChange();
@@ -62,7 +64,7 @@ class OperatorFlatMapAaMapResult<T, K, V, F> extends RxMapResultImpl<K, V, F> {
 
     _listener = source.listen(
       onChange: (final Observable<T> source) {
-        final ObservableMapResult<K, V, F> rxIntermediate = mapper(source);
+        final ObservableMapResult<K, V, F> rxIntermediate = mapper(source, factory);
         if (_activeRxIntermediate != rxIntermediate) {
           value = rxIntermediate.value;
           _intermediateListener?.dispose();

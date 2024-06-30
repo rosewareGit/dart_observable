@@ -46,19 +46,19 @@ abstract interface class RxSetResult<E, F> implements ObservableSetResult<E, F>,
     return RxSetResultImpl<E, F>(factory: factory);
   }
 
-  set data(final Set<E> data);
+  ObservableSetResultChange<E, F>? add(final E item);
 
-  set failure(final F failure);
+  ObservableSetResultChange<E, F>? addAll(final Iterable<E> items);
 
-  void add(final E item);
+  ObservableSetResultChange<E, F>? applyAction(final ObservableSetResultUpdateAction<E, F> action);
 
-  void addAll(final Iterable<E> items);
+  ObservableSetResultChange<E, F>? remove(final E item);
 
-  void applyAction(final ObservableSetResultUpdateAction<E, F> action);
+  ObservableSetResultChange<E, F>? removeWhere(final bool Function(E item) predicate);
 
-  void remove(final E item);
+  ObservableSetResultChange<E, F>? setData(final Set<E> data);
 
-  void removeWhere(final bool Function(E item) predicate);
+  ObservableSetResultChange<E, F>? setFailure(final F failure);
 
-  void setUndefined();
+  ObservableSetResultChange<E, F>? setUndefined();
 }

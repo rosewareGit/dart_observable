@@ -16,7 +16,6 @@ class OperatorCollectionsTransformAsSet<E, E2, C, T extends CollectionState<E, C
   @override
   final ObservableCollection<E, C, T> source;
 
-  @override
   final void Function(
     ObservableSet<E2> state,
     C change,
@@ -31,4 +30,13 @@ class OperatorCollectionsTransformAsSet<E, E2, C, T extends CollectionState<E, C
 
   @override
   ObservableSet<E2> get current => this;
+
+  @override
+  void transformChange(
+    final ObservableSet<E2> state,
+    final C change,
+    final Emitter<ObservableSetUpdateAction<E2>> updater,
+  ) {
+    transformFn(state, change, updater);
+  }
 }

@@ -12,27 +12,27 @@ abstract interface class RxListResult<E, F> implements ObservableListResult<E, F
     );
   }
 
-  set failure(final F failure);
-
   void operator []=(final int index, final E value);
 
-  void add(final E item);
+  ObservableListResultChange<E, F>? add(final E item);
 
-  void addAll(final Iterable<E> items);
+  ObservableListResultChange<E, F>? addAll(final Iterable<E> items);
 
-  void applyAction(final ObservableListResultUpdateAction<E, F> action);
+  ObservableListResultChange<E, F>? applyAction(final ObservableListResultUpdateAction<E, F> action);
 
-  void clear();
+  ObservableListResultChange<E, F>? clear();
 
-  void insert(final int index, final E item);
+  ObservableListResultChange<E, F>? insert(final int index, final E item);
 
-  void insertAll(final int index, final Iterable<E> items);
+  ObservableListResultChange<E, F>? insertAll(final int index, final Iterable<E> items);
 
-  void remove(final E item);
+  ObservableListResultChange<E, F>? remove(final E item);
 
-  void removeAt(final int index);
+  ObservableListResultChange<E, F>? removeAt(final int index);
 
-  void removeWhere(final bool Function(E item) predicate);
+  ObservableListResultChange<E, F>? removeWhere(final bool Function(E item) predicate);
 
-  void setUndefined();
+  ObservableListResultChange<E, F>? setFailure(final F failure);
+
+  ObservableListResultChange<E, F>? setUndefined();
 }

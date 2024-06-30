@@ -40,11 +40,16 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
         );
 
   @override
-  set data(final Set<E> data) {
+  ObservableSetChange<E>? setData(final Set<E> data) {
+    final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(_value.data, data);
+    if (change.isEmpty) {
+      return null;
+    }
     this.value = RxSetState<E>(
       data,
-      ObservableSetChange<E>(added: data),
+      change,
     );
+    return change;
   }
 
   @override
@@ -64,8 +69,8 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
   RxSetState<E> get _value => value as RxSetState<E>;
 
   @override
-  void add(final E item) {
-    applyAction(
+  ObservableSetChange<E>? add(final E item) {
+    return applyAction(
       ObservableSetUpdateAction<E>(
         addItems: <E>{item},
         removeItems: <E>{},
@@ -74,8 +79,8 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
   }
 
   @override
-  void addAll(final Iterable<E> items) {
-    applyAction(
+  ObservableSetChange<E>? addAll(final Iterable<E> items) {
+    return applyAction(
       ObservableSetUpdateAction<E>(
         addItems: items.toSet(),
         removeItems: <E>{},
@@ -84,13 +89,18 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
   }
 
   @override
-  void applyAction(final ObservableSetUpdateAction<E> action) {
+  ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action) {
     final Set<E> updated = _value.data;
     final ObservableSetChange<E> change = action.apply(updated);
+    if (change.isEmpty) {
+      return null;
+    }
+
     super.value = RxSetState<E>(
       updated,
       change,
     );
+    return change;
   }
 
   @override
@@ -99,8 +109,8 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
   }
 
   @override
-  void remove(final E item) {
-    applyAction(
+  ObservableSetChange<E>? remove(final E item) {
+    return applyAction(
       ObservableSetUpdateAction<E>(
         addItems: <E>{},
         removeItems: <E>{item},
@@ -109,9 +119,13 @@ class RxSetImpl<E> extends RxImpl<ObservableSetState<E>>
   }
 
   @override
-  void removeWhere(final bool Function(E item) predicate) {
+  ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate) {
     final Set<E> removed = _value.data.where(predicate).toSet();
-    applyAction(
+    if (removed.isEmpty) {
+      return null;
+    }
+
+    return applyAction(
       ObservableSetUpdateAction<E>(
         addItems: <E>{},
         removeItems: removed,

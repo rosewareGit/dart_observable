@@ -44,7 +44,7 @@ sealed class Result<T, F> {
   T? getOrNull() {
     return fold(
       onSuccess: (final T success) => success,
-      onFailure: (_) => null,
+      onFailure: (final _) => null,
     );
   }
 

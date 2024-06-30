@@ -51,23 +51,23 @@ abstract interface class RxMapResult<K, V, F> implements ObservableMapResult<K, 
     return RxMapResultImpl<K, V, F>.undefined(factory: factory);
   }
 
-  set failure(final F failure);
-
-  set success(final Map<K, V> data);
-
   operator []=(final K key, final V value);
 
-  void add(final K key, final V value);
+  ObservableMapResultChange<K, V, F>? add(final K key, final V value);
 
-  void addAll(final Map<K, V> other);
+  ObservableMapResultChange<K, V, F>? addAll(final Map<K, V> other);
 
-  void applyAction(final ObservableMapResultUpdateAction<K, V, F> action);
+  ObservableMapResultChange<K, V, F>? applyAction(final ObservableMapResultUpdateAction<K, V, F> action);
 
-  void clear();
+  ObservableMapResultChange<K, V, F>? clear();
 
-  void remove(final K key);
+  ObservableMapResultChange<K, V, F>? remove(final K key);
 
-  void removeWhere(final bool Function(K key, V value) predicate);
+  ObservableMapResultChange<K, V, F>? removeWhere(final bool Function(K key, V value) predicate);
 
-  void setUndefined();
+  ObservableMapResultChange<K, V, F>? setData(final Map<K, V> data);
+
+  ObservableMapResultChange<K, V, F>? setFailure(final F failure);
+
+  ObservableMapResultChange<K, V, F>? setUndefined();
 }

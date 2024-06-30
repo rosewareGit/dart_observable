@@ -18,26 +18,134 @@ void main() {
     });
 
     group('add', () {
-      test('Should add the item to the end of the list', () {
+      test('Should add the item to the list', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.add(4);
+        final ObservableListChange<int>? change = rxList.add(4);
+        expect(change!.added[3], 4);
         expect(rxList[3], 4);
       });
     });
 
     group('addAll', () {
-      test('Should add all the items to the end of the list', () {
+      test('Should add all items to the list', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.addAll(<int>[4, 5]);
+        final ObservableListChange<int>? change = rxList.addAll(<int>[4, 5]);
+        expect(change!.added[3], 4);
+        expect(change.added[4], 5);
         expect(rxList[3], 4);
         expect(rxList[4], 5);
       });
     });
 
-    group('applyAction', () {
-      test('Should apply add action to the list', () {
+    group('insert', () {
+      test('Should insert the item at the specified index', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.applyAction(
+        final ObservableListChange<int>? change = rxList.insert(1, 4);
+        expect(change!.added[1], 4);
+        expect(rxList[1], 4);
+      });
+    });
+
+    group('insertAll', () {
+      test('Should insert all items at the specified index', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.insertAll(1, <int>[4, 5]);
+        expect(change!.added[1], 4);
+        expect(change.added[2], 5);
+        expect(rxList[1], 4);
+        expect(rxList[2], 5);
+      });
+    });
+
+    group('remove', () {
+      test('Should remove the item from the list', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.remove(2);
+        expect(change!.removed[1], 2);
+        expect(rxList[1], 3);
+      });
+    });
+
+    group('removeAt', () {
+      test('Should remove the item at the specified index', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.removeAt(1);
+        expect(change!.removed[1], 2);
+        expect(rxList[1], 3);
+      });
+    });
+
+    group('removeWhere', () {
+      test('Should remove items that satisfy the predicate', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.removeWhere((final int item) => item % 2 == 0);
+        expect(change!.removed[1], 2);
+        expect(rxList[0], 1);
+        expect(rxList[1], 3);
+      });
+    });
+
+    group('applyAction', () {
+      test('Should apply action that contains multiple type of updates', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 0]);
+        final ObservableListChange<int>? change = rxList.applyAction(
+          ObservableListUpdateAction<int>(
+            insertItemAtPosition: <MapEntry<int?, Iterable<int>>>[
+              MapEntry<int?, Iterable<int>>(0, <int>[4, 5]),
+              MapEntry<int?, Iterable<int>>(1, <int>[6, 7]),
+              MapEntry<int?, Iterable<int>>(null, <int>[11]),
+              MapEntry<int?, Iterable<int>>(10, <int>[10]),
+            ],
+            removeIndexes: <int>{0, 1},
+            updateItemAtPosition: <int, int>{
+              2: 8,
+            },
+          ),
+        );
+
+        expect(rxList.value.listView, <int>[4, 5, 8, 6, 7, 0, 11, 10]);
+
+        expect(change!.added[0], 4);
+        expect(change.added[1], 5);
+        expect(change.added[3], 6);
+        expect(change.added[4], 7);
+        expect(change.added[6], 11);
+        expect(change.added[7], 10);
+        expect(change.removed[0], 1);
+        expect(change.removed[1], 2);
+        expect(change.updated[2]!.newValue, 8);
+      });
+
+      test('Should not do anything if add action is empty', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.applyAction(
+          ObservableListUpdateAction<int>.add(<MapEntry<int?, Iterable<int>>>[]),
+        );
+
+        expect(change, null);
+      });
+
+      test('Should not do anything if remove action is empty', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.applyAction(
+          ObservableListUpdateAction<int>.remove(<int>{}),
+        );
+
+        expect(change, null);
+      });
+
+      test('Should not do anything if update action is empty', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.applyAction(
+          ObservableListUpdateAction<int>.update(<int, int>{}),
+        );
+
+        expect(change, null);
+      });
+
+      test('Should apply add action to the list based on the added items-1', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.applyAction(
           ObservableListUpdateAction<int>.add(
             <MapEntry<int?, Iterable<int>>>[
               MapEntry<int?, Iterable<int>>(0, <int>[4, 5]),
@@ -48,6 +156,33 @@ void main() {
         );
 
         expect(rxList.value.listView, <int>[4, 5, 1, 6, 7, 2, 3, 10]);
+
+        expect(change!.added[0], 4);
+        expect(change.added[1], 5);
+        expect(change.added[3], 6);
+        expect(change.added[4], 7);
+        expect(change.added[7], 10);
+      });
+
+      test('Should apply add action to the list based on the added items with different order', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.applyAction(
+          ObservableListUpdateAction<int>.add(
+            <MapEntry<int?, Iterable<int>>>[
+              MapEntry<int?, Iterable<int>>(1, <int>[6, 7]),
+              MapEntry<int?, Iterable<int>>(0, <int>[4, 5]),
+              MapEntry<int?, Iterable<int>>(10, <int>[10]),
+            ],
+          ),
+        );
+
+        expect(rxList.value.listView, <int>[4, 5, 1, 6, 7, 2, 3, 10]);
+
+        expect(change!.added[0], 4);
+        expect(change.added[1], 5);
+        expect(change.added[3], 6);
+        expect(change.added[4], 7);
+        expect(change.added[7], 10);
       });
 
       test('Should apply remove action to the list', () {
@@ -74,49 +209,6 @@ void main() {
         );
 
         expect(rxList.value.listView, <int>[4, 5, 3, 10]);
-      });
-    });
-
-    group('insert', () {
-      test('Should insert the item at the specified index', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.insert(1, 4);
-        expect(rxList[1], 4);
-        expect(rxList.value.listView, <int>[1, 4, 2, 3]);
-      });
-    });
-
-    group('insertAll', () {
-      test('Should insert all the items at the specified index', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.insertAll(1, <int>[4, 5]);
-        expect(rxList[1], 4);
-        expect(rxList[2], 5);
-        expect(rxList.value.listView, <int>[1, 4, 5, 2, 3]);
-      });
-    });
-
-    group('remove', () {
-      test('Should remove first item matches the item', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 1, 2, 3]);
-        rxList.remove(1);
-        expect(rxList.value.listView, <int>[2, 3, 1, 2, 3]);
-      });
-    });
-
-    group('removeAt', () {
-      test('Should remove the item at the specified index', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.removeAt(1);
-        expect(rxList.value.listView, <int>[1, 3]);
-      });
-    });
-
-    group('removeWhere', () {
-      test('Should remove all items that match the predicate', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 1, 2, 3]);
-        rxList.removeWhere((final int item) => item == 1);
-        expect(rxList.value.listView, <int>[2, 3, 2, 3]);
       });
     });
   });

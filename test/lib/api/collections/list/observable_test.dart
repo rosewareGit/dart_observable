@@ -94,5 +94,65 @@ void main() {
         expect(rxItem.value, 4);
       });
     });
+
+    group('filterList', () {
+      test('Should filter initial source list on listen', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        final ObservableList<int> filteredList = rxList.filterList(predicate: (final int item) => item % 2 == 0);
+
+        expect(filteredList.length, 0);
+
+        filteredList.listen();
+
+        expect(filteredList.length, 5);
+        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+      });
+
+      test('Should filter source list on change', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        final ObservableList<int> filteredList = rxList.filterList(predicate: (final int item) => item % 2 == 0);
+
+        filteredList.listen();
+
+        expect(filteredList.length, 5);
+        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+
+        // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] -> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        rxList.add(11);
+
+        expect(filteredList.length, 5);
+        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+
+        // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] -> [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        rxList.add(12);
+
+        expect(filteredList.length, 6);
+        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10, 12]);
+
+        // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] -> [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        rxList.removeAt(0);
+
+        expect(filteredList.length, 6);
+        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10, 12]);
+
+        // [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] -> [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        rxList.removeAt(0);
+
+        expect(filteredList.length, 5);
+        expect(filteredList.value.listView, <int>[4, 6, 8, 10, 12]);
+
+        // Update 4 -> 20
+        rxList[1] = 20;
+
+        expect(filteredList.length, 5);
+        expect(filteredList.value.listView, <int>[20, 6, 8, 10, 12]);
+
+        // Update 20 -> 3
+        rxList[1] = 3;
+
+        expect(filteredList.length, 4);
+        expect(filteredList.value.listView, <int>[6, 8, 10, 12]);
+      });
+    });
   });
 }

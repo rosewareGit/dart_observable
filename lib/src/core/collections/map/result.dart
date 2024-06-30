@@ -4,7 +4,7 @@ import '../../../../dart_observable.dart';
 import '../../rx/_impl.dart';
 import '../_base.dart';
 import '../operators/_base_transform.dart';
-import 'operators/result_rx_item.dart';
+import 'operators/result/result_rx_item.dart';
 
 part '../operators/transform_as_map_result.dart';
 
@@ -65,16 +65,24 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
         );
 
   @override
-  set failure(final F error) {
-    applyAction(
+  ObservableMapResultChange<K, V, F>? setFailure(final F error) {
+    return applyAction(
       ObservableMapResultUpdateActionFailure<K, V, F>(failure: error),
     );
   }
 
   @override
-  set success(final Map<K, V> data) {
+  ObservableMapResultChange<K, V, F>? setData(final Map<K, V> data) {
     final ObservableMapChange<K, V> change = _calculateChange(newValue: data);
-    super.value = _MutableStateData<K, V, F>(_factory(data), change);
+    if (change.isEmpty) {
+      return null;
+    }
+    final Map<K, V> map = _factory(data);
+    super.value = _MutableStateData<K, V, F>(map, change);
+    return ObservableMapResultChangeData<K, V, F>(
+      change: change,
+      data: UnmodifiableMapView<K, V>(map),
+    );
   }
 
   @override
@@ -87,7 +95,7 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
         applyAction(ObservableMapResultUpdateActionFailure<K, V, F>(failure: failure));
       },
       onSuccess: (final Map<K, V> data, final ObservableMapChange<K, V> change) {
-        success = data;
+        setData(data);
       },
     );
   }
@@ -112,8 +120,8 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void add(final K key, final V value) {
-    applyAction(
+  ObservableMapResultChange<K, V, F>? add(final K key, final V value) {
+    return applyAction(
       ObservableMapResultUpdateActionData<K, V, F>(
         addItems: <K, V>{key: value},
         removeItems: <K>{},
@@ -122,8 +130,8 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void addAll(final Map<K, V> other) {
-    applyAction(
+  ObservableMapResultChange<K, V, F>? addAll(final Map<K, V> other) {
+    return applyAction(
       ObservableMapResultUpdateActionData<K, V, F>(
         addItems: other,
         removeItems: <K>{},
@@ -132,34 +140,47 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void applyAction(final ObservableMapResultUpdateAction<K, V, F> action) {
+  ObservableMapResultChange<K, V, F>? applyAction(final ObservableMapResultUpdateAction<K, V, F> action) {
     switch (action) {
       case final ObservableMapResultUpdateActionUndefined<K, V, F> _:
-        value.when(
-          onUndefined: () {
-            // Nothing to do, same state
-          },
+        return value.fold<ObservableMapResultChange<K, V, F>?>(
+          onUndefined: () => null,
           onFailure: (final _) {
             super.value = _MutableStateUndefined<K, V, F>(<K, V>{});
+            return ObservableMapResultChangeUndefined<K, V, F>();
           },
           onSuccess: (final UnmodifiableMapView<K, V> data, final ObservableMapChange<K, V> change) {
             super.value = _MutableStateUndefined<K, V, F>(data);
+            return ObservableMapResultChangeUndefined<K, V, F>(removedItems: data);
           },
         );
-        break;
       case final ObservableMapResultUpdateActionFailure<K, V, F> failure:
-        value.when(
+        return value.fold(
           onUndefined: () {
             super.value = _MutableStateFailure<K, V, F>(failure.failure, <K, V>{});
+            return ObservableMapResultChangeFailure<K, V, F>(
+              failure: failure.failure,
+              removedItems: <K, V>{},
+            );
           },
-          onFailure: (final _) {
+          onFailure: (final F currentFailure) {
+            if (currentFailure == failure.failure) {
+              return null;
+            }
             super.value = _MutableStateFailure<K, V, F>(failure.failure, <K, V>{});
+            return ObservableMapResultChangeFailure<K, V, F>(
+              failure: failure.failure,
+              removedItems: <K, V>{},
+            );
           },
           onSuccess: (final UnmodifiableMapView<K, V> data, final ObservableMapChange<K, V> change) {
             super.value = _MutableStateFailure<K, V, F>(failure.failure, data);
+            return ObservableMapResultChangeFailure<K, V, F>(
+              failure: failure.failure,
+              removedItems: data,
+            );
           },
         );
-        break;
       case final ObservableMapResultUpdateActionData<K, V, F> data:
         switch (value) {
           case final ObservableMapResultStateData<K, V, F> currentData:
@@ -167,46 +188,58 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
             final Map<K, V> updatedMap = state._data;
             final ObservableMapChange<K, V> change = data.apply(updatedMap);
             if (change.isEmpty) {
-              return;
+              return null;
             }
             final _MutableStateData<K, V, F> newState = _MutableStateData<K, V, F>(
               updatedMap,
               change,
             );
             super.value = newState;
-            break;
+            return ObservableMapResultChangeData<K, V, F>(
+              change: change,
+              data: UnmodifiableMapView<K, V>(updatedMap),
+            );
           case final ObservableMapResultStateFailure<K, V, F> _:
             final Map<K, V> updatedMap = data.addItems;
             final ObservableMapChange<K, V> change = ObservableMapChange<K, V>(
               added: data.addItems,
             );
+            final Map<K, V> result = _factory(updatedMap);
             final _MutableStateData<K, V, F> newState = _MutableStateData<K, V, F>(
-              _factory(updatedMap),
+              result,
               change,
             );
             super.value = newState;
-            break;
+            return ObservableMapResultChangeData<K, V, F>(
+              change: change,
+              data: UnmodifiableMapView<K, V>(result),
+            );
           case final ObservableMapResultStateUndefined<K, V, F> _:
             final Map<K, V> updatedMap = data.addItems;
             final ObservableMapChange<K, V> change = ObservableMapChange<K, V>(
               added: data.addItems,
             );
+            final Map<K, V> result = _factory(updatedMap);
             final _MutableStateData<K, V, F> newState = _MutableStateData<K, V, F>(
-              _factory(updatedMap),
+              result,
               change,
             );
             super.value = newState;
-            break;
+            return ObservableMapResultChangeData<K, V, F>(
+              change: change,
+              data: UnmodifiableMapView<K, V>(result),
+            );
         }
-        break;
     }
   }
 
   @override
-  void clear() {
-    value.when(
+  ObservableMapResultChange<K, V, F>? clear() {
+    return value.fold(
+      onUndefined: () => null,
+      onFailure: (final F failure) => null,
       onSuccess: (final Map<K, V> data, final ObservableMapChange<K, V> change) {
-        applyAction(
+        return applyAction(
           ObservableMapResultUpdateActionData<K, V, F>(
             addItems: <K, V>{},
             removeItems: data.keys.toSet(),
@@ -217,7 +250,7 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  ObservableMapResult<K, V, F> filterObservableMapAsMapResult(
+  ObservableMapResult<K, V, F> filterAsMapResult(
     final bool Function(K key, V value) predicate, {
     final Map<K, V> Function(Map<K, V>? items)? factory,
   }) {
@@ -315,8 +348,8 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void remove(final K key) {
-    applyAction(
+  ObservableMapResultChange<K, V, F>? remove(final K key) {
+    return applyAction(
       ObservableMapResultUpdateActionData<K, V, F>(
         addItems: <K, V>{},
         removeItems: <K>{key},
@@ -325,11 +358,11 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void removeWhere(final bool Function(K key, V value) predicate) {
+  ObservableMapResultChange<K, V, F>? removeWhere(final bool Function(K key, V value) predicate) {
     final Set<K> removeKeys = <K>{};
-    value.when(
-      onUndefined: () {},
-      onFailure: (final _) {},
+    return value.fold(
+      onUndefined: () => null,
+      onFailure: (final _) => null,
       onSuccess: (final Map<K, V> data, final ObservableMapChange<K, V> change) {
         for (final MapEntry<K, V> entry in data.entries) {
           if (predicate(entry.key, entry.value)) {
@@ -337,9 +370,9 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
           }
         }
         if (removeKeys.isEmpty) {
-          return;
+          return null;
         }
-        applyAction(
+        return applyAction(
           ObservableMapResultUpdateActionData<K, V, F>(
             addItems: <K, V>{},
             removeItems: removeKeys,
@@ -358,8 +391,8 @@ class RxMapResultImpl<K, V, F> extends RxImpl<ObservableMapResultState<K, V, F>>
   }
 
   @override
-  void setUndefined() {
-    applyAction(
+  ObservableMapResultChange<K, V, F>? setUndefined() {
+    return applyAction(
       ObservableMapResultUpdateActionUndefined<K, V, F>(),
     );
   }

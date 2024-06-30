@@ -1,6 +1,6 @@
 part of '../map/map.dart';
 
-class OperatorCollectionsTransformAsMap<E, C, T extends CollectionState<E, C>, K, V> extends RxMapImpl<K, V>
+abstract class OperatorCollectionsTransformAsMap<E, C, T extends CollectionState<E, C>, K, V> extends RxMapImpl<K, V>
     with
         BaseCollectionTransformOperator<
             E, //
@@ -14,19 +14,34 @@ class OperatorCollectionsTransformAsMap<E, C, T extends CollectionState<E, C>, K
   @override
   final ObservableCollection<E, C, T> source;
 
-  @override
-  final void Function(
-    ObservableMap<K, V> state,
-    C change,
-    Emitter<ObservableMapUpdateAction<K, V>> updater,
-  ) transformFn;
-
   OperatorCollectionsTransformAsMap({
     required this.source,
+    final FactoryMap<K, V>? factory,
+  }) : super(factory: factory);
+
+  @override
+  ObservableMap<K, V> get current => this;
+}
+
+class OperatorCollectionsTransformAsMapArg<E, C, T extends CollectionState<E, C>, K, V>
+    extends OperatorCollectionsTransformAsMap<E, C, T, K, V> {
+  final MapUpdater<K, V, C> transformFn;
+
+  OperatorCollectionsTransformAsMapArg({
+    required super.source,
     required this.transformFn,
     final FactoryMap<K, V>? factory,
   }) : super(factory: factory);
 
   @override
   ObservableMap<K, V> get current => this;
+
+  @override
+  void transformChange(
+    final ObservableMap<K, V> state,
+    final C change,
+    final Emitter<ObservableMapUpdateAction<K, V>> updater,
+  ) {
+    transformFn(state, change, updater);
+  }
 }

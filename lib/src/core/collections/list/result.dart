@@ -88,8 +88,8 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void add(final E item) {
-    applyAction(
+  ObservableListResultChange<E, F>? add(final E item) {
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.add(
         <MapEntry<int?, Iterable<E>>>[
           MapEntry<int?, Iterable<E>>(null, <E>[item]),
@@ -99,8 +99,8 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void addAll(final Iterable<E> items) {
-    applyAction(
+  ObservableListResultChange<E, F>? addAll(final Iterable<E> items) {
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.add(
         <MapEntry<int?, Iterable<E>>>[
           MapEntry<int?, Iterable<E>>(null, items),
@@ -110,50 +110,58 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void clear() {
-    value.when(
-      onUndefined: () {},
-      onFailure: (final _) {},
-      onSuccess: (final UnmodifiableListView<E> data, final _) {
-        applyAction(
-          ObservableListResultUpdateActionData<E, F>.remove(
-            <int>{for (int i = 0; i < data.length; i++) i},
-          ),
-        );
-      },
+  ObservableListResultChange<E, F>? clear() {
+    return value.fold(
+      onUndefined: () => null,
+      onFailure: (final _) => null,
+      onSuccess: (final UnmodifiableListView<E> data, final _) => applyAction(
+        ObservableListResultUpdateActionData<E, F>.remove(
+          <int>{for (int i = 0; i < data.length; i++) i},
+        ),
+      ),
     );
   }
 
   @override
-  void applyAction(final ObservableListResultUpdateAction<E, F> action) {
+  ObservableListResultChange<E, F>? applyAction(final ObservableListResultUpdateAction<E, F> action) {
     switch (action) {
       case final ObservableListResultUpdateActionFailure<E, F> actionFailure:
         final F failure = actionFailure.failure;
-        value.when(
+        return value.fold<ObservableListResultChange<E, F>?>(
           onUndefined: () {
             super.value = _MutableStateFailure<E, F>(failure, <E>[]);
+            return ObservableListResultChangeFailure<E, F>(failure: failure);
           },
           onFailure: (final F currentFailure) {
+            if (currentFailure == failure) {
+              return null;
+            }
             super.value = _MutableStateFailure<E, F>(failure, <E>[]);
+            return ObservableListResultChangeFailure<E, F>(failure: failure);
           },
           onSuccess: (final UnmodifiableListView<E> data, final _) {
             super.value = _MutableStateFailure<E, F>(
               failure,
               data.toList(),
             );
+            return ObservableListResultChangeFailure<E, F>(
+              failure: failure,
+              removedItems: data.toList(),
+            );
           },
         );
-        break;
       case final ObservableListResultUpdateActionUndefined<E, F> _:
-        value.when(
+        return value.fold<ObservableListResultChange<E, F>?>(
+          onUndefined: () => null,
           onFailure: (final F failure) {
             super.value = _MutableStateUndefined<E, F>(<E>[]);
+            return ObservableListResultChangeUndefined<E, F>();
           },
           onSuccess: (final UnmodifiableListView<E> data, final _) {
             super.value = _MutableStateUndefined<E, F>(data.toList());
+            return ObservableListResultChangeUndefined<E, F>(removedItems: data.toList());
           },
         );
-        break;
       case final ObservableListResultUpdateActionData<E, F> actionData:
         switch (value) {
           case final ObservableListResultStateData<E, F> stateData:
@@ -162,7 +170,7 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
             final ObservableListChange<E> change = actionData.apply(currentData);
 
             if (change.isEmpty) {
-              return;
+              return null;
             }
 
             final _MutableStateData<E, F> newState = _MutableStateData<E, F>(
@@ -170,7 +178,10 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
               change,
             );
             super.value = newState;
-            break;
+            return ObservableListResultChangeData<E, F>(
+              change: change,
+              data: UnmodifiableListView<E>(currentData),
+            );
           case final ObservableListResultStateFailure<E, F> _:
             final List<E> data = <E>[];
             final ObservableListChange<E> change = actionData.apply(data);
@@ -179,7 +190,11 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
               change,
             );
             super.value = newState;
-            break;
+
+            return ObservableListResultChangeData<E, F>(
+              change: change,
+              data: UnmodifiableListView<E>(data),
+            );
           case final ObservableListResultStateUndefined<E, F> _:
             final List<E> data = <E>[];
             final ObservableListChange<E> change = actionData.apply(data);
@@ -188,22 +203,25 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
               change,
             );
             super.value = newState;
-            break;
+
+            return ObservableListResultChangeData<E, F>(
+              change: change,
+              data: UnmodifiableListView<E>(data),
+            );
         }
-        break;
     }
   }
 
   @override
-  set failure(final F failure) {
-    applyAction(
+  ObservableListResultChange<E, F>? setFailure(final F failure) {
+    return applyAction(
       ObservableListResultUpdateActionFailure<E, F>(failure: failure),
     );
   }
 
   @override
-  void insert(final int index, final E item) {
-    applyAction(
+  ObservableListResultChange<E, F>? insert(final int index, final E item) {
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.add(
         <MapEntry<int?, Iterable<E>>>[
           MapEntry<int?, Iterable<E>>(index, <E>[item]),
@@ -213,8 +231,8 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void insertAll(final int index, final Iterable<E> items) {
-    applyAction(
+  ObservableListResultChange<E, F>? insertAll(final int index, final Iterable<E> items) {
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.add(
         <MapEntry<int?, Iterable<E>>>[
           MapEntry<int?, Iterable<E>>(index, items),
@@ -224,7 +242,7 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void remove(final E item) {
+  ObservableListResultChange<E, F>? remove(final E item) {
     final int indexOf = value.fold(
       onUndefined: () => -1,
       onFailure: (final _) => -1,
@@ -232,10 +250,10 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
     );
 
     if (indexOf == -1) {
-      return;
+      return null;
     }
 
-    applyAction(
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.remove(
         <int>{indexOf},
       ),
@@ -243,25 +261,25 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void removeAt(final int index) {
-    value.when(
-      onSuccess: (final _, final __) {
-        applyAction(
-          ObservableListResultUpdateActionData<E, F>.remove(
-            <int>{index},
-          ),
-        );
-      },
+  ObservableListResultChange<E, F>? removeAt(final int index) {
+    return value.fold<ObservableListResultChange<E, F>?>(
+      onFailure: (final _) => null,
+      onUndefined: () => null,
+      onSuccess: (final _, final __) => applyAction(
+        ObservableListResultUpdateActionData<E, F>.remove(
+          <int>{index},
+        ),
+      ),
     );
   }
 
   @override
-  void removeWhere(final bool Function(E item) predicate) {
-    final List<int> indexes = value.fold(
-      onUndefined: () => <int>[],
-      onFailure: (final _) => <int>[],
+  ObservableListResultChange<E, F>? removeWhere(final bool Function(E item) predicate) {
+    final Set<int> indexes = value.fold(
+      onUndefined: () => <int>{},
+      onFailure: (final _) => <int>{},
       onSuccess: (final UnmodifiableListView<E> data, final _) {
-        final List<int> indexes = <int>[];
+        final Set<int> indexes = <int>{};
 
         for (int i = 0; i < data.length; i++) {
           if (predicate(data[i])) {
@@ -274,10 +292,10 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
     );
 
     if (indexes.isEmpty) {
-      return;
+      return null;
     }
 
-    applyAction(
+    return applyAction(
       ObservableListResultUpdateActionData<E, F>.remove(indexes),
     );
   }
@@ -291,8 +309,8 @@ class RxListResultImpl<E, F> extends RxImpl<ObservableListResultState<E, F>>
   }
 
   @override
-  void setUndefined() {
-    applyAction(
+  ObservableListResultChange<E, F>? setUndefined() {
+    return applyAction(
       ObservableListResultUpdateActionUndefined<E, F>(),
     );
   }

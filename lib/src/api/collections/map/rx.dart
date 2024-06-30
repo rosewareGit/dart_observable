@@ -1,7 +1,5 @@
-import '../../../../src/core/collections/map/factories/stream.dart';
+import '../../../../dart_observable.dart';
 import '../../../../src/core/collections/map/map.dart';
-import 'observable.dart';
-import 'update_action.dart';
 
 abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
   factory RxMap([
@@ -10,16 +8,6 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
   ]) {
     return RxMapImpl<K, V>(
       initial: initial,
-      factory: factory,
-    );
-  }
-
-  factory RxMap.fromStream({
-    required final Stream<ObservableMapUpdateAction<K, V>> stream,
-    final Map<K, V> Function(Map<K, V>? items)? factory,
-  }) {
-    return ObservableMapFromStream<K, V>(
-      stream: stream,
       factory: factory,
     );
   }
@@ -34,19 +22,19 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V> {
     );
   }
 
-  set data(final Map<K, V> value);
-
   operator []=(final K key, final V value);
 
-  void add(final K key, final V value);
+  ObservableMapChange<K, V>? add(final K key, final V value);
 
-  void addAll(final Map<K, V> other);
+  ObservableMapChange<K, V>? addAll(final Map<K, V> other);
 
-  void applyAction(final ObservableMapUpdateAction<K, V> action);
+  ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action);
 
-  void clear();
+  ObservableMapChange<K, V>? clear();
 
-  void remove(final K key);
+  ObservableMapChange<K, V>? remove(final K key);
 
-  void removeWhere(final bool Function(K key, V value) predicate);
+  ObservableMapChange<K, V>? removeWhere(final bool Function(K key, V value) predicate);
+
+  ObservableMapChange<K, V>? setData(final Map<K, V> value);
 }

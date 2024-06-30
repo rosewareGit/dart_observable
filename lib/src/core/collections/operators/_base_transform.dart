@@ -12,18 +12,18 @@ mixin BaseCollectionTransformOperator<
     U extends ObservableCollectionUpdateAction> on RxImpl<T2> {
   ObservableCollection<E, C, T> get source;
 
-  void applyAction(final U action);
+  C2? applyAction(final U action);
 
   S get current;
 
   Disposable? _listener;
   late final List<C> _bufferedChanges = <C>[];
 
-  void Function(
-    S state,
-    C change,
-    Emitter<U> updater,
-  ) get transformFn;
+  void transformChange(
+    final S state,
+    final C change,
+    final Emitter<U> updater,
+  );
 
   @override
   void onActive() {
@@ -49,7 +49,7 @@ mixin BaseCollectionTransformOperator<
     if (_listener != null) {
       // apply buffered changes
       for (final C change in _bufferedChanges) {
-        transformFn(
+        transformChange(
           current,
           change,
           (final U action) {
@@ -61,7 +61,7 @@ mixin BaseCollectionTransformOperator<
       return;
     }
 
-    transformFn(
+    transformChange(
       current,
       source.value.asChange(),
       (final U action) {
@@ -79,7 +79,7 @@ mixin BaseCollectionTransformOperator<
           return;
         }
 
-        transformFn(
+        transformChange(
           current,
           value.lastChange,
           (final U action) {

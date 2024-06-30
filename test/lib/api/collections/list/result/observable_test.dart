@@ -28,7 +28,7 @@ void main() {
           initial: null,
         );
 
-        rxList.failure = 'failure';
+        rxList.setFailure('failure');
         expect(rxList[0], null);
       });
     });

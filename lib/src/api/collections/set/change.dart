@@ -9,11 +9,11 @@ class ObservableSetChange<E> {
         removed = removed ?? <E>{};
 
   factory ObservableSetChange.fromDiff(
-    final Set<E> previous,
     final Set<E> current,
+    final Set<E> updated,
   ) {
-    final Set<E> added = current.difference(previous);
-    final Set<E> removed = previous.difference(current);
+    final Set<E> added = updated.difference(current);
+    final Set<E> removed = current.difference(updated);
 
     return ObservableSetChange<E>(
       added: added,

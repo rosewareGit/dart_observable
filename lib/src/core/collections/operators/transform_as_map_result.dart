@@ -15,7 +15,6 @@ class OperatorCollectionsTransformAsMapResult<E, C, T extends CollectionState<E,
   @override
   final ObservableCollection<E, C, T> source;
 
-  @override
   final void Function(
     ObservableMapResult<K, V, F> state,
     C change,
@@ -30,4 +29,13 @@ class OperatorCollectionsTransformAsMapResult<E, C, T extends CollectionState<E,
 
   @override
   ObservableMapResult<K, V, F> get current => this;
+
+  @override
+  void transformChange(
+    final ObservableMapResult<K, V, F> state,
+    final C change,
+    final Emitter<ObservableMapResultUpdateAction<K, V, F>> updater,
+  ) {
+    transformFn(state, change, updater);
+  }
 }

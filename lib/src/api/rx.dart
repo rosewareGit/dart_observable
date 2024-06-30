@@ -64,7 +64,7 @@ abstract interface class Rx<T> implements Observable<T> {
   });
 }
 
-abstract interface class Rxn<T> implements ObservableN<T> {
+abstract interface class Rxn<T> extends Rx<T?> implements ObservableN<T> {
   factory Rxn({
     final T? value,
     final bool distinct = true,
@@ -96,6 +96,4 @@ abstract interface class Rxn<T> implements ObservableN<T> {
       distinct: distinct,
     );
   }
-
-  set value(final T? value);
 }

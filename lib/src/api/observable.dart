@@ -111,9 +111,10 @@ abstract interface class Observable<T> {
     final ObservableMap<K, V> Function(Observable<T> source) mapper,
   );
 
-  ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>(
-    final ObservableMapResult<K, V, F> Function(Observable<T> source) mapper,
-  );
+  ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>({
+    required final ObservableMapResult<K, V, F> Function(Observable<T> source, FactoryMap<K, V>? factory) mapper,
+    final FactoryMap<K, V>? factory,
+  });
 
   ObservableSet<T2> flatMapAsSet<T2>(
     final ObservableSet<T2> Function(Observable<T> source) mapper, {

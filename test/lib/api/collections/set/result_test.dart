@@ -46,7 +46,7 @@ void main() {
           },
         );
 
-        result.data = <int>{2, 3, 4};
+        result.setData(<int>{2, 3, 4});
 
         expect(result.value is ObservableSetResultStateData, true);
         expect((result.value as ObservableSetResultStateData<int, String>).data, <int>{2, 3, 4});

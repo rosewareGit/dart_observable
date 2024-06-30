@@ -40,7 +40,7 @@ abstract interface class ObservableMapResult<K, V, F>
 
   V? operator [](final K key);
 
-  ObservableMapResult<K, V, F> filterObservableMapAsMapResult(
+  ObservableMapResult<K, V, F> filterAsMapResult(
     final bool Function(K key, V value) predicate, {
     final Map<K, V> Function(Map<K, V>? items)? factory,
   });

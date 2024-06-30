@@ -1,4 +1,5 @@
 import '../../../../src/core/collections/set/set.dart';
+import 'change.dart';
 import 'observable.dart';
 import 'update_action.dart';
 
@@ -21,15 +22,15 @@ abstract interface class RxSet<E> implements ObservableSet<E> {
     return RxSetImpl<E>.splayTreeSet(initial: initial, compare: compare);
   }
 
-  set data(final Set<E> data);
+  ObservableSetChange<E>? add(final E item);
 
-  void add(final E item);
+  ObservableSetChange<E>? addAll(final Iterable<E> items);
 
-  void addAll(final Iterable<E> items);
+  ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action);
 
-  void applyAction(final ObservableSetUpdateAction<E> action);
+  ObservableSetChange<E>? remove(final E item);
 
-  void remove(final E item);
+  ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate);
 
-  void removeWhere(final bool Function(E item) predicate);
+  ObservableSetChange<E>? setData(final Set<E> data);
 }

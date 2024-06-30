@@ -29,8 +29,8 @@ sealed class ObservableMapResultUpdateAction<K, V, F> extends ObservableCollecti
 
 class ObservableMapResultUpdateActionData<K, V, F> extends ObservableMapResultUpdateAction<K, V, F> {
   final Map<K, V> addItems;
-
   final Iterable<K> removeItems;
+
   ObservableMapResultUpdateActionData({
     required this.removeItems,
     required this.addItems,

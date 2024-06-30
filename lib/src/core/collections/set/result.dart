@@ -99,16 +99,32 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
         super(state);
 
   @override
-  set data(final Set<E> data) {
+  ObservableSetResultChange<E, F>? setData(final Set<E> data) {
+    final Set<E> currentData = value.fold(
+      onUndefined: () => <E>{},
+      onFailure: (final _) => <E>{},
+      onSuccess: (final UnmodifiableSetView<E> data, final _) => data,
+    );
+
+    final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(currentData, data);
+    if (change.isEmpty) {
+      return null;
+    }
+
+    final Set<E> set = _factory(data);
     this.value = ObservableSetResultState<E, F>.data(
-      data: data,
-      change: ObservableSetChange<E>(added: data),
+      data: set,
+      change: change,
+    );
+    return ObservableSetResultChangeData<E, F>(
+      data: UnmodifiableSetView<E>(set),
+      change: change,
     );
   }
 
   @override
-  set failure(final F failure) {
-    applyAction(
+  ObservableSetResultChange<E, F>? setFailure(final F failure) {
+    return applyAction(
       ObservableSetResultUpdateActionFailure<E, F>(
         failure: failure,
       ),
@@ -153,8 +169,8 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void add(final E item) {
-    applyAction(
+  ObservableSetResultChange<E, F>? add(final E item) {
+    return applyAction(
       ObservableSetResultUpdateActionData<E, F>(
         addItems: <E>{item},
         removeItems: <E>{},
@@ -163,8 +179,8 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void addAll(final Iterable<E> items) {
-    applyAction(
+  ObservableSetResultChange<E, F>? addAll(final Iterable<E> items) {
+    return applyAction(
       ObservableSetResultUpdateActionData<E, F>(
         addItems: items.toSet(),
         removeItems: <E>{},
@@ -173,36 +189,44 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void applyAction(final ObservableSetResultUpdateAction<E, F> action) {
+  ObservableSetResultChange<E, F>? applyAction(final ObservableSetResultUpdateAction<E, F> action) {
     switch (action) {
       case ObservableSetResultUpdateActionUndefined<E, F> _:
-        value.when(
+        return value.fold(
           onUndefined: () {
-            // Same state, nothing to  do
+            // No change
+            return null;
           },
           onFailure: (final F failure) {
             super.value = ObservableSetResultState<E, F>.undefined(removedItems: <E>{});
+            return ObservableSetResultChangeUndefined<E, F>();
           },
           onSuccess: (final UnmodifiableSetView<E> data, final ObservableSetChange<E> change) {
             super.value = ObservableSetResultState<E, F>.undefined(removedItems: data);
+            return ObservableSetResultChangeUndefined<E, F>(removedItems: data);
           },
         );
-        break;
       case final ObservableSetResultUpdateActionFailure<E, F> failure:
-        value.when(
+        return value.fold(
           onUndefined: () {
             super.value = ObservableSetResultState<E, F>.failure(failure.failure, removedItems: <E>{});
+            return ObservableSetResultChangeFailure<E, F>(failure: failure.failure);
           },
           onFailure: (final F currentFailure) {
             if (currentFailure != failure.failure) {
               super.value = ObservableSetResultState<E, F>.failure(failure.failure, removedItems: <E>{});
+              return ObservableSetResultChangeFailure<E, F>(failure: failure.failure);
             }
+            return null;
           },
           onSuccess: (final UnmodifiableSetView<E> data, final ObservableSetChange<E> change) {
             super.value = ObservableSetResultState<E, F>.failure(failure.failure, removedItems: data);
+            return ObservableSetResultChangeFailure<E, F>(
+              failure: failure.failure,
+              removedItems: data,
+            );
           },
         );
-        break;
       case final ObservableSetResultUpdateActionData<E, F> action:
         switch (value) {
           case final ObservableSetResultStateData<E, F> data:
@@ -210,7 +234,7 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
             final ObservableSetChange<E> change = action.apply(set);
 
             if (change.isEmpty) {
-              return;
+              return null;
             }
 
             final ObservableSetResultState<E, F> newState = ObservableSetResultState<E, F>.data(
@@ -218,21 +242,31 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
               change: change,
             );
             super.value = newState;
-            break;
+            return ObservableSetResultChangeData<E, F>(data: UnmodifiableSetView<E>(set), change: change);
+
           case ObservableSetResultStateFailure<E, F>():
+            final Set<E> set = _factory(action.addItems);
+            final ObservableSetChange<E> change = ObservableSetChange<E>(added: action.addItems);
             super.value = ObservableSetResultState<E, F>.data(
-              data: _factory(action.addItems),
-              change: ObservableSetChange<E>(added: action.addItems),
+              data: set,
+              change: change,
             );
-            break;
+            return ObservableSetResultChangeData<E, F>(
+              data: UnmodifiableSetView<E>(set),
+              change: change,
+            );
           case ObservableSetResultStateUndefined<E, F>():
+            final Set<E> set = _factory(action.addItems);
+            final ObservableSetChange<E> change = ObservableSetChange<E>(added: action.addItems);
             super.value = ObservableSetResultState<E, F>.data(
-              data: _factory(action.addItems),
-              change: ObservableSetChange<E>(added: action.addItems),
+              data: set,
+              change: change,
             );
-            break;
+            return ObservableSetResultChangeData<E, F>(
+              data: UnmodifiableSetView<E>(set),
+              change: change,
+            );
         }
-        break;
     }
   }
 
@@ -248,8 +282,8 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void remove(final E item) {
-    applyAction(
+  ObservableSetResultChange<E, F>? remove(final E item) {
+    return applyAction(
       ObservableSetResultUpdateActionData<E, F>(
         addItems: <E>{},
         removeItems: <E>{item},
@@ -258,20 +292,18 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void removeWhere(final bool Function(E item) predicate) {
+  ObservableSetResultChange<E, F>? removeWhere(final bool Function(E item) predicate) {
     final Set<E> itemsToRemove = <E>{};
     value.when(
-      onUndefined: () {},
-      onFailure: (final F failure) {},
       onSuccess: (final UnmodifiableSetView<E> data, final ObservableSetChange<E> change) {
         itemsToRemove.addAll(data.where(predicate));
       },
     );
     if (itemsToRemove.isEmpty) {
-      return;
+      return null;
     }
 
-    applyAction(
+    return applyAction(
       ObservableSetResultUpdateActionData<E, F>(
         addItems: <E>{},
         removeItems: itemsToRemove,
@@ -296,8 +328,8 @@ class RxSetResultImpl<E, F> extends RxImpl<ObservableSetResultState<E, F>>
   }
 
   @override
-  void setUndefined() {
-    applyAction(ObservableSetResultUpdateActionUndefined<E, F>());
+  ObservableSetResultChange<E, F>? setUndefined() {
+    return applyAction(ObservableSetResultUpdateActionUndefined<E, F>());
   }
 
   void Function(

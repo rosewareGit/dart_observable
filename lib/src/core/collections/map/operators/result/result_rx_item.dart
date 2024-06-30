@@ -1,5 +1,5 @@
-import '../../../../../dart_observable.dart';
-import '../../../rx/_impl.dart';
+import '../../../../../../dart_observable.dart';
+import '../../../../rx/_impl.dart';
 
 class OperatorObservableMapResultRxItem<K, V, F> extends RxnImpl<V> {
   final K key;
@@ -43,6 +43,9 @@ class OperatorObservableMapResultRxItem<K, V, F> extends RxnImpl<V> {
     if (_listener != null) {
       return;
     }
+
+    // Update initial value
+    value = source[key];
 
     _listener = source.listen(
       onChange: (final Observable<ObservableMapResultState<K, V, F>> source) {

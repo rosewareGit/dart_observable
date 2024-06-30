@@ -215,12 +215,14 @@ abstract class RxBase<T>
   }
 
   @override
-  ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>(
-    final ObservableMapResult<K, V, F> Function(Observable<T> source) mapper,
-  ) {
+  ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>({
+    required final ObservableMapResult<K, V, F> Function(Observable<T> source, FactoryMap<K,V>? factory) mapper,
+    final FactoryMap<K, V>? factory,
+  }) {
     return OperatorFlatMapAaMapResult<T, K, V, F>(
       source: this,
       mapper: mapper,
+      factory: factory,
     );
   }
 

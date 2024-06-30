@@ -1,6 +1,7 @@
 import '../../../dart_observable.dart';
 import 'map/map.dart';
 import 'map/result.dart';
+import 'operators/flatmap_as_list.dart';
 import 'operators/flatmap_as_map.dart';
 import 'operators/flatmap_as_set.dart';
 import 'operators/transform_as_list.dart';
@@ -35,15 +36,23 @@ mixin ObservableCollectionBase<E, C, T extends CollectionState<E, C>> on Observa
   }
 
   @override
+  ObservableList<E2> flatMapCollectionAsList<E2>({
+    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableList<E2>>? Function(C change) sourceProvider,
+    final FactoryList<E2>? factory,
+  }) {
+    return OperatorCollectionsFlatMapAsList<E, E2, C, T>(
+      source: this,
+      sourceProvider: sourceProvider,
+      factory: factory,
+    );
+  }
+
+  @override
   ObservableMap<K2, V2> transformCollectionAsMap<K2, V2>({
-    required final void Function(
-      ObservableMap<K2, V2> state,
-      C change,
-      Emitter<ObservableMapUpdateAction<K2, V2>> updater,
-    ) transform,
+    required final MapUpdater<K2, V2, C> transform,
     final FactoryMap<K2, V2>? factory,
   }) {
-    return OperatorCollectionsTransformAsMap<E, C, T, K2, V2>(
+    return OperatorCollectionsTransformAsMapArg<E, C, T, K2, V2>(
       source: this,
       transformFn: transform,
       factory: factory,
@@ -91,7 +100,7 @@ mixin ObservableCollectionBase<E, C, T extends CollectionState<E, C>> on Observa
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return OperatorCollectionsTransformAsList<E, E2, C, T>(
+    return OperatorCollectionsTransformAsListArg<E, E2, C, T>(
       source: this,
       transformFn: transform,
       factory: factory,
