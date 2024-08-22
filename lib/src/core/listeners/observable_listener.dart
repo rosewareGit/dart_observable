@@ -1,16 +1,17 @@
 import 'dart:async';
 
 import '../../../dart_observable.dart';
+import '../../api/change_tracking_observable.dart';
 
-class ObservableListener<T> implements Disposable {
-  final FutureOr<void> Function(ObservableListener<T> disposable) _disposer;
-  final void Function(Observable<T> source)? _onChange;
+class ObservableListener<S extends ChangeTrackingObservable<S, T, C>, T, C> implements Disposable {
+  final FutureOr<void> Function(ObservableListener<S, T, C> disposable) _disposer;
+  final void Function(S source)? _onChange;
   final void Function(dynamic error, StackTrace stack)? _onError;
   final Zone _zone;
 
   ObservableListener({
-    required final FutureOr<void> Function(ObservableListener<T> disposable) disposer,
-    final void Function(Observable<T> source)? onChange,
+    required final FutureOr<void> Function(ObservableListener<S, T, C> disposable) disposer,
+    final void Function(S source)? onChange,
     final void Function(dynamic error, StackTrace stack)? onError,
   }) : this._zoned(
           _forkZone(Zone.current, onError),
@@ -21,11 +22,11 @@ class ObservableListener<T> implements Disposable {
 
   ObservableListener._zoned(
     this._zone, {
-    required final void Function(ObservableListener<T> disposable) disposer,
-    final void Function(Observable<T> source)? onChange,
+    required final void Function(ObservableListener<S, T, C> disposable) disposer,
+    final void Function(S source)? onChange,
     final void Function(dynamic error, StackTrace stack)? onError,
-  })  : _disposer = _registerDisposer<T>(_zone, disposer),
-        _onChange = _registerHandler<T>(_zone, onChange),
+  })  : _disposer = _registerDisposer<S, T, C>(_zone, disposer),
+        _onChange = _registerHandler<S, T, C>(_zone, onChange),
         _onError = _registerErrorHandler(_zone, onError);
 
   @override
@@ -33,8 +34,8 @@ class ObservableListener<T> implements Disposable {
     await _disposer(this);
   }
 
-  void notify(final Observable<T> source) {
-    final void Function(Observable<T> source)? handler = _onChange;
+  void notify(final S source) {
+    final void Function(S source)? handler = _onChange;
     if (handler == null) {
       return;
     }
@@ -73,9 +74,9 @@ class ObservableListener<T> implements Disposable {
     );
   }
 
-  static _registerDisposer<T>(
+  static _registerDisposer<S extends ChangeTrackingObservable<S, T, C>, T, C>(
     final Zone zone,
-    final void Function(ObservableListener<T> disposable) disposer,
+    final void Function(ObservableListener<S, T, C> disposable) disposer,
   ) {
     return zone.registerUnaryCallback(disposer);
   }
@@ -90,9 +91,9 @@ class ObservableListener<T> implements Disposable {
     return zone.registerBinaryCallback<dynamic, dynamic, StackTrace>(onError);
   }
 
-  static _registerHandler<T>(
+  static _registerHandler<S extends ChangeTrackingObservable<S, T, C>, T, C>(
     final Zone zone,
-    final void Function(Observable<T> source)? handler,
+    final void Function(S source)? handler,
   ) {
     if (handler == null) {
       return null;

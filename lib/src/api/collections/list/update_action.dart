@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import '../../../../dart_observable.dart';
 
-class ObservableListUpdateAction<E> extends ObservableCollectionUpdateAction {
+class ObservableListUpdateAction<E> {
   final Iterable<MapEntry<int?, Iterable<E>>> insertItemAtPosition;
   final Set<int> removeIndexes;
   final Map<int, E> updateItemAtPosition;

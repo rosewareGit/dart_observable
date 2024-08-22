@@ -1,14 +1,18 @@
 import '../../../../dart_observable.dart';
+import '../../../api/change_tracking_observable.dart';
 import '../_impl.dart';
 
-mixin OperatorHandleError<T> implements Observable<T> {
+mixin OperatorHandleError<Self extends ChangeTrackingObservable<Self, T, C>, T, C>
+    implements ChangeTrackingObservable<Self, T, C> {
+  Self get self;
+
   @override
   Observable<T> handleError(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
     final bool Function(dynamic error)? predicate,
   }) {
-    return _HandleErrorOperator<T>(
-      source: this,
+    return _HandleErrorOperator<Self, T, C>(
+      source: self,
       handler: handler,
       initial: value,
       predicate: predicate,
@@ -16,8 +20,8 @@ mixin OperatorHandleError<T> implements Observable<T> {
   }
 }
 
-class _HandleErrorOperator<T> extends RxImpl<T> {
-  final Observable<T> source;
+class _HandleErrorOperator<Self extends ChangeTrackingObservable<Self, T, C>, T, C> extends RxImpl<T> {
+  final Self source;
 
   final void Function(dynamic error, Emitter<T> emitter) handler;
   final bool Function(dynamic error)? predicate;
@@ -77,7 +81,7 @@ class _HandleErrorOperator<T> extends RxImpl<T> {
     }
 
     _listener = source.listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         value = source.value;
       },
       onError: _handleError,

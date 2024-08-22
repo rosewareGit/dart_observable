@@ -1,11 +1,12 @@
 import '../../../../dart_observable.dart';
+import '../../../api/change_tracking_observable.dart';
 import '../_impl.dart';
 
 class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
-  final Observable<T1> observable1;
-  final Observable<T2> observable2;
-  final Observable<T3> observable3;
-  final Observable<T4> observable4;
+  final ChangeTrackingObservable<dynamic, T1, dynamic> observable1;
+  final ChangeTrackingObservable<dynamic, T2, dynamic> observable2;
+  final ChangeTrackingObservable<dynamic, T3, dynamic> observable3;
+  final ChangeTrackingObservable<dynamic, T4, dynamic> observable4;
   final R Function(T1 value1, T2 value2, T3 value3, T4 value4) combiner;
   final List<Disposable> _listeners = <Disposable>[];
 
@@ -32,7 +33,8 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
     super.onInit();
     // When all disposed, dispose this
     int disposeCount = 0;
-    for (final Observable<dynamic> observable in <Observable<dynamic>>[
+    for (final ChangeTrackingObservable<dynamic, Object?, dynamic> observable
+        in <ChangeTrackingObservable<dynamic, Object?, dynamic>>[
       observable1,
       observable2,
       observable3,
@@ -47,7 +49,7 @@ class ObservableCombineWith4<R, T1, T2, T3, T4> extends RxImpl<R> {
     }
   }
 
-  void _initListener<T>(final Observable<T> observable) {
+  void _initListener<T>(final ChangeTrackingObservable<dynamic, T, dynamic> observable) {
     _listeners.add(
       observable.listen(
         onChange: (final _) {

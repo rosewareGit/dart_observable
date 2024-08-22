@@ -1,0 +1,3 @@
+class Undefined {
+  const Undefined();
+}

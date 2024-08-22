@@ -1,28 +1,11 @@
+import '../../../../dart_observable.dart';
 import '../../../core/collections/list/list.dart';
-import 'change.dart';
-import 'observable.dart';
-import 'update_action.dart';
+import 'rx_actions.dart';
 
-abstract interface class RxList<E> implements ObservableList<E> {
+abstract interface class RxList<E> implements ObservableList<E>, RxListActions<E> {
   factory RxList([final Iterable<E>? initial, final List<E> Function(Iterable<E>? items)? factory]) {
     return RxListImpl<E>(initial: initial, factory: factory);
   }
 
-  void operator []=(final int index, final E value);
-
-  ObservableListChange<E>? add(final E item);
-
-  ObservableListChange<E>? addAll(final Iterable<E> items);
-
   ObservableListChange<E>? applyAction(final ObservableListUpdateAction<E> action);
-
-  ObservableListChange<E>? insert(final int index, final E item);
-
-  ObservableListChange<E>? insertAll(final int index, final Iterable<E> items);
-
-  ObservableListChange<E>? remove(final E item);
-
-  ObservableListChange<E>? removeAt(final int index);
-
-  ObservableListChange<E>? removeWhere(final bool Function(E item) predicate);
 }

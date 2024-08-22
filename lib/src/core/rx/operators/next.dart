@@ -1,17 +1,19 @@
 import 'dart:async';
 
 import '../../../../dart_observable.dart';
+import '../../../api/change_tracking_observable.dart';
 
-mixin OperatorNext<T> implements Observable<T> {
+mixin OperatorNext<Self extends ChangeTrackingObservable<Self, T, C>, T, C>
+    implements ChangeTrackingObservable<Self, T, C> {
   @override
   Future<T> next({
     final Duration? timeout,
-    final bool Function(Observable<T> source)? predicate,
+    final bool Function(Self source)? predicate,
     final T Function()? onTimeout,
   }) {
     final Completer<T> completer = Completer<T>();
     final Disposable disposable = listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         if (completer.isCompleted) {
           return;
         }

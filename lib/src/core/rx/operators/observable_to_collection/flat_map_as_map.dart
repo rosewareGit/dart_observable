@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import '../../../../../dart_observable.dart';
+import '../../../../api/change_tracking_observable.dart';
 import '../../../collections/map/map.dart';
 
-class OperatorFlatMapAsMap<T, K, V> extends RxMapImpl<K, V> {
-  final ObservableMap<K, V> Function(Observable<T> source) mapper;
-  final Observable<T> source;
+class OperatorFlatMapAsMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, K, V> extends RxMapImpl<K, V> {
+  final ObservableMap<K, V> Function(Self source) mapper;
+  final Self source;
 
   Disposable? _intermediateListener;
   Disposable? _listener;
@@ -61,7 +62,7 @@ class OperatorFlatMapAsMap<T, K, V> extends RxMapImpl<K, V> {
     );
 
     _intermediateListener = rxIntermediate.listen(
-      onChange: (final Observable<ObservableMapState<K, V>> source) {
+      onChange: (final ObservableMap<K, V> source) {
         final ObservableMapChange<K, V> change = source.value.lastChange;
         applyAction(
           ObservableMapUpdateAction<K, V>(
@@ -73,13 +74,13 @@ class OperatorFlatMapAsMap<T, K, V> extends RxMapImpl<K, V> {
     );
 
     _listener = source.listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         final ObservableMap<K, V> rxIntermediate = mapper(source);
         if (_activeRxIntermediate != rxIntermediate) {
           value = rxIntermediate.value;
           _intermediateListener?.dispose();
           _intermediateListener = rxIntermediate.listen(
-            onChange: (final Observable<ObservableMapState<K, V>> source) {
+            onChange: (final ObservableMap<K, V> source) {
               final ObservableMapChange<K, V> change = source.value.lastChange;
               applyAction(
                 ObservableMapUpdateAction<K, V>(

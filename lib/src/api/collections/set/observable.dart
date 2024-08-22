@@ -1,7 +1,7 @@
 import '../../../../dart_observable.dart';
 
 abstract interface class ObservableSet<E>
-    implements ObservableCollection<E, ObservableSetChange<E>, ObservableSetState<E>> {
+    implements ObservableCollection<ObservableSet<E>, E, ObservableSetChange<E>, ObservableSetState<E>> {
   int get length;
 
   bool contains(final E item);

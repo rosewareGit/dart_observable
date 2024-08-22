@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import '../../../../../dart_observable.dart';
+import '../../../../api/change_tracking_observable.dart';
 import '../../../collections/set/set.dart';
 
-class OperatorFlatMapAsSet<T, T2> extends RxSetImpl<T2> {
-  final ObservableSet<T2> Function(Observable<T> source) mapper;
-  final Observable<T> source;
+class OperatorFlatMapAsSet<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T2> extends RxSetImpl<T2> {
+  final ObservableSet<T2> Function(Self source) mapper;
+  final Self source;
 
   Disposable? _intermediateListener;
   Disposable? _listener;
@@ -63,7 +64,7 @@ class OperatorFlatMapAsSet<T, T2> extends RxSetImpl<T2> {
     );
 
     _intermediateListener = rxIntermediate.listen(
-      onChange: (final Observable<ObservableSetState<T2>> source) {
+      onChange: (final source) {
         final ObservableSetChange<T2> change = source.value.lastChange;
         applyAction(
           ObservableSetUpdateAction<T2>(
@@ -75,13 +76,13 @@ class OperatorFlatMapAsSet<T, T2> extends RxSetImpl<T2> {
     );
 
     _listener = source.listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         final ObservableSet<T2> rxIntermediate = mapper(source);
         if (_activeRxIntermediate != rxIntermediate) {
           value = rxIntermediate.value;
           _intermediateListener?.dispose();
           _intermediateListener = rxIntermediate.listen(
-            onChange: (final Observable<ObservableSetState<T2>> source) {
+            onChange: (final ObservableSet<T2> source) {
               final ObservableSetChange<T2> change = source.value.lastChange;
               applyAction(
                 ObservableSetUpdateAction<T2>(

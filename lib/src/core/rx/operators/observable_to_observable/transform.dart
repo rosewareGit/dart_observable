@@ -1,10 +1,11 @@
 import '../../../../../dart_observable.dart';
+import '../../../../api/change_tracking_observable.dart';
 import '../../_impl.dart';
 
-class OperatorTransform<T, T2> extends RxImpl<T2> {
-  final Observable<T> source;
+class OperatorTransform<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T2> extends RxImpl<T2> {
+  final Self source;
   final void Function(
-    Observable<T> source,
+    Self source,
     Emitter<T2> emit,
   ) handler;
   Disposable? _listener;
@@ -43,7 +44,7 @@ class OperatorTransform<T, T2> extends RxImpl<T2> {
     });
 
     _listener = source.listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         handler(source, (final T2 change) {
           value = change;
         });

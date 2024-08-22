@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import '../collection_state.dart';
+import '../../change_tracking_state.dart';
 import 'change.dart';
 
-abstract class ObservableMapState<K, V> extends CollectionState<K, ObservableMapChange<K, V>> {
+abstract class ObservableMapState<K, V> extends ChangeTrackingState<ObservableMapChange<K, V>> {
   UnmodifiableMapView<K, V> get mapView;
 }

@@ -1,10 +1,11 @@
 import '../../../../dart_observable.dart';
+import '../../../api/change_tracking_observable.dart';
 import '../_impl.dart';
 
 class ObservableCombineWith3<R, T1, T2, T3> extends RxImpl<R> {
-  final Observable<T1> observable1;
-  final Observable<T2> observable2;
-  final Observable<T3> observable3;
+  final ChangeTrackingObservable<dynamic, T1, dynamic> observable1;
+  final ChangeTrackingObservable<dynamic, T2, dynamic> observable2;
+  final ChangeTrackingObservable<dynamic, T3, dynamic> observable3;
   final R Function(T1 value1, T2 value2, T3 value3) combiner;
   final List<Disposable> _listeners = <Disposable>[];
 
@@ -30,7 +31,8 @@ class ObservableCombineWith3<R, T1, T2, T3> extends RxImpl<R> {
     super.onInit();
     // When all disposed, dispose this
     int disposeCount = 0;
-    for (final Observable<dynamic> observable in <Observable<dynamic>>[observable1, observable2, observable3]) {
+    for (final ChangeTrackingObservable<dynamic, Object?, dynamic> observable
+        in <ChangeTrackingObservable<dynamic, Object?, dynamic>>[observable1, observable2, observable3]) {
       observable.addDisposeWorker(() {
         disposeCount++;
         if (disposeCount == 3) {
@@ -40,7 +42,7 @@ class ObservableCombineWith3<R, T1, T2, T3> extends RxImpl<R> {
     }
   }
 
-  void _initListener<T>(final Observable<T> observable) {
+  void _initListener<T>(final ChangeTrackingObservable<dynamic, T, dynamic> observable) {
     _listeners.add(
       observable.listen(
         onChange: (final _) {

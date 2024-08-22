@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import '../collection_state.dart';
+import '../../change_tracking_state.dart';
 import 'change.dart';
 
-abstract class ObservableListState<E> extends CollectionState<E, ObservableListChange<E>> {
+abstract class ObservableListState<E> extends ChangeTrackingState<ObservableListChange<E>> {
   UnmodifiableListView<E> get listView;
 }

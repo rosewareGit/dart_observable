@@ -1,32 +1,36 @@
-import 'dart:collection';
-
 import '../../../../dart_observable.dart';
-import '../../rx/_impl.dart';
+import '../../../api/change_tracking_observable.dart';
+import '../../rx/base_tracking.dart';
 import '../_base.dart';
 import '../operators/_base_transform.dart';
+import 'map_state.dart';
 import 'operators/factory.dart';
 import 'operators/filter.dart';
 import 'operators/map.dart';
 import 'operators/rx_item.dart';
+import 'rx_actions.dart';
 
-part '../operators/transform_as_map.dart';
+part '../operators/transforms/map.dart';
 
-Map<K, V> Function(Map<K, V>? items) _defaultMapFactory<K, V>() {
+Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   return (final Map<K, V>? items) {
     return Map<K, V>.of(items ?? <K, V>{});
   };
 }
 
-class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
-    with ObservableCollectionBase<K, ObservableMapChange<K, V>, ObservableMapState<K, V>>
+class RxMapImpl<K, V> extends RxBaseTracking<ObservableMap<K, V>, ObservableMapState<K, V>, ObservableMapChange<K, V>>
+    with
+        ObservableCollectionBase<ObservableMap<K, V>, K, ObservableMapChange<K, V>, ObservableMapState<K, V>>,
+        RxMapActionsImpl<K, V>
     implements RxMap<K, V> {
+  // TODO check usage
   final Map<K, V> Function(Map<K, V>? items) _factory;
 
   RxMapImpl({
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
-  })  : _factory = factory ?? _defaultMapFactory<K, V>(),
-        super(_MutableState<K, V>.initial((factory ?? _defaultMapFactory<K, V>()).call(initial)));
+  })  : _factory = factory ?? defaultMapFactory<K, V>(),
+        super(RxMapState<K, V>.initial((factory ?? defaultMapFactory<K, V>()).call(initial)));
 
   factory RxMapImpl.sorted({
     required final Comparator<V> comparator,
@@ -41,7 +45,7 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
   }
 
   @override
-  int get length => _value._map.length;
+  int get length => _value.data.length;
 
   @override
   set value(final ObservableMapState<K, V> value) {
@@ -49,42 +53,18 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
     if (change.isEmpty) {
       return;
     }
-    super.value = _MutableState<K, V>._(
-      _value._map,
+
+    super.value = RxMapState<K, V>(
+      _value.data,
       change,
     );
   }
 
-  _MutableState<K, V> get _value => value as _MutableState<K, V>;
+  RxMapState<K, V> get _value => value as RxMapState<K, V>;
 
   @override
   V? operator [](final K key) {
-    return _value._map[key];
-  }
-
-  @override
-  void operator []=(final K key, final V value) {
-    applyAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{},
-        addItems: <K, V>{key: value},
-      ),
-    );
-  }
-
-  @override
-  ObservableMapChange<K, V>? add(final K key, final V value) {
-    return addAll(<K, V>{key: value});
-  }
-
-  @override
-  ObservableMapChange<K, V>? addAll(final Map<K, V> other) {
-    return applyAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{},
-        addItems: other,
-      ),
-    );
+    return _value.data[key];
   }
 
   @override
@@ -93,13 +73,13 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
       throw ObservableDisposedError();
     }
 
-    final Map<K, V> updatedMap = _value._map;
+    final Map<K, V> updatedMap = _value.data;
     final ObservableMapChange<K, V> change = action.apply(updatedMap);
     if (change.isEmpty) {
       return null;
     }
 
-    final _MutableState<K, V> newState = _MutableState<K, V>._(
+    final RxMapState<K, V> newState = RxMapState<K, V>(
       updatedMap,
       change,
     );
@@ -112,27 +92,13 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
   ObservableMap<K, V> changeFactory(final FactoryMap<K, V> factory) {
     return OperatorMapFactory<K, V>(
       factory: factory,
-      source: this,
-    );
-  }
-
-  @override
-  ObservableMapChange<K, V>? clear() {
-    if (_value._map.isEmpty) {
-      return null;
-    }
-
-    return applyAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: _value._map.keys.toSet(),
-        addItems: <K, V>{},
-      ),
+      source: self,
     );
   }
 
   @override
   bool containsKey(final K key) {
-    return _value._map.containsKey(key);
+    return _value.data.containsKey(key);
   }
 
   @override
@@ -142,7 +108,7 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
   }) {
     return OperatorMapFilter<K, V>(
       predicate: predicate,
-      source: this,
+      source: self,
       factory: factory,
     );
   }
@@ -154,88 +120,52 @@ class RxMapImpl<K, V> extends RxImpl<ObservableMapState<K, V>>
   }) {
     return OperatorMapMap<K, V, V2>(
       valueMapper: valueMapper,
-      source: this,
+      source: self,
       factory: factory,
-    );
-  }
-
-  @override
-  ObservableMapChange<K, V>? remove(final K key) {
-    return applyAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{key},
-        addItems: <K, V>{},
-      ),
-    );
-  }
-
-  @override
-  ObservableMapChange<K, V>? removeWhere(final bool Function(K key, V value) predicate) {
-    final Set<K> removed = <K>{};
-    for (final MapEntry<K, V> entry in _value._map.entries) {
-      if (predicate(entry.key, entry.value)) {
-        removed.add(entry.key);
-      }
-    }
-    if (removed.isEmpty) {
-      return null;
-    }
-    return applyAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: removed,
-        addItems: <K, V>{},
-      ),
     );
   }
 
   @override
   Observable<V?> rxItem(final K key) {
     return OperatorObservableMapRxItem<K, V>(
-      source: this,
+      source: self,
       key: key,
     );
   }
 
   @override
-  ObservableMapChange<K, V>? setData(final Map<K, V> value) {
-    final ObservableMapChange<K, V> change = ObservableMapChange<K, V>.fromDiff(this._value._map, value);
-    if (change.isEmpty) {
-      return null;
-    }
-
-    this.value = _MutableState<K, V>._(
-      _factory(value),
-      change,
-    );
-    return change;
-  }
-
-  @override
   List<V> toList() {
-    return _value._map.values.toList();
+    return _value.data.values.toList();
   }
-}
-
-class _MutableState<K, V> extends ObservableMapState<K, V> {
-  final Map<K, V> _map;
-  final ObservableMapChange<K, V> _change;
-
-  _MutableState.initial(final Map<K, V> initial)
-      : _map = initial,
-        _change = ObservableMapChange<K, V>(
-          added: initial,
-        );
-
-  _MutableState._(final Map<K, V> map, final ObservableMapChange<K, V> change)
-      : _map = map,
-        _change = change;
 
   @override
-  ObservableMapChange<K, V> get lastChange => _change;
+  Map<K, V>? get data => _value.mapView;
 
   @override
-  UnmodifiableMapView<K, V> get mapView => UnmodifiableMapView<K, V>(_map);
+  ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action) {
+    return applyAction(action);
+  }
 
   @override
-  ObservableMapChange<K, V> asChange() => ObservableMapChange<K, V>(added: _map);
+  ObservableMap<K, V> get self => this;
+
+// @override
+// ObservableMapChange<K, V>? setData(final Map<K, V> value) {
+//   final Map<K, V>? data = this.data;
+//
+//   if (data == null) {
+//     return addAll(value);
+//   }
+//
+//   final ObservableMapChange<K, V> change = ObservableMapChange<K, V>.fromDiff(data, value);
+//   if (change.isEmpty) {
+//     return null;
+//   }
+//
+//   this.value = MutableState<K, V>._(
+//     _factory(value),
+//     change,
+//   );
+//   return change;
+// }
 }

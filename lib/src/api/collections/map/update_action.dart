@@ -1,7 +1,6 @@
-import '../update_action.dart';
 import 'change.dart';
 
-class ObservableMapUpdateAction<K, V> extends ObservableCollectionUpdateAction {
+class ObservableMapUpdateAction<K, V> {
   final Map<K, V> addItems;
   final Iterable<K> removeItems;
 

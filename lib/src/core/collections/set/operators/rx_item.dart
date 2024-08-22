@@ -46,7 +46,7 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
     }
 
     _listener = source.listen(
-      onChange: (final Observable<ObservableSetState<E>> source) {
+      onChange: (final ObservableSet<E> source) {
         final ObservableSetState<E> state = source.value;
         final ObservableSetChange<E> change = state.lastChange;
 

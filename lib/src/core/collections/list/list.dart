@@ -1,64 +1,45 @@
-import 'dart:collection';
-
 import '../../../../dart_observable.dart';
-import '../../rx/_impl.dart';
+import '../../rx/base_tracking.dart';
 import '../_base.dart';
-import 'operators/filter.dart';
-import 'operators/rx_item.dart';
+import '../operators/list/filter.dart';
+import '../operators/list/rx_item.dart';
+import 'list_state.dart';
+import 'rx_actions.dart';
 
-List<E> Function(Iterable<E>? items) _defaultListFactory<E>() {
+FactoryList<E> defaultListFactory<E>() {
   return (final Iterable<E>? items) {
     return List<E>.of(items ?? <E>{});
   };
 }
 
-class RxListImpl<E> extends RxImpl<ObservableListState<E>>
-    with ObservableCollectionBase<E, ObservableListChange<E>, ObservableListState<E>>
+class RxListImpl<E> extends RxBaseTracking<ObservableList<E>, ObservableListState<E>, ObservableListChange<E>>
+    with
+        ObservableCollectionBase<ObservableList<E>, E, ObservableListChange<E>, ObservableListState<E>>,
+        RxListActionsImpl<E>
     implements RxList<E> {
   RxListImpl({
     final Iterable<E>? initial,
     final List<E> Function(Iterable<E>? items)? factory,
-  }) : super(_MutableState<E>.initial((factory ?? _defaultListFactory<E>()).call(initial)));
+  }) : super(RxListState<E>.initial((factory ?? defaultListFactory<E>()).call(initial)));
+
+  RxListState<E> get _value => value as RxListState<E>;
 
   @override
-  int get length => _value._data.length;
-
-  _MutableState<E> get _value => value as _MutableState<E>;
+  List<E> get data => _value.data;
 
   @override
   E? operator [](final int position) {
-    return _value._data[position];
+    final List<E> data = _value.data;
+    if (position < 0 || position >= data.length) return null;
+    return data[position];
   }
 
   @override
-  void operator []=(final int index, final E value) {
-    applyAction(
-      ObservableListUpdateAction<E>.update(
-        <int, E>{index: value},
-      ),
-    );
-  }
+  int get length => data.length;
 
   @override
-  ObservableListChange<E>? add(final E item) {
-    return applyAction(
-      ObservableListUpdateAction<E>.add(
-        <MapEntry<int?, Iterable<E>>>[
-          MapEntry<int?, Iterable<E>>(null, <E>[item]),
-        ],
-      ),
-    );
-  }
-
-  @override
-  ObservableListChange<E>? addAll(final Iterable<E> items) {
-    return applyAction(
-      ObservableListUpdateAction<E>.add(
-        <MapEntry<int?, Iterable<E>>>[
-          MapEntry<int?, Iterable<E>>(null, items),
-        ],
-      ),
-    );
+  ObservableListChange<E>? applyListUpdateAction(final ObservableListUpdateAction<E> action) {
+    return applyAction(action);
   }
 
   @override
@@ -67,12 +48,12 @@ class RxListImpl<E> extends RxImpl<ObservableListState<E>>
       return null;
     }
 
-    final List<E> updated = _value._data;
+    final List<E> updated = _value.data;
     final ObservableListChange<E> change = action.apply(updated);
     if (change.isEmpty) {
       return null;
     }
-    value = _MutableState<E>._(
+    value = RxListState<E>(
       updated,
       change,
     );
@@ -98,99 +79,14 @@ class RxListImpl<E> extends RxImpl<ObservableListState<E>>
       ObservableList<E> source,
     ) sourceProvider,
     final FactoryList<E2>? factory,
-  }) {}
-
-  @override
-  ObservableListChange<E>? insert(final int index, final E item) {
-    return applyAction(
-      ObservableListUpdateAction<E>.add(
-        <MapEntry<int?, Iterable<E>>>[
-          MapEntry<int?, Iterable<E>>(index, <E>[item]),
-        ],
-      ),
-    );
+  }) {
+    throw UnimplementedError();
   }
 
   @override
-  ObservableListChange<E>? insertAll(final int index, final Iterable<E> items) {
-    return applyAction(
-      ObservableListUpdateAction<E>.add(
-        <MapEntry<int?, Iterable<E>>>[
-          MapEntry<int?, Iterable<E>>(index, items),
-        ],
-      ),
-    );
-  }
-
-  @override
-  ObservableListResult<E, F> mapAsListResult<F>({
-    final ObservableListResultUpdateAction<E, F> Function(
-      ObservableListChange<E> change,
-      ObservableList<E> source,
-    )? changeHandler,
-    final FactoryList<E>? factory,
-  }) {}
-
-  @override
-  ObservableMap<K, E> mapAsMap<K>({
-    required final K Function(E item) keyProvider,
-    final FactoryMap<K, E>? factory,
-  }) {}
-
-  @override
-  ObservableMapResult<K, E, F> mapAsMapResult<K, F>({
-    required final K Function(E item) keyProvider,
-    final FactoryMap<K, E>? factory,
-    final ObservableMapResultUpdateAction<K, E, F> Function(
-      ObservableMapChange<K, E> change,
-      ObservableList<E> source,
-    )? changeHandler,
-  }) {}
-
-  @override
-  ObservableSet<E> mapAsSet({final FactorySet<E>? factory}) {}
-
-  @override
-  ObservableSetResult<E, F> mapAsSetResult<F>({
-    final ObservableSetResultUpdateAction<E, F> Function(
-      ObservableSetChange<E> change,
-      ObservableList<E> source,
-    )? changeHandler,
-    final FactorySet<E>? factory,
-  }) {}
-
-  @override
-  ObservableListChange<E>? remove(final E item) {
-    final int index = _value._data.indexOf(item);
-    if (index == -1) {
-      return null;
-    }
-    return applyAction(
-      ObservableListUpdateAction<E>.remove(<int>{index}),
-    );
-  }
-
-  @override
-  ObservableListChange<E>? removeAt(final int index) {
-    return applyAction(
-      ObservableListUpdateAction<E>.remove(<int>{index}),
-    );
-  }
-
-  @override
-  ObservableListChange<E>? removeWhere(final bool Function(E item) predicate) {
-    final Set<int> removed = <int>{};
-    for (int i = 0; i < _value._data.length; i++) {
-      if (predicate(_value._data[i])) {
-        removed.add(i);
-      }
-    }
-    if (removed.isEmpty) {
-      return null;
-    }
-    return applyAction(
-      ObservableListUpdateAction<E>.remove(removed),
-    );
+  ObservableSet<E> mapAsSet({final FactorySet<E>? factory}) {
+    // TODO: implement mapAsSet
+    throw UnimplementedError();
   }
 
   @override
@@ -200,44 +96,7 @@ class RxListImpl<E> extends RxImpl<ObservableListState<E>>
       index: position,
     );
   }
-}
-
-class _MutableState<E> extends ObservableListState<E> {
-  final List<E> _data;
-
-  final ObservableListChange<E> change;
-
-  _MutableState.initial(final Iterable<E> initial)
-      : _data = initial.toList(),
-        change = ObservableListChange<E>(
-          added: () {
-            final List<E> list = initial.toList();
-            return <int, E>{
-              for (int i = 0; i < initial.length; i++) i: list[i],
-            };
-          }(),
-        );
-
-  _MutableState._(final List<E> list, this.change) : _data = list;
 
   @override
-  ObservableListChange<E> get lastChange => change;
-
-  @override
-  UnmodifiableListView<E> get listView => UnmodifiableListView<E>(_data);
-
-  @override
-  ObservableListChange<E> asChange() {
-    return ObservableListChange<E>(
-      added: () {
-        final Map<int, E> initial = <int, E>{};
-
-        for (int i = 0; i < _data.length; i++) {
-          initial[i] = _data[i];
-        }
-
-        return initial;
-      }(),
-    );
-  }
+  ObservableList<E> get self => this;
 }

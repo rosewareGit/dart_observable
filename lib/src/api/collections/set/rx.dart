@@ -1,9 +1,8 @@
+import '../../../../dart_observable.dart';
 import '../../../../src/core/collections/set/set.dart';
-import 'change.dart';
-import 'observable.dart';
-import 'update_action.dart';
+import 'rx_actions.dart';
 
-abstract interface class RxSet<E> implements ObservableSet<E> {
+abstract interface class RxSet<E> implements ObservableSet<E>, RxSetActions<E> {
   factory RxSet([final Iterable<E>? initial]) {
     return RxSetImpl<E>(initial: initial);
   }
@@ -22,15 +21,5 @@ abstract interface class RxSet<E> implements ObservableSet<E> {
     return RxSetImpl<E>.splayTreeSet(initial: initial, compare: compare);
   }
 
-  ObservableSetChange<E>? add(final E item);
-
-  ObservableSetChange<E>? addAll(final Iterable<E> items);
-
   ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action);
-
-  ObservableSetChange<E>? remove(final E item);
-
-  ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate);
-
-  ObservableSetChange<E>? setData(final Set<E> data);
 }

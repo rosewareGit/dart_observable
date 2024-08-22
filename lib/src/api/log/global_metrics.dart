@@ -1,4 +1,5 @@
 import '../../../dart_observable.dart';
+import '../change_tracking_observable.dart';
 
 class DartObservableGlobalMetrics {
   static final DartObservableGlobalMetrics _instance = DartObservableGlobalMetrics._();
@@ -31,7 +32,7 @@ class DartObservableGlobalMetrics {
     _rxInactives.clear();
   }
 
-  void emitActive(final Observable<dynamic> source) {
+  void emitActive(final ChangeTrackingObservable<dynamic, dynamic, dynamic> source) {
     if (shouldIgnore(source)) {
       return;
     }
@@ -39,7 +40,7 @@ class DartObservableGlobalMetrics {
     _rxActives[source.debugName] = <DateTime>[...current, DateTime.now()];
   }
 
-  void emitDispose(final Observable<dynamic> source) {
+  void emitDispose(final ChangeTrackingObservable<dynamic, dynamic, dynamic> source) {
     if (shouldIgnore(source)) {
       return;
     }
@@ -47,7 +48,7 @@ class DartObservableGlobalMetrics {
     _rxDisposes[source.debugName] = <DateTime>[...current, DateTime.now()];
   }
 
-  void emitInactive(final Observable<dynamic> source) {
+  void emitInactive(final ChangeTrackingObservable<dynamic, dynamic, dynamic> source) {
     if (shouldIgnore(source)) {
       return;
     }
@@ -55,7 +56,7 @@ class DartObservableGlobalMetrics {
     _rxInactives[source.debugName] = <DateTime>[...current, DateTime.now()];
   }
 
-  void emitNotify(final Observable<dynamic> source) {
+  void emitNotify(final ChangeTrackingObservable<dynamic, dynamic, dynamic> source) {
     if (shouldIgnore(source)) {
       return;
     }
@@ -99,7 +100,7 @@ class DartObservableGlobalMetrics {
     _ignoredPaths.add(filePath);
   }
 
-  bool shouldIgnore(final Observable<dynamic> source) {
+  bool shouldIgnore(final ChangeTrackingObservable<dynamic, dynamic, dynamic> source) {
     final String debugName = source.debugName;
     for (final String ignoredPath in _ignoredPaths) {
       if (debugName.contains(ignoredPath)) {

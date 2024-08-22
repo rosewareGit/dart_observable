@@ -1,12 +1,16 @@
 import '../../../../dart_observable.dart';
+import '../../../api/change_tracking_observable.dart';
 import 'observable_to_observable/flat_map.dart';
 import 'observable_to_observable/transform.dart';
 
-mixin OperatorsObservableToObservable<T> implements Observable<T> {
+mixin OperatorsObservableToObservable<Self extends ChangeTrackingObservable<Self, T, C>, T, C>
+    implements ChangeTrackingObservable<Self, T, C> {
+  Self get self;
+
   @override
-  Observable<T?> filter(final bool Function(Observable<T> source) predicate) {
+  Observable<T?> filter(final bool Function(Self source) predicate) {
     return transform<T?>(
-      initialProvider: (final Observable<T> source) {
+      initialProvider: (final Self source) {
         if (predicate(source)) {
           return value;
         } else {
@@ -14,7 +18,7 @@ mixin OperatorsObservableToObservable<T> implements Observable<T> {
         }
       },
       onChanged: (
-        final Observable<T> source,
+        final Self source,
         final Emitter<T?> emitter,
       ) {
         if (predicate(source)) {
@@ -26,22 +30,22 @@ mixin OperatorsObservableToObservable<T> implements Observable<T> {
 
   @override
   Observable<T2> flatMap<T2>(
-    final Observable<T2> Function(Observable<T> source) mapper,
+    final Observable<T2> Function(Self source) mapper,
   ) {
-    return OperatorFlatMap<T, T2>(
-      source: this,
+    return OperatorFlatMap<Self, T, C, T2>(
+      source: self,
       mapper: mapper,
     );
   }
 
   @override
-  Observable<T2> map<T2>(final T2 Function(Observable<T> source) onChanged) {
+  Observable<T2> map<T2>(final T2 Function(Self source) onChanged) {
     return transform(
-      initialProvider: (final Observable<T> source) {
+      initialProvider: (final Self source) {
         return onChanged(source);
       },
       onChanged: (
-        final Observable<T> source,
+        final Self source,
         final Emitter<T2> emitter,
       ) {
         emitter(onChanged(source));
@@ -51,12 +55,12 @@ mixin OperatorsObservableToObservable<T> implements Observable<T> {
 
   @override
   Observable<T2> transform<T2>({
-    required final T2 Function(Observable<T> source) initialProvider,
-    required final void Function(Observable<T> source, Emitter<T2> emitter) onChanged,
+    required final T2 Function(Self source) initialProvider,
+    required final void Function(Self source, Emitter<T2> emitter) onChanged,
   }) {
-    return OperatorTransform<T, T2>(
-      initialProvider(this),
-      source: this,
+    return OperatorTransform<Self, T, C, T2>(
+      initialProvider(self),
+      source: self,
       handler: onChanged,
     );
   }

@@ -1,7 +1,6 @@
-import '../update_action.dart';
 import 'change.dart';
 
-class ObservableSetUpdateAction<E> extends ObservableCollectionUpdateAction {
+class ObservableSetUpdateAction<E> {
   final Set<E> addItems;
   final Set<E> removeItems;
 

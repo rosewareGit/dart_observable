@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import '../../../../../dart_observable.dart';
+import '../../../../api/change_tracking_observable.dart';
 import '../../_impl.dart';
 
-class OperatorFlatMap<T, T2> extends RxImpl<T2> {
-  final Observable<T2> Function(Observable<T> source) mapper;
-  final Observable<T> source;
+class OperatorFlatMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T2> extends RxImpl<T2> {
+  final Observable<T2> Function(Self source) mapper;
+  final Self source;
 
   Disposable? _intermediateListener;
   Disposable? _listener;
@@ -52,7 +53,7 @@ class OperatorFlatMap<T, T2> extends RxImpl<T2> {
       },
     );
     _listener = source.listen(
-      onChange: (final Observable<T> source) {
+      onChange: (final Self source) {
         final Observable<T2> rxIntermediate = mapper(source);
         if (_activeRxIntermediate != rxIntermediate) {
           value = rxIntermediate.value;
