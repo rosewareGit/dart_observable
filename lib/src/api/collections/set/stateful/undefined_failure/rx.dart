@@ -24,4 +24,8 @@ abstract class RxSetUndefinedFailure<E, F>
       factory: factory,
     );
   }
+
+  set failure(final F failure);
+
+  void setUndefined();
 }

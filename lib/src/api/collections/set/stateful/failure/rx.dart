@@ -22,4 +22,6 @@ abstract class RxSetFailure<E, F>
       factory: factory,
     );
   }
+
+  set failure(final F failure);
 }

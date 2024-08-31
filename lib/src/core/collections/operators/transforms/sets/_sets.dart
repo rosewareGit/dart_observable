@@ -19,7 +19,7 @@ class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactorySet<E2>? factory,
   }) {
-    return SetFailureImpl<Self, F, E2, C, CS>(
+    return TransformSetFailureImpl<Self, F, E2, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -35,7 +35,7 @@ class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactorySet<E2>? factory,
   }) {
-    return SetUndefinedImpl<Self, E2, C, CS>(
+    return TransformSetUndefinedImpl<Self, E2, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -51,7 +51,7 @@ class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactorySet<E2>? factory,
   }) {
-    return SetUndefinedFailureImpl<Self, E2, F, C, CS>(
+    return TransformSetUndefinedFailureImpl<Self, E2, F, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,

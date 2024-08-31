@@ -3,7 +3,7 @@ import '../../../../../api/change_tracking_observable.dart';
 import '../../../set/stateful/undefined/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class SetUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS> extends RxSetUndefinedImpl<E2>
+class TransformSetUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS> extends RxSetUndefinedImpl<E2>
     with
         BaseCollectionTransformOperator<
             Self, //
@@ -22,7 +22,7 @@ class SetUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C
     Emitter<StateOf<ObservableSetUpdateAction<E2>, Undefined>> updater,
   ) transformFn;
 
-  SetUndefinedImpl({
+  TransformSetUndefinedImpl({
     required this.source,
     required this.transformFn,
     final FactorySet<E2>? factory,

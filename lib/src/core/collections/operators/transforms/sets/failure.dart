@@ -3,7 +3,7 @@ import '../../../../../api/change_tracking_observable.dart';
 import '../../../set/stateful/failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class SetFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, F, E2, C, CS> extends RxSetFailureImpl<E2, F>
+class TransformSetFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, F, E2, C, CS> extends RxSetFailureImpl<E2, F>
     with
         BaseCollectionTransformOperator<
             Self,
@@ -22,7 +22,7 @@ class SetFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, F, E2, 
     Emitter<StateOf<ObservableSetUpdateAction<E2>, F>> updater,
   ) transformFn;
 
-  SetFailureImpl({
+  TransformSetFailureImpl({
     required this.source,
     required this.transformFn,
     final FactorySet<E2>? factory,

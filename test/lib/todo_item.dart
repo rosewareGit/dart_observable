@@ -6,8 +6,8 @@ class TodoItem {
 
   TodoItem({
     required this.id,
-    required this.title,
-    required this.description,
-    required this.completed,
+    this.title = '',
+    this.description = '',
+    this.completed = false,
   });
 }

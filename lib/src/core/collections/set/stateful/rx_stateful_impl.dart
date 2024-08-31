@@ -137,21 +137,6 @@ abstract class RxSetStatefulImpl<Self extends RxSetStateful<O, E, S>, O extends 
   }
 
   @override
-  ObservableSetChange<E>? setData(final Set<E> data) {
-    final RxSetState<E> current = value.data as RxSetState<E>;
-    final Set<E> set = current.data;
-    final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(set, data);
-    if (change.isEmpty) {
-      return null;
-    }
-
-    super.value = RxSetStatefulState<E, S>.data(
-      RxSetState<E>(set, change),
-    );
-    return change;
-  }
-
-  @override
   StateOf<ObservableSetChange<E>, S>? setState(final S newState) {
     return applyAction(StateOf<ObservableSetUpdateAction<E>, S>.custom(newState));
   }

@@ -27,10 +27,6 @@ class ObservableSetFilterOperator<E>
     final Set<E> removed = change.removed;
     final Set<E> added = change.added.where(predicate).toSet();
 
-    if (removed.isEmpty && added.isEmpty) {
-      return;
-    }
-
     updater(
       ObservableSetUpdateAction<E>(
         removeItems: removed,

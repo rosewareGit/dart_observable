@@ -61,4 +61,9 @@ class RxSetFailureImpl<E, F> extends RxSetStatefulImpl<RxSetFailure<E, F>, Obser
     );
     return instance.asObservable();
   }
+
+  @override
+  set failure(final F failure) {
+    setState(failure);
+  }
 }

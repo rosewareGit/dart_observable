@@ -29,10 +29,6 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
   @override
   ObservableSetChange<E>? clear() {
     final Set<E> items = data;
-    if (items.isEmpty) {
-      return null;
-    }
-
     return applySetUpdateAction(
       ObservableSetUpdateAction<E>(
         removeItems: items,
@@ -54,15 +50,7 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
   @override
   ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate) {
     final Set<E> data = this.data;
-    if (data.isEmpty) {
-      return null;
-    }
-
     final Set<E> removed = data.where(predicate).toSet();
-    if (removed.isEmpty) {
-      return null;
-    }
-
     return applySetUpdateAction(
       ObservableSetUpdateAction<E>(
         addItems: <E>{},
@@ -76,10 +64,6 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
     final Set<E> current = this.data;
 
     final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(current, data);
-    if (change.isEmpty) {
-      return null;
-    }
-
     final ObservableSetUpdateAction<E> action = ObservableSetUpdateAction<E>.fromChange(change);
     return applySetUpdateAction(action);
   }

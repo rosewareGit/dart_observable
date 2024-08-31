@@ -12,4 +12,6 @@ abstract class RxSetUndefined<E>
       factory: factory,
     );
   }
+
+  void setUndefined();
 }

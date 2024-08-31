@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('OperatorsTransformLists', () {
-    group('optionalResult', () {
+    group('UndefinedFailure', () {
       ObservableListUndefinedFailure<int, String> createStateFromSet(final RxSet<int> source) {
         return source.transformAs.lists.undefinedFailure<int, String>(
           transform: (

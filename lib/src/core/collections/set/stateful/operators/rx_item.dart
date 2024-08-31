@@ -12,10 +12,11 @@ StateOf<E?, S>? _getStateByPredicate<E, S>({
       final ObservableSetChange<E> change = isInitial ? set.asChange() : set.lastChange;
       final Set<E> added = change.added;
       final Set<E> removed = change.removed;
+      bool itemRemoved = false;
       if (removed.isNotEmpty) {
         final E? matched = removed.firstWhereOrNull((final E element) => predicate(element));
         if (matched != null) {
-          return StateOf<E?, S>.data(null);
+          itemRemoved = true;
         }
       }
 
@@ -26,6 +27,9 @@ StateOf<E?, S>? _getStateByPredicate<E, S>({
         }
       }
 
+      if (itemRemoved) {
+        return StateOf<E?, S>.data(null);
+      }
       return null;
     },
     onCustom: (final S state) {

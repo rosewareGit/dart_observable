@@ -64,4 +64,9 @@ class RxSetUndefinedImpl<E> extends RxSetStatefulImpl<RxSetUndefined<E>, Observa
     );
     return instance.asObservable();
   }
+
+  @override
+  void setUndefined() {
+    setState(Undefined());
+  }
 }

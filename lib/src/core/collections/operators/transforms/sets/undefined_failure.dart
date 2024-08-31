@@ -3,7 +3,7 @@ import '../../../../../api/change_tracking_observable.dart';
 import '../../../set/stateful/undefined_failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class SetUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, F, C, CS>
+class TransformSetUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, F, C, CS>
     extends RxSetUndefinedFailureImpl<E2, F>
     with
         BaseCollectionTransformOperator<
@@ -23,7 +23,7 @@ class SetUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>
     Emitter<StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> updater,
   ) transformFn;
 
-  SetUndefinedFailureImpl({
+  TransformSetUndefinedFailureImpl({
     required this.source,
     required this.transformFn,
     final FactorySet<E2>? factory,

@@ -85,4 +85,14 @@ class RxSetUndefinedFailureImpl<E, F>
     );
     return instance.asObservable();
   }
+
+  @override
+  set failure(final F failure) {
+    setState(UndefinedFailure<F>.failure(failure));
+  }
+
+  @override
+  void setUndefined() {
+    setState(UndefinedFailure<F>.undefined());
+  }
 }
