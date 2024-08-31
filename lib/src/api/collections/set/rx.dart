@@ -1,5 +1,5 @@
 import '../../../../dart_observable.dart';
-import '../../../../src/core/collections/set/set.dart';
+import '../../../../src/core/collections/set/rx_impl.dart';
 import 'rx_actions.dart';
 
 abstract interface class RxSet<E> implements ObservableSet<E>, RxSetActions<E> {
@@ -20,6 +20,8 @@ abstract interface class RxSet<E> implements ObservableSet<E>, RxSetActions<E> {
   }) {
     return RxSetImpl<E>.splayTreeSet(initial: initial, compare: compare);
   }
+
+  set value(final ObservableSetState<E> value);
 
   ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action);
 }

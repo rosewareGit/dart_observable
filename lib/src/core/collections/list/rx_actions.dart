@@ -2,7 +2,7 @@ import '../../../../dart_observable.dart';
 import '../../../api/collections/list/rx_actions.dart';
 
 mixin RxListActionsImpl<E> implements RxListActions<E> {
-  List<E>? get data;
+  List<E> get data;
 
   @override
   void operator []=(final int index, final E value) {
@@ -39,10 +39,12 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
 
   @override
   ObservableListChange<E>? clear() {
-    final List<E>? items = data;
-    if (items == null) {
+    final List<E> items = data;
+    if (items.isEmpty) {
+      onEmptyData();
       return null;
     }
+
     return applyListUpdateAction(
       ObservableListUpdateAction<E>.remove(
         <int>{for (int i = 0; i < items.length; i++) i},
@@ -72,9 +74,16 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     );
   }
 
+  void onEmptyData() {}
+
   @override
   ObservableListChange<E>? remove(final E item) {
-    final int index = data?.indexOf(item) ?? -1;
+    if (data.isEmpty) {
+      onEmptyData();
+      return null;
+    }
+
+    final int index = data.indexOf(item);
     if (index == -1) {
       return null;
     }
@@ -85,8 +94,11 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
 
   @override
   ObservableListChange<E>? removeAt(final int index) {
-    final List<E>? items = data;
-    if (items == null) return null;
+    final List<E> items = data;
+    if (items.isEmpty) {
+      onEmptyData();
+      return null;
+    }
 
     if (index < 0 || index >= items.length) {
       return null;
@@ -99,9 +111,12 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
   @override
   ObservableListChange<E>? removeWhere(final bool Function(E item) predicate) {
     final Set<int> removed = <int>{};
-    final List<E>? items = data;
+    final List<E> items = data;
 
-    if (items == null) return null;
+    if (items.isEmpty) {
+      onEmptyData();
+      return null;
+    }
 
     for (int i = 0; i < items.length; i++) {
       if (predicate(items[i])) {
@@ -115,5 +130,17 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     return applyListUpdateAction(
       ObservableListUpdateAction<E>.remove(removed),
     );
+  }
+
+  @override
+  ObservableListChange<E>? setData(final List<E> data) {
+    final List<E> current = this.data;
+    final ObservableListChange<E> change = ObservableListChange<E>.fromDiff(current, data);
+    if (change.isEmpty) {
+      return null;
+    }
+
+    final ObservableListUpdateAction<E> action = ObservableListUpdateAction<E>.fromChange(change);
+    return applyListUpdateAction(action);
   }
 }

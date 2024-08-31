@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/map/stateful/failure/map.dart';
+import '../../../../../core/collections/map/stateful/failure/rx_impl.dart';
 
 abstract class RxMapFailure<K, V, F>
     implements ObservableMapFailure<K, V, F>, RxMapStateful<ObservableMapFailure<K, V, F>, K, V, F> {
@@ -12,4 +12,6 @@ abstract class RxMapFailure<K, V, F>
       factory: factory,
     );
   }
+
+  set failure(final F failure);
 }

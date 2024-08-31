@@ -33,7 +33,6 @@ export 'src/api/collections/map/update_action.dart';
 export 'src/api/collections/observable_collection.dart';
 export 'src/api/collections/operators/flatmaps.dart';
 export 'src/api/collections/operators/transforms.dart';
-export 'src/api/collections/operators/transforms/lists.dart';
 export 'src/api/collections/set/change.dart';
 export 'src/api/collections/set/observable.dart';
 export 'src/api/collections/set/rx.dart';

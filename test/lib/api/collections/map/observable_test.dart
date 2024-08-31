@@ -5,10 +5,9 @@ import 'package:dart_observable/dart_observable.dart';
 import 'package:test/test.dart';
 
 class TestModel {
-  final String key;
   final int value;
 
-  TestModel(this.key, this.value);
+  TestModel(this.value);
 }
 
 void main() {
@@ -181,7 +180,7 @@ void main() {
         rxMap['a'] = 2;
         rxMap.remove('b');
 
-        final ObservableMap<String, int> filtered = rxMap.filterMap((final String key, final int value) {
+        final ObservableMap<String, int> filtered = rxMap.filterItem((final String key, final int value) {
           return value > 1;
         });
 
@@ -225,7 +224,7 @@ void main() {
           'c': 3,
         });
 
-        final ObservableMap<String, int> filtered = rxMap.filterMap((final String key, final int value) {
+        final ObservableMap<String, int> filtered = rxMap.filterItem((final String key, final int value) {
           return value > 1;
         });
 
@@ -242,8 +241,8 @@ void main() {
           'c': 3,
         });
 
-        final ObservableMap<String, String> rxMapped = rxSource.mapMap<String>(
-          valueMapper: (final String key, final int value) {
+        final ObservableMap<String, String> rxMapped = rxSource.mapItem<String>(
+          (final String key, final int value) {
             return '$key$value';
           },
         );
@@ -265,8 +264,8 @@ void main() {
           'c': 3,
         });
 
-        final ObservableMap<String, String> rxMapped = rxSource.mapMap<String>(
-          valueMapper: (final String key, final int value) {
+        final ObservableMap<String, String> rxMapped = rxSource.mapItem<String>(
+          (final String key, final int value) {
             return '$key$value';
           },
         );
@@ -311,8 +310,8 @@ void main() {
           'c': 3,
         });
 
-        final ObservableMap<String, String> rxMapped = rxSource.mapMap<String>(
-          valueMapper: (final String key, final int value) {
+        final ObservableMap<String, String> rxMapped = rxSource.mapItem<String>(
+          (final String key, final int value) {
             return '$key$value';
           },
         );

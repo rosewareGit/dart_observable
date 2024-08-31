@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/list/stateful/undefined/list.dart';
+import '../../../../../core/collections/list/stateful/undefined/rx_impl.dart';
 
 abstract class RxListUndefined<E>
     implements ObservableListUndefined<E>, RxListStateful<ObservableListUndefined<E>, E, Undefined> {
@@ -12,4 +12,6 @@ abstract class RxListUndefined<E>
       factory: factory,
     );
   }
+
+  void setUndefined();
 }

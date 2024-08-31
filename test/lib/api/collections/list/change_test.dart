@@ -35,5 +35,55 @@ void main() {
         expect(change.isEmpty, false);
       });
     });
+
+    group('fromDiff', () {
+      test('Should return an ObservableListChange with added items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>.fromDiff(
+          <int>[1, 2, 3],
+          <int>[1, 2, 3, 4],
+        );
+        expect(change.added, <int, int>{3: 4});
+      });
+
+      test('Should return an ObservableListChange with removed items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>.fromDiff(
+          <int>[1, 2, 3],
+          <int>[1],
+        );
+        expect(change.removed, <int, int>{1: 2, 2: 3});
+      });
+
+      test('Should return an ObservableListChange with updated items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>.fromDiff(
+          <int>[1, 2, 3],
+          <int>[1, 4, 3],
+        );
+        expect(change.updated, <int, ObservableItemChange<int>>{
+          1: ObservableItemChange<int>(
+            oldValue: 2,
+            newValue: 4,
+          ),
+        });
+      });
+
+      test('Should return complex change', () {
+        final ObservableListChange<int> change = ObservableListChange<int>.fromDiff(
+          <int>[1, 2, 3, 4, 5],
+          <int>[1, 4, 3, 6],
+        );
+        expect(change.added, <int, int>{});
+        expect(change.removed, <int, int>{4: 5});
+        expect(change.updated, <int, ObservableItemChange<int>>{
+          1: ObservableItemChange<int>(
+            oldValue: 2,
+            newValue: 4,
+          ),
+          3: ObservableItemChange<int>(
+            oldValue: 4,
+            newValue: 6,
+          ),
+        });
+      });
+    });
   });
 }

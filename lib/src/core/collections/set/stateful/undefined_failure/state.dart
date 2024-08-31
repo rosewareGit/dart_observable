@@ -7,17 +7,17 @@ class RxSetUndefinedFailureState<E, F> extends RxSetStatefulState<E, UndefinedFa
     return RxSetUndefinedFailureState<E, F>._data(RxSetState<E>.initial(data));
   }
 
-  factory RxSetUndefinedFailureState.undefined() {
-    return RxSetUndefinedFailureState<E, F>._custom(UndefinedFailure<F>.undefined());
-  }
-
   factory RxSetUndefinedFailureState.failure(final F failure) {
     return RxSetUndefinedFailureState<E, F>._custom(UndefinedFailure<F>.failure(failure));
   }
 
-  const RxSetUndefinedFailureState._data(final ObservableSetState<E> state) : super.data(state);
+  factory RxSetUndefinedFailureState.undefined() {
+    return RxSetUndefinedFailureState<E, F>._custom(UndefinedFailure<F>.undefined());
+  }
 
   const RxSetUndefinedFailureState._custom(final UndefinedFailure<F> state) : super.custom(state);
+
+  const RxSetUndefinedFailureState._data(final ObservableSetState<E> state) : super.data(state);
 
   R foldState<R>({
     required final R Function(ObservableSetState<E> state) onData,

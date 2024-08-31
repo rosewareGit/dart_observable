@@ -1,9 +1,9 @@
 import '../../../../../../dart_observable.dart';
 import '../../../../../api/change_tracking_observable.dart';
-import '../../../list/stateful/undefined_failure/list.dart';
+import '../../../list/stateful/undefined_failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class OperatorCollectionsTransformAsOptionalResult<Self extends ChangeTrackingObservable<Self, CS, C>, E2, F, C, CS>
+class TransformListUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, F, C, CS>
     extends RxListUndefinedFailureImpl<E2, F>
     with
         BaseCollectionTransformOperator<
@@ -23,21 +23,17 @@ class OperatorCollectionsTransformAsOptionalResult<Self extends ChangeTrackingOb
     Emitter<StateOf<ObservableListUpdateAction<E2>, UndefinedFailure<F>>> updater,
   ) transformFn;
 
-  OperatorCollectionsTransformAsOptionalResult({
+  TransformListUndefinedFailureImpl({
     required this.source,
     required this.transformFn,
     final FactoryList<E2>? factory,
-  }) : super(factory: factory);
-
-  @override
-  ObservableListUndefinedFailure<E2, F> get current => this;
+  });
 
   @override
   void transformChange(
-    final ObservableListUndefinedFailure<E2, F> state,
     final C change,
     final Emitter<StateOf<ObservableListUpdateAction<E2>, UndefinedFailure<F>>> updater,
   ) {
-    transformFn(state, change, updater);
+    transformFn(this, change, updater);
   }
 }

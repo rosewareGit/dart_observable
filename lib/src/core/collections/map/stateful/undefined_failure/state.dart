@@ -7,17 +7,17 @@ class RxMapUndefinedFailureState<K, V, F> extends RxMapStatefulState<K, V, Undef
     return RxMapUndefinedFailureState<K, V, F>._data(RxMapState<K, V>.initial(data));
   }
 
-  factory RxMapUndefinedFailureState.undefined() {
-    return RxMapUndefinedFailureState<K, V, F>._custom(UndefinedFailure<F>.undefined());
-  }
-
   factory RxMapUndefinedFailureState.failure(final F failure) {
     return RxMapUndefinedFailureState<K, V, F>._custom(UndefinedFailure<F>.failure(failure));
   }
 
-  const RxMapUndefinedFailureState._data(final ObservableMapState<K, V> state) : super.data(state);
+  factory RxMapUndefinedFailureState.undefined() {
+    return RxMapUndefinedFailureState<K, V, F>._custom(UndefinedFailure<F>.undefined());
+  }
 
   const RxMapUndefinedFailureState._custom(final UndefinedFailure<F> state) : super.custom(state);
+
+  const RxMapUndefinedFailureState._data(final ObservableMapState<K, V> state) : super.data(state);
 
   R foldState<R>({
     required final R Function(ObservableMapState<K, V> state) onData,

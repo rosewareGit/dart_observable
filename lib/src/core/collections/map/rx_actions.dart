@@ -2,9 +2,7 @@ import '../../../../dart_observable.dart';
 import '../../../api/collections/map/rx_actions.dart';
 
 mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
-  Map<K, V>? get data;
-
-  ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action);
+  Map<K, V> get data;
 
   @override
   void operator []=(final K key, final V value) {
@@ -31,10 +29,12 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
     );
   }
 
+  ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action);
+
   @override
   ObservableMapChange<K, V>? clear() {
-    final Map<K, V>? data = this.data;
-    if (data == null || data.isEmpty) {
+    final Map<K, V> data = this.data;
+    if (data.isEmpty) {
       return null;
     }
 
@@ -59,10 +59,7 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
   @override
   ObservableMapChange<K, V>? removeWhere(final bool Function(K key, V value) predicate) {
     final Set<K> removed = <K>{};
-    final Map<K, V>? data = this.data;
-    if (data == null) {
-      return null;
-    }
+    final Map<K, V> data = this.data;
     for (final MapEntry<K, V> entry in data.entries) {
       if (predicate(entry.key, entry.value)) {
         removed.add(entry.key);
@@ -77,5 +74,17 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
         addItems: <K, V>{},
       ),
     );
+  }
+
+  @override
+  ObservableMapChange<K, V>? setData(final Map<K, V> data) {
+    final Map<K, V> current = this.data;
+    final ObservableMapChange<K, V> change = ObservableMapChange<K, V>.fromDiff(current, data);
+    if (change.isEmpty) {
+      return null;
+    }
+
+    final ObservableMapUpdateAction<K, V> action = ObservableMapUpdateAction<K, V>.fromChange(change);
+    return applyMapUpdateAction(action);
   }
 }

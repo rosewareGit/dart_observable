@@ -3,9 +3,94 @@ import 'package:test/test.dart';
 
 void main() {
   group('ObservableListUpdateAction', () {
-    group('apply', () {
+    group('fromChange', () {
+      test('Should return an ObservableListUpdateAction instance with added items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>(
+          added: <int, int>{
+            1: 4,
+            2: 5,
+          },
+        );
+        final ObservableListUpdateAction<int> action = ObservableListUpdateAction<int>.fromChange(change);
+        final MapEntry<int?, Iterable<int>> insert = action.insertItemAtPosition.first;
+        expect(insert.key, null);
+        expect(insert.value, <int>[4, 5]);
 
-      test('Should return empty change when action is empty', (){
+        expect(action.removeIndexes, <int>{});
+        expect(action.updateItemAtPosition, <int, int>{});
+      });
+
+      test('Should return an ObservableListUpdateAction instance with removed items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>(
+          removed: <int, int>{
+            0: 1,
+            2: 3,
+          },
+        );
+        final ObservableListUpdateAction<int> action = ObservableListUpdateAction<int>.fromChange(change);
+        final MapEntry<int?, Iterable<int>> insert = action.insertItemAtPosition.first;
+        expect(insert.key, null);
+        expect(insert.value, <int>[]);
+
+        expect(action.removeIndexes, <int>{0, 2});
+        expect(action.updateItemAtPosition, <int, int>{});
+      });
+
+      test('Should return an ObservableListUpdateAction instance with updated items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>(
+          updated: <int, ObservableItemChange<int>>{
+            0: ObservableItemChange<int>(
+              oldValue: 1,
+              newValue: 4,
+            ),
+            2: ObservableItemChange<int>(
+              oldValue: 3,
+              newValue: 5,
+            ),
+          },
+        );
+        final ObservableListUpdateAction<int> action = ObservableListUpdateAction<int>.fromChange(change);
+        final MapEntry<int?, Iterable<int>> insert = action.insertItemAtPosition.first;
+        expect(insert.key, null);
+        expect(insert.value, <int>[]);
+
+        expect(action.removeIndexes, <int>{});
+        expect(action.updateItemAtPosition, <int, int>{0: 4, 2: 5});
+      });
+
+      test('Should return an ObservableListUpdateAction instance with added, removed and updated items', () {
+        final ObservableListChange<int> change = ObservableListChange<int>(
+          added: <int, int>{
+            1: 4,
+            2: 5,
+          },
+          removed: <int, int>{
+            0: 1,
+            2: 3,
+          },
+          updated: <int, ObservableItemChange<int>>{
+            0: ObservableItemChange<int>(
+              oldValue: 1,
+              newValue: 4,
+            ),
+            2: ObservableItemChange<int>(
+              oldValue: 3,
+              newValue: 5,
+            ),
+          },
+        );
+        final ObservableListUpdateAction<int> action = ObservableListUpdateAction<int>.fromChange(change);
+        final MapEntry<int?, Iterable<int>> insert = action.insertItemAtPosition.first;
+        expect(insert.key, null);
+        expect(insert.value, <int>[4, 5]);
+
+        expect(action.removeIndexes, <int>{0, 2});
+        expect(action.updateItemAtPosition, <int, int>{0: 4, 2: 5});
+      });
+    });
+
+    group('apply', () {
+      test('Should return empty change when action is empty', () {
         final List<int> state = <int>[1, 2, 3];
         final ObservableListUpdateAction<int> action = ObservableListUpdateAction<int>();
         final ObservableListChange<int> change = action.apply(state);

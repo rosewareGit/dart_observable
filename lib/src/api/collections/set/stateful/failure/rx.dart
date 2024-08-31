@@ -1,9 +1,9 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/set/stateful/failure/set.dart';
+import '../../../../../core/collections/set/stateful/failure/rx_impl.dart';
 
-abstract class RxSetResult<E, F>
+abstract class RxSetFailure<E, F>
     implements ObservableSetFailure<E, F>, RxSetStateful<ObservableSetFailure<E, F>, E, F> {
-  factory RxSetResult({
+  factory RxSetFailure({
     final Iterable<E>? initial,
     final FactorySet<E>? factory,
   }) {
@@ -13,7 +13,7 @@ abstract class RxSetResult<E, F>
     );
   }
 
-  factory RxSetResult.failure({
+  factory RxSetFailure.failure({
     required final F failure,
     final FactorySet<E>? factory,
   }) {

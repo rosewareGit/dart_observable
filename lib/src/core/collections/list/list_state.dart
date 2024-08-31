@@ -5,9 +5,9 @@ import '../../../../dart_observable.dart';
 class RxListState<E> extends ObservableListState<E> {
   final List<E> _data;
 
-  List<E> get data => _data;
-
   final ObservableListChange<E> change;
+
+  RxListState(final List<E> list, this.change) : _data = list;
 
   RxListState.initial(final Iterable<E> initial)
       : _data = initial.toList(),
@@ -20,7 +20,7 @@ class RxListState<E> extends ObservableListState<E> {
           }(),
         );
 
-  RxListState(final List<E> list, this.change) : _data = list;
+  List<E> get data => _data;
 
   @override
   ObservableListChange<E> get lastChange => change;

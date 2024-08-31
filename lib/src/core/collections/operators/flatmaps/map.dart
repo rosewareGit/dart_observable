@@ -1,16 +1,17 @@
 import '../../../../../dart_observable.dart';
 import '../../../../api/change_tracking_observable.dart';
-import '../../map/map.dart';
+import '../../map/rx_impl.dart';
+import '../_base_flat_map.dart';
 
 class OperatorCollectionsFlatMapAsMap<Self extends ChangeTrackingObservable<Self, CS, C>, E, K, V, C, CS>
-    extends RxMapImpl<K, V> {
+    extends RxMapImpl<K, V>
+    with
+        BaseCollectionFlatMapOperator<Self, ObservableMap<K, V>, CS, ObservableMapState<K, V>, C,
+            ObservableMapChange<K, V>> {
+  @override
   final Self source;
-  final ObservableCollectionFlatMapUpdate<E, K, ObservableMap<K, V>> Function(C change) sourceProvider;
-
-  Disposable? _listener;
-
-  final Map<E, ObservableMap<K, V>> _activeObservables = <E, ObservableMap<K, V>>{};
-  final Map<E, Disposable> _activeObservableListeners = <E, Disposable>{};
+  @override
+  final ObservableCollectionFlatMapUpdate<ObservableMap<K, V>> Function(C change) sourceProvider;
 
   OperatorCollectionsFlatMapAsMap({
     required this.source,
@@ -19,88 +20,53 @@ class OperatorCollectionsFlatMapAsMap<Self extends ChangeTrackingObservable<Self
   }) : super(factory: factory);
 
   @override
-  void onActive() {
-    super.onActive();
-    _initListener();
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    source.addDisposeWorker(() {
-      return Future.wait(<Future<void>>[
-        ..._activeObservableListeners.values.map((final Disposable value) async {
-          value.dispose();
-        }),
-        dispose(),
-      ]).then((final _) {
-        _activeObservableListeners.clear();
-        _activeObservables.clear();
-      });
-    });
-  }
-
-  void _handleChange(final C change) {
-    final ObservableCollectionFlatMapUpdate<E, K, ObservableMap<K, V>> sourceByValue = sourceProvider(change);
-    final Map<E, ObservableMap<K, V>> registerObservables = sourceByValue.newObservables;
-    final Set<E> unregisterObservablesKeys = sourceByValue.removedObservables;
-
-    final Map<K, V> addItems = <K, V>{};
-    final Set<K> removeItems = <K>{};
-
-    for (final E key in unregisterObservablesKeys) {
-      if (_activeObservables.containsKey(key)) {
-        removeItems.addAll(_activeObservables[key]!.value.mapView.keys);
-        _activeObservables.remove(key);
-        _activeObservableListeners[key]?.dispose();
-      }
-    }
-
-    registerObservables.forEach((final E key, final ObservableMap<K, V> value) {
-      addItems.addAll(value.value.mapView);
-      _activeObservables[key] = value;
-      _activeObservableListeners[key] = value.listen(
-        onChange: (final ObservableMap<K, V> source) {
-          final ObservableMapState<K, V> value = source.value;
-          final ObservableMapChange<K, V> change = value.lastChange;
-          applyAction(
-            ObservableMapUpdateAction<K, V>(
-              addItems: <K, V>{
-                ...change.added,
-                ...change.updated.map(
-                  (final K key, final ObservableItemChange<V> value) => MapEntry<K, V>(key, value.newValue),
-                ),
-              },
-              removeItems: change.removed.keys,
-            ),
-          );
-        },
-      );
-    });
-
+  void handleChange(final ObservableMap<K, V> source) {
+    final ObservableMapState<K, V> value = source.value;
+    final ObservableMapChange<K, V> change = value.lastChange;
     applyAction(
       ObservableMapUpdateAction<K, V>(
-        addItems: addItems,
-        removeItems: removeItems,
+        addItems: <K, V>{
+          ...change.added,
+          ...change.updated.map(
+            (final K key, final ObservableItemChange<V> value) => MapEntry<K, V>(key, value.newValue),
+          ),
+        },
+        removeItems: change.removed.keys,
       ),
     );
   }
 
-  void _initListener() {
-    if (_listener != null) {
-      // TODO buffer
-      return;
+  @override
+  void handleRegisteredObservables(final Set<ObservableMap<K, V>> registerObservables) {
+    final Map<K, V> addItems = <K, V>{};
+
+    for (final ObservableMap<K, V> observable in registerObservables) {
+      final ObservableMapState<K, V> state = observable.value;
+      addItems.addAll(state.mapView);
     }
 
-    final C initial = source.asChange(source.value);
-    _handleChange(initial);
+    applyAction(
+      ObservableMapUpdateAction<K, V>(
+        addItems: addItems,
+        removeItems: <K>{},
+      ),
+    );
+  }
 
-    _listener = source.listen(
-      onChange: (final Self source) {
-        final CS value = source.value;
-        final C change = source.lastChange(value);
-        _handleChange(change);
-      },
+  @override
+  void handleRemovedObservables(final Set<ObservableMap<K, V>> unregisterObservables) {
+    final Set<K> removeKeys = <K>{};
+
+    for (final ObservableMap<K, V> observable in unregisterObservables) {
+      final ObservableMapState<K, V> state = observable.value;
+      removeKeys.addAll(state.mapView.keys);
+    }
+
+    applyAction(
+      ObservableMapUpdateAction<K, V>(
+        addItems: <K, V>{},
+        removeItems: removeKeys,
+      ),
     );
   }
 }

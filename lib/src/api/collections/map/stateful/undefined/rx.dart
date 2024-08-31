@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/map/stateful/undefined/map.dart';
+import '../../../../../core/collections/map/stateful/undefined/rx_impl.dart';
 
 abstract class RxMapUndefined<K, V>
     implements ObservableMapUndefined<K, V>, RxMapStateful<ObservableMapUndefined<K, V>, K, V, Undefined> {
@@ -12,4 +12,6 @@ abstract class RxMapUndefined<K, V>
       factory: factory,
     );
   }
+
+  void setUndefined();
 }

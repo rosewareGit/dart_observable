@@ -48,6 +48,53 @@ void main() {
         );
       }
 
+      test('Transform from Observable', () async {
+        final Rx<String> source = Rx<String>('test');
+        final ObservableList<String> rxList = source.transformAs.list<String>(
+          transform: (
+            final ObservableList<String> state,
+            final String change,
+            final Emitter<ObservableListUpdateAction<String>> emitter,
+          ) {
+            emitter(
+              ObservableListUpdateAction<String>.add(
+                <MapEntry<int?, Iterable<String>>>[
+                  MapEntry<int?, Iterable<String>>(null, <String>[change]),
+                ],
+              ),
+            );
+          },
+        );
+
+        expect(rxList.length, 0);
+        final Disposable listener = rxList.listen();
+
+        expect(rxList.length, 1);
+        expect(rxList[0], 'test');
+
+        source.value = 'test2';
+
+        expect(rxList.length, 2);
+        expect(rxList[1], 'test2');
+
+        listener.dispose();
+
+        source.value = 'test3';
+        source.value = 'test4';
+
+        expect(rxList.length, 2);
+
+        rxList.listen();
+
+        expect(rxList.length, 4);
+        expect(rxList[2], 'test3');
+        expect(rxList[3], 'test4');
+
+        await source.dispose();
+
+        expect(rxList.disposed, true);
+      });
+
       test('Should apply transform from set', () async {
         final RxSet<int> source = RxSet<int>(<int>[1, 2]);
 

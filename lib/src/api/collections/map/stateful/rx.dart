@@ -9,5 +9,7 @@ abstract interface class RxMapStateful<Self extends ObservableMapStateful<Self, 
 
   ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action);
 
+  Self asObservable();
+
   StateOf<ObservableMapChange<K, V>, S>? setState(final S newState);
 }

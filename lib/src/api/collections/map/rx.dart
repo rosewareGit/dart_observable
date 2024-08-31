@@ -1,5 +1,5 @@
 import '../../../../dart_observable.dart';
-import '../../../../src/core/collections/map/map.dart';
+import '../../../../src/core/collections/map/rx_impl.dart';
 import 'rx_actions.dart';
 
 abstract interface class RxMap<K, V> implements ObservableMap<K, V>, RxMapActions<K, V> {

@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/map/stateful/undefined_failure/map.dart';
+import '../../../../../core/collections/map/stateful/undefined_failure/rx_impl.dart';
 
 abstract class RxMapUndefinedFailure<K, V, F>
     implements
@@ -24,4 +24,8 @@ abstract class RxMapUndefinedFailure<K, V, F>
       factory: factory,
     );
   }
+
+  set failure(final F failure);
+
+  void setUndefined();
 }

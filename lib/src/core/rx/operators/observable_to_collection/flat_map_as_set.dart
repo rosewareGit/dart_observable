@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../../../../../dart_observable.dart';
 import '../../../../api/change_tracking_observable.dart';
-import '../../../collections/set/set.dart';
+import '../../../collections/set/rx_impl.dart';
 
 class OperatorFlatMapAsSet<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T2> extends RxSetImpl<T2> {
   final ObservableSet<T2> Function(Self source) mapper;
@@ -64,7 +64,7 @@ class OperatorFlatMapAsSet<Self extends ChangeTrackingObservable<Self, T, C>, T,
     );
 
     _intermediateListener = rxIntermediate.listen(
-      onChange: (final source) {
+      onChange: (final ObservableSet<T2> source) {
         final ObservableSetChange<T2> change = source.value.lastChange;
         applyAction(
           ObservableSetUpdateAction<T2>(

@@ -18,4 +18,6 @@ abstract interface class RxListActions<E> {
   ObservableListChange<E>? removeAt(final int index);
 
   ObservableListChange<E>? removeWhere(final bool Function(E item) predicate);
+
+  ObservableListChange<E>? setData(final List<E> data);
 }

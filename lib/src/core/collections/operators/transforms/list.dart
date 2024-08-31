@@ -1,6 +1,6 @@
 import '../../../../../dart_observable.dart';
 import '../../../../api/change_tracking_observable.dart';
-import '../../list/list.dart';
+import '../../list/rx_impl.dart';
 import '../_base_transform.dart';
 
 abstract class OperatorTransformAsList<
@@ -24,17 +24,14 @@ abstract class OperatorTransformAsList<
     required this.source,
     super.factory,
   });
-
-  @override
-  ObservableList<E2> get current => this;
 }
 
-class OperatorTransformAsListArg<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS>
-    extends OperatorTransformAsList<Self, E2, C, CS> {
+class OperatorTransformAsListArg<Self extends ChangeTrackingObservable<Self, CS, C>, E, C, CS>
+    extends OperatorTransformAsList<Self, E, C, CS> {
   final void Function(
-    ObservableList<E2> state,
+    ObservableList<E> state,
     C change,
-    Emitter<ObservableListUpdateAction<E2>> updater,
+    Emitter<ObservableListUpdateAction<E>> updater,
   ) transformFn;
 
   OperatorTransformAsListArg({
@@ -45,10 +42,9 @@ class OperatorTransformAsListArg<Self extends ChangeTrackingObservable<Self, CS,
 
   @override
   void transformChange(
-    final ObservableList<E2> state,
     final C change,
-    final Emitter<ObservableListUpdateAction<E2>> updater,
+    final Emitter<ObservableListUpdateAction<E>> updater,
   ) {
-    transformFn(state, change, updater);
+    transformFn(this, change, updater);
   }
 }

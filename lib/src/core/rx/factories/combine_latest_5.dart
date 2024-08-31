@@ -35,7 +35,8 @@ class ObservableCombineWith5<R, T1, T2, T3, T4, T5> extends RxImpl<R> {
     super.onInit();
     // When all disposed, dispose this
     int disposeCount = 0;
-    for (final ChangeTrackingObservable<dynamic, Object?, dynamic> observable in <ChangeTrackingObservable<dynamic, Object?, dynamic>>[
+    for (final ChangeTrackingObservable<dynamic, Object?, dynamic> observable
+        in <ChangeTrackingObservable<dynamic, Object?, dynamic>>[
       observable1,
       observable2,
       observable3,

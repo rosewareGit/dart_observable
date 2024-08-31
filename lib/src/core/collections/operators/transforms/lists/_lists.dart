@@ -19,7 +19,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return OperatorCollectionsTransformAsResult<Self, F, E2, C, CS>(
+    return TransformListFailureImpl<Self, F, E2, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -35,7 +35,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return OperatorCollectionsTransformAsUndefined<Self, E2, C, CS>(
+    return TransformListUndefinedImpl<Self, E2, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -51,7 +51,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return OperatorCollectionsTransformAsOptionalResult<Self, E2, F, C, CS>(
+    return TransformListUndefinedFailureImpl<Self, E2, F, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,

@@ -12,8 +12,6 @@ import 'factories/combine_latest_4.dart';
 import 'factories/combine_latest_5.dart';
 import 'operators/handle_error.dart';
 import 'operators/next.dart';
-import 'operators/observable_to_collection/flat_map_as_map.dart';
-import 'operators/observable_to_collection/flat_map_as_set.dart';
 import 'operators/observable_to_observable.dart';
 
 abstract class RxBaseTracking<Self extends ChangeTrackingObservable<Self, T, C>, T, C>
@@ -56,6 +54,11 @@ abstract class RxBaseTracking<Self extends ChangeTrackingObservable<Self, T, C>,
   @override
   bool get distinct => _distinct;
 
+  @override
+  ObservableCollectionFlatMaps<C> get flatMapAs {
+    return ObservableCollectionFlatMapsImpl<Self, T, C>(self);
+  }
+
   int get listenerCount => _listeners.length;
 
   @override
@@ -77,11 +80,6 @@ abstract class RxBaseTracking<Self extends ChangeTrackingObservable<Self, T, C>,
   @override
   ObservableCollectionTransforms<C> get transformAs {
     return ObservableCollectionTransformsImpl<Self, T, C>(self);
-  }
-
-  @override
-  ObservableCollectionFlatMaps<C> get flatMapAs {
-    return ObservableCollectionFlatMapsImpl<Self, T, C>(self);
   }
 
   @override
@@ -211,55 +209,6 @@ abstract class RxBaseTracking<Self extends ChangeTrackingObservable<Self, T, C>,
 
     DartObservableGlobalMetrics().emitDispose(this);
   }
-
-  @override
-  ObservableMap<K, V> flatMapAsMap<K, V>(
-    final ObservableMap<K, V> Function(Self source) mapper,
-  ) {
-    return OperatorFlatMapAsMap<Self, T, C, K, V>(
-      source: self,
-      mapper: mapper,
-    );
-  }
-
-  // @override
-  // ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>({
-  //   required final ObservableMapResult<K, V, F> Function(Observable<T> source, FactoryMap<K,V>? factory) mapper,
-  //   final FactoryMap<K, V>? factory,
-  // }) {
-  //   return OperatorFlatMapAaMapResult<T, K, V, F>(
-  //     source: this,
-  //     mapper: mapper,
-  //     factory: factory,
-  //   );
-  // }
-
-  @override
-  ObservableSet<T2> flatMapAsSet<T2>(
-    final ObservableSet<T2> Function(Self source) mapper, {
-    final Set<T2> Function(Iterable<T2>? items)? factory,
-  }) {
-    return OperatorFlatMapAsSet<Self, T, C, T2>(
-      source: self,
-      mapper: mapper,
-      factory: factory,
-    );
-  }
-
-  // @override
-  // ObservableSetResult<T2, F> flatMapAsSetResult<T2, F>({
-  //   required final ObservableSetResult<T2, F> Function(
-  //     Observable<T> source,
-  //     FactorySet<T2>? factory,
-  //   ) mapper,
-  //   final FactorySet<T2>? factory,
-  // }) {
-  //   return OperatorFlatMapAsSetResult<T, T2, F>(
-  //     source: this,
-  //     mapper: mapper,
-  //     factory: factory,
-  //   );
-  // }
 
   @override
   Disposable listen({

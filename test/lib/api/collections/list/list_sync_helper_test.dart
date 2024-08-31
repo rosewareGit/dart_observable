@@ -11,7 +11,7 @@ void main() {
           'B',
         ]);
         final ObservableListSyncHelper<String> helper = ObservableListSyncHelper<String>(
-          target: target,
+          applyAction: target.applyAction,
         );
         helper.handleListChange(
           sourceChange: ObservableListChange<String>(
@@ -43,7 +43,7 @@ void main() {
       test('Handle update change', () {
         final RxList<String> target = RxList<String>(<String>['A', 'B']);
         final ObservableListSyncHelper<String> helper = ObservableListSyncHelper<String>(
-          target: target,
+          applyAction: target.applyAction,
         );
         // Add initial data
         helper.handleListChange(
@@ -78,7 +78,7 @@ void main() {
       test('Handle removed change', () {
         final RxList<String> target = RxList<String>(<String>['E1', 'E2']);
         final ObservableListSyncHelper<String> helper = ObservableListSyncHelper<String>(
-          target: target,
+          applyAction: target.applyAction,
         );
         // Add initial data
         helper.handleListChange(
@@ -116,7 +116,7 @@ void main() {
       test('Handle multiple changes', () {
         final RxList<String> target = RxList<String>(<String>['A', 'B']);
         final ObservableListSyncHelper<String> helper = ObservableListSyncHelper<String>(
-          target: target,
+          applyAction: target.applyAction,
         );
         // Add initial data
         helper.handleListChange(

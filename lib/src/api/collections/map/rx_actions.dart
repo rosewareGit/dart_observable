@@ -12,4 +12,6 @@ abstract interface class RxMapActions<K, V> {
   ObservableMapChange<K, V>? remove(final K key);
 
   ObservableMapChange<K, V>? removeWhere(final bool Function(K key, V value) predicate);
+
+  ObservableMapChange<K, V>? setData(final Map<K, V> data);
 }

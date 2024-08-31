@@ -19,6 +19,32 @@ class ObservableListUpdateAction<E> {
     return ObservableListUpdateAction<E>(insertItemAtPosition: insertItemAtPosition);
   }
 
+  factory ObservableListUpdateAction.fromChange(final ObservableListChange<E> change) {
+    final Map<int, E> added = change.added;
+    final Map<int, E> removed = change.removed;
+    final Map<int, ObservableItemChange<E>> updated = change.updated;
+
+    final Map<int?, Iterable<E>> insertItemAtPosition = <int?, Iterable<E>>{
+      null: added.values,
+    };
+    final Set<int> removeIndexes = <int>{};
+    final Map<int, E> updateItemAtPosition = <int, E>{};
+
+    for (final MapEntry<int, ObservableItemChange<E>> entry in updated.entries) {
+      updateItemAtPosition[entry.key] = entry.value.newValue;
+    }
+
+    for (final int index in removed.keys) {
+      removeIndexes.add(index);
+    }
+
+    return ObservableListUpdateAction<E>(
+      insertItemAtPosition: insertItemAtPosition.entries,
+      removeIndexes: removeIndexes,
+      updateItemAtPosition: updateItemAtPosition,
+    );
+  }
+
   factory ObservableListUpdateAction.remove(final Set<int> removeIndexes) {
     return ObservableListUpdateAction<E>(removeIndexes: removeIndexes);
   }

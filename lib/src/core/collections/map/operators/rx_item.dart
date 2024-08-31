@@ -1,7 +1,7 @@
 import '../../../../../dart_observable.dart';
 import '../../../rx/_impl.dart';
 
-class OperatorObservableMapRxItem<K, V> extends RxnImpl<V> {
+class OperatorObservableMapRxItem<K, V> extends RxnImpl<V?> {
   final K key;
   final ObservableMap<K, V> source;
 

@@ -34,17 +34,17 @@ sealed class Result<T, F> {
     );
   }
 
-  T getOrThrow() {
-    return fold(
-      onSuccess: (final T success) => success,
-      onFailure: (final F failure) => throw StateError(failure.toString()),
-    );
-  }
-
   T? getOrNull() {
     return fold(
       onSuccess: (final T success) => success,
       onFailure: (final _) => null,
+    );
+  }
+
+  T getOrThrow() {
+    return fold(
+      onSuccess: (final T success) => success,
+      onFailure: (final F failure) => throw StateError(failure.toString()),
     );
   }
 

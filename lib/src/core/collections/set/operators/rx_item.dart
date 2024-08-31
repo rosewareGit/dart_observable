@@ -45,6 +45,10 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
       return;
     }
 
+    // initial value
+    final E? initial = source.value.setView.firstWhereOrNull(predicate);
+    value = initial;
+
     _listener = source.listen(
       onChange: (final ObservableSet<E> source) {
         final ObservableSetState<E> state = source.value;

@@ -1,6 +1,26 @@
 import '../../../../dart_observable.dart';
-import 'transforms/maps.dart';
-import 'transforms/sets.dart';
+
+export 'transforms/lists.dart';
+export 'transforms/maps.dart';
+export 'transforms/sets.dart';
+
+typedef ListUpdater<E, C> = void Function(
+  ObservableList<E> state,
+  C change,
+  Emitter<ObservableListUpdateAction<E>> updater,
+);
+
+typedef MapUpdater<K, V, C> = void Function(
+  ObservableMap<K, V> state,
+  C change,
+  Emitter<ObservableMapUpdateAction<K, V>> updater,
+);
+
+typedef SetUpdater<E, C> = void Function(
+  ObservableSet<E> state,
+  C change,
+  Emitter<ObservableSetUpdateAction<E>> updater,
+);
 
 abstract interface class ObservableCollectionTransforms<C> {
   OperatorsTransformLists<C> get lists;
@@ -9,13 +29,9 @@ abstract interface class ObservableCollectionTransforms<C> {
 
   OperatorsTransformSets<C> get sets;
 
-  ObservableList<E2> list<E2>({
-    required final void Function(
-      ObservableList<E2> state,
-      C change,
-      Emitter<ObservableListUpdateAction<E2>> updater,
-    ) transform,
-    final FactoryList<E2>? factory,
+  ObservableList<E> list<E>({
+    required final ListUpdater<E, C> transform,
+    final FactoryList<E>? factory,
   });
 
   ObservableMap<K, V> map<K, V>({
@@ -23,12 +39,8 @@ abstract interface class ObservableCollectionTransforms<C> {
     final FactoryMap<K, V>? factory,
   });
 
-  ObservableSet<E2> set<E2>({
-    required final void Function(
-      ObservableSet<E2> state,
-      C change,
-      Emitter<ObservableSetUpdateAction<E2>> updater,
-    ) transform,
-    final Set<E2> Function(Iterable<E2>? items)? factory,
+  ObservableSet<E> set<E>({
+    required final SetUpdater<E, C> transform,
+    final Set<E> Function(Iterable<E>? items)? factory,
   });
 }

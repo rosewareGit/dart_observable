@@ -211,5 +211,40 @@ void main() {
         expect(rxList.value.listView, <int>[4, 5, 3, 10]);
       });
     });
+
+    group('setData', () {
+      test('Should set the list data', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.setData(<int>[4, 5, 3, 6]);
+
+        expect(change, isNotNull);
+        expect(change!.added, <int, int>{
+          3: 6,
+        });
+        expect(change.removed, <int, int>{});
+        expect(change.updated, <int, ObservableItemChange<int>>{
+          0: ObservableItemChange<int>(oldValue: 1, newValue: 4),
+          1: ObservableItemChange<int>(oldValue: 2, newValue: 5),
+        });
+
+        expect(rxList.value.listView, <int>[4, 5, 3, 6]);
+      });
+
+      test('Should set the list data with empty list', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.setData(<int>[]);
+
+        expect(change, isNotNull);
+        expect(change!.added, <int, int>{});
+        expect(change.removed, <int, int>{
+          0: 1,
+          1: 2,
+          2: 3,
+        });
+        expect(change.updated, <int, ObservableItemChange<int>>{});
+
+        expect(rxList.value.listView, <int>[]);
+      });
+    });
   });
 }

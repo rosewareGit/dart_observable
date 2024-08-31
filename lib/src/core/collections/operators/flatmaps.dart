@@ -11,11 +11,11 @@ class ObservableCollectionFlatMapsImpl<Self extends ChangeTrackingObservable<Sel
   ObservableCollectionFlatMapsImpl(this.source);
 
   @override
-  ObservableList<E2> list<E, E2>({
-    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableList<E2>>? Function(C change) sourceProvider,
+  ObservableList<E2> list<E2>({
+    required final ObservableCollectionFlatMapUpdate<ObservableList<E2>>? Function(C change) sourceProvider,
     final FactoryList<E2>? factory,
   }) {
-    return OperatorCollectionsFlatMapAsList<Self, E, E2, C, T>(
+    return OperatorCollectionsFlatMapAsList<Self, E2, C, T>(
       source: source,
       sourceProvider: sourceProvider,
       factory: factory,
@@ -24,7 +24,7 @@ class ObservableCollectionFlatMapsImpl<Self extends ChangeTrackingObservable<Sel
 
   @override
   ObservableMap<K, V> map<K, V>({
-    required final ObservableCollectionFlatMapUpdate<K, K, ObservableMap<K, V>> Function(C change) sourceProvider,
+    required final ObservableCollectionFlatMapUpdate<ObservableMap<K, V>> Function(C change) sourceProvider,
     final FactoryMap<K, V>? factory,
   }) {
     return OperatorCollectionsFlatMapAsMap<Self, K, K, V, C, T>(
@@ -35,11 +35,11 @@ class ObservableCollectionFlatMapsImpl<Self extends ChangeTrackingObservable<Sel
   }
 
   @override
-  ObservableSet<E2> set<E, E2>({
-    required final ObservableCollectionFlatMapUpdate<E, E2, ObservableSet<E2>> Function(C change) sourceProvider,
+  ObservableSet<E2> set<E2>({
+    required final ObservableCollectionFlatMapUpdate<ObservableSet<E2>> Function(C change) sourceProvider,
     final Set<E2> Function(Iterable<E2>? items)? factory,
   }) {
-    return OperatorCollectionsFlatMapAsSet<Self, E, E2, C, T>(
+    return OperatorCollectionsFlatMapAsSet<Self, E2, C, T>(
       source: source,
       sourceProvider: sourceProvider,
       factory: factory,

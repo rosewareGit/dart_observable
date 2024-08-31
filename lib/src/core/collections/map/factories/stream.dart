@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import '../../../../../dart_observable.dart';
-import '../map.dart';
+import '../rx_impl.dart';
 
 class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
   final Stream<ObservableMapUpdateAction<K, V>> stream;

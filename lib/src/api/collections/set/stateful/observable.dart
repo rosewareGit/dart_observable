@@ -4,7 +4,6 @@ abstract class ObservableSetStateful<Self extends ObservableSetStateful<Self, E,
     implements
         ObservableCollectionStateful<
             Self, // The collection type
-            E, // The type of the elements
             ObservableSetChange<E>, // the collection type
             S, // The custom state
             ObservableSetStatefulState<E, S>> {
@@ -12,9 +11,14 @@ abstract class ObservableSetStateful<Self extends ObservableSetStateful<Self, E,
 
   int? get lengthOrNull;
 
+  Self changeFactory(final FactorySet<E> factory);
+
   bool contains(final E item);
 
-  Observable<StateOf<E?, S>> rxItem(final bool Function(E item) predicate);
+  Self filterItem(
+    final bool Function(E item) predicate, {
+    final FactorySet<E>? factory,
+  });
 
-// T changeFactory(final FactorySet<E> factory);
+  Observable<StateOf<E?, S>> rxItem(final bool Function(E item) predicate);
 }

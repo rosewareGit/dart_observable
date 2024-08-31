@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/set/stateful/undefined_failure/set.dart';
+import '../../../../../core/collections/set/stateful/undefined_failure/rx_impl.dart';
 
 abstract class RxSetUndefinedFailure<E, F>
     implements

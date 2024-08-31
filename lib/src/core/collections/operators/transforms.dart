@@ -1,11 +1,11 @@
 import '../../../../dart_observable.dart';
 import '../../../api/change_tracking_observable.dart';
-import '../../../api/collections/operators/transforms/maps.dart';
-import '../../../api/collections/operators/transforms/sets.dart';
-import '../map/map.dart';
+import '../map/rx_impl.dart';
 import 'transforms/list.dart';
 import 'transforms/lists/_lists.dart';
+import 'transforms/maps/_maps.dart';
 import 'transforms/set.dart';
+import 'transforms/sets/_sets.dart';
 
 class ObservableCollectionTransformsImpl<Self extends ChangeTrackingObservable<Self, CS, C>, CS, C>
     implements ObservableCollectionTransforms<C> {
@@ -17,21 +17,17 @@ class ObservableCollectionTransformsImpl<Self extends ChangeTrackingObservable<S
   OperatorsTransformLists<C> get lists => OperatorsTransformListsImpl<Self, C, CS>(source);
 
   @override
-  OperatorsTransformMaps<C> get maps => throw UnimplementedError();
+  OperatorsTransformMaps<C> get maps => OperatorsTransformMapsImpl<Self, C, CS>(source);
 
   @override
-  OperatorsTransformSets<C> get sets => throw UnimplementedError();
+  OperatorsTransformSets<C> get sets => OperatorsTransformSetsImpl<Self, C, CS>(source);
 
   @override
-  ObservableList<E2> list<E2>({
-    required final void Function(
-      ObservableList<E2> state,
-      C change,
-      Emitter<ObservableListUpdateAction<E2>> updater,
-    ) transform,
-    final FactoryList<E2>? factory,
+  ObservableList<E> list<E>({
+    required final ListUpdater<E, C> transform,
+    final FactoryList<E>? factory,
   }) {
-    return OperatorTransformAsListArg<Self, E2, C, CS>(
+    return OperatorTransformAsListArg<Self, E, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -51,15 +47,11 @@ class ObservableCollectionTransformsImpl<Self extends ChangeTrackingObservable<S
   }
 
   @override
-  ObservableSet<E2> set<E2>({
-    required final void Function(
-      ObservableSet<E2> state,
-      C change,
-      Emitter<ObservableSetUpdateAction<E2>> updater,
-    ) transform,
-    final Set<E2> Function(Iterable<E2>? items)? factory,
+  ObservableSet<E> set<E>({
+    required final SetUpdater<E, C> transform,
+    final Set<E> Function(Iterable<E>? items)? factory,
   }) {
-    return OperatorCollectionsTransformAsSet<Self, E2, C, CS>(
+    return OperatorTransformAsSetArg<Self, E, C, CS>(
       source: source,
       transformFn: transform,
       factory: factory,

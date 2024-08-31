@@ -12,17 +12,26 @@ class StateOf<L, R> {
       : custom = null,
         _isData = true;
 
-  bool get isData => _isData;
+  R? get customOrNull => isCustom ? custom : null;
 
-  bool get isCustom => !_isData;
+  R get customOrThrow => customOrNull ?? (throw Exception('Right is null'));
 
   L? get dataOrNull => isData ? data : null;
 
   L get dataOrThrow => dataOrNull ?? (throw Exception('Left is null'));
 
-  R? get customOrNull => isCustom ? custom : null;
+  @override
+  int get hashCode => data.hashCode ^ custom.hashCode;
 
-  R get customOrThrow => customOrNull ?? (throw Exception('Right is null'));
+  bool get isCustom => !_isData;
+
+  bool get isData => _isData;
+
+  @override
+  bool operator ==(final Object other) {
+    if (identical(this, other)) return true;
+    return other is StateOf<L, R> && other.data == data && other.custom == custom;
+  }
 
   T fold<T>({
     required final T Function(L data) onData,

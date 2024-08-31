@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/set/stateful/undefined/set.dart';
+import '../../../../../core/collections/set/stateful/undefined/rx_impl.dart';
 
 abstract class RxSetUndefined<E>
     implements ObservableSetUndefined<E>, RxSetStateful<ObservableSetUndefined<E>, E, Undefined> {

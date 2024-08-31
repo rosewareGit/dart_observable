@@ -1,10 +1,13 @@
 import '../../../../../dart_observable.dart';
 import '../../../../api/change_tracking_observable.dart';
-import '../../set/set.dart';
+import '../../set/rx_impl.dart';
 import '../_base_transform.dart';
 
-class OperatorCollectionsTransformAsSet<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS>
-    extends RxSetImpl<E2>
+abstract class OperatorTransformAsSet<
+        Self extends ChangeTrackingObservable<Self, CS, C>,
+        E2, //
+        C,
+        CS> extends RxSetImpl<E2>
     with
         BaseCollectionTransformOperator<
             Self,
@@ -17,27 +20,31 @@ class OperatorCollectionsTransformAsSet<Self extends ChangeTrackingObservable<Se
   @override
   final Self source;
 
+  OperatorTransformAsSet({
+    required this.source,
+    super.factory,
+  });
+}
+
+class OperatorTransformAsSetArg<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS>
+    extends OperatorTransformAsSet<Self, E2, C, CS> {
   final void Function(
     ObservableSet<E2> state,
     C change,
     Emitter<ObservableSetUpdateAction<E2>> updater,
   ) transformFn;
 
-  OperatorCollectionsTransformAsSet({
-    required this.source,
+  OperatorTransformAsSetArg({
+    required super.source,
     required this.transformFn,
-    final Set<E2> Function(Iterable<E2>? items)? factory,
-  }) : super(factory: factory);
-
-  @override
-  ObservableSet<E2> get current => this;
+    super.factory,
+  });
 
   @override
   void transformChange(
-    final ObservableSet<E2> state,
     final C change,
     final Emitter<ObservableSetUpdateAction<E2>> updater,
   ) {
-    transformFn(state, change, updater);
+    transformFn(this, change, updater);
   }
 }

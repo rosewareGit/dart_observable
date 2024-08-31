@@ -95,10 +95,37 @@ void main() {
       });
     });
 
-    group('filterList', () {
+    group('changFactory', () {
+      test('Should return a new ObservableList with the specified factory', () async {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableList<int> rxList2 = rxList.changeFactory((final Iterable<int>? data) {
+          return List<int>.of(data ?? <int>[]);
+        });
+
+        expect(rxList2.length, 0);
+
+        rxList2.listen();
+
+        expect(rxList2.length, 3);
+        expect(rxList2.value.listView, <int>[1, 2, 3]);
+
+        rxList.add(4);
+        expect(rxList2.length, 4);
+        expect(rxList2.value.listView, <int>[1, 2, 3, 4]);
+
+        rxList.removeAt(0);
+        expect(rxList2.length, 3);
+        expect(rxList2.value.listView, <int>[2, 3, 4]);
+
+        await rxList.dispose();
+        expect(rxList2.disposed, true);
+      });
+    });
+
+    group('filterItem', () {
       test('Should filter initial source list on listen', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        final ObservableList<int> filteredList = rxList.filterList(predicate: (final int item) => item % 2 == 0);
+        final ObservableList<int> filteredList = rxList.filterItem((final int item) => item % 2 == 0);
 
         expect(filteredList.length, 0);
 
@@ -110,7 +137,7 @@ void main() {
 
       test('Should filter source list on change', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        final ObservableList<int> filteredList = rxList.filterList(predicate: (final int item) => item % 2 == 0);
+        final ObservableList<int> filteredList = rxList.filterItem((final int item) => item % 2 == 0);
 
         filteredList.listen();
 
@@ -152,6 +179,63 @@ void main() {
 
         expect(filteredList.length, 4);
         expect(filteredList.value.listView, <int>[6, 8, 10, 12]);
+      });
+    });
+
+    group('mapItem', () {
+      test('Should map initial items on listen', () {
+        final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+        final ObservableList<String> rxMapped = rxSource.mapItem<String>(
+          (final int item) => item.toString(),
+        );
+
+        rxMapped.listen();
+
+        expect(rxMapped.length, 5);
+        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+      });
+
+      test('Should map changes', () {
+        final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+        final ObservableList<String> rxMapped = rxSource.mapItem<String>(
+          (final int item) => item.toString(),
+        );
+
+        rxMapped.listen();
+
+        expect(rxMapped.length, 5);
+        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+
+        rxSource.add(6);
+
+        expect(rxMapped.length, 6);
+        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5', '6']);
+
+        rxSource.removeAt(0);
+
+        expect(rxMapped.length, 5);
+        expect(rxMapped.value.listView, <String>['2', '3', '4', '5', '6']);
+
+        rxSource[0] = 7;
+
+        expect(rxMapped.length, 5);
+        expect(rxMapped.value.listView, <String>['7', '3', '4', '5', '6']);
+      });
+
+      test('Should dispose when source disposed', () async {
+        final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+        final ObservableList<String> rxMapped = rxSource.mapItem<String>(
+          (final int item) => item.toString(),
+        );
+
+        rxMapped.listen();
+
+        expect(rxMapped.length, 5);
+        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+
+        await rxSource.dispose();
+
+        expect(rxMapped.disposed, true);
       });
     });
   });

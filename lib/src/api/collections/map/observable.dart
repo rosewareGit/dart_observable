@@ -2,7 +2,7 @@ import '../../../../dart_observable.dart';
 import '../../../core/collections/map/factories/stream.dart';
 
 abstract interface class ObservableMap<K, V>
-    implements ObservableCollection<ObservableMap<K, V>, K, ObservableMapChange<K, V>, ObservableMapState<K, V>> {
+    implements ObservableCollection<ObservableMap<K, V>, ObservableMapChange<K, V>, ObservableMapState<K, V>> {
   factory ObservableMap([
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
@@ -38,13 +38,13 @@ abstract interface class ObservableMap<K, V>
 
   bool containsKey(final K key);
 
-  ObservableMap<K, V> filterMap(
+  ObservableMap<K, V> filterItem(
     final bool Function(K key, V value) predicate, {
     final FactoryMap<K, V>? factory,
   });
 
-  ObservableMap<K, V2> mapMap<V2>({
-    required final V2 Function(K key, V value) valueMapper,
+  ObservableMap<K, V2> mapItem<V2>(
+    final V2 Function(K key, V value) valueMapper, {
     final FactoryMap<K, V2>? factory,
   });
 

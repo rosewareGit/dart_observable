@@ -8,18 +8,39 @@ import '../../../../dart_observable.dart';
 // Receives the source state/change and updates the mapping based no the action result.
 class ObservableListSyncHelper<E> {
   final bool Function(E item)? predicate;
-  final E2 Function<E2>(E item)? mapper;
-  final RxList<E> target;
-
-  ObservableListSyncHelper({
-    required this.target,
-    this.predicate,
-    this.mapper,
-  });
+  ObservableListChange<E>? Function(ObservableListUpdateAction<E> action) applyAction;
 
   // key: index in source, value: index in target
   @visibleForTesting
   final Map<int, int> $indexMapper = <int, int>{};
+
+  ObservableListSyncHelper({
+    required this.applyAction,
+    this.predicate,
+  });
+
+  void handleInitialState({
+    required final ObservableList<E> state,
+  }) {
+    final UnmodifiableListView<E> itemsToAdd = state.value.listView;
+
+    for (int i = 0; i < itemsToAdd.length; i++) {
+      final ObservableListChange<E>? addedChange = applyAction(
+        ObservableListUpdateAction<E>(
+          insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
+            MapEntry<int?, Iterable<E>>(null, <E>[itemsToAdd[i]]),
+          ],
+        ),
+      );
+
+      if (addedChange != null) {
+        final MapEntry<int, E>? added = addedChange.added.entries.firstOrNull;
+        if (added != null) {
+          $indexMapper[i] = added.key;
+        }
+      }
+    }
+  }
 
   void handleListChange({
     required final ObservableListChange<E> sourceChange,
@@ -44,7 +65,7 @@ class ObservableListSyncHelper<E> {
       }
     }
 
-    target.applyAction(
+    applyAction(
       ObservableListUpdateAction<E>(updateItemAtPosition: updateActionData),
     );
 
@@ -65,7 +86,7 @@ class ObservableListSyncHelper<E> {
       }
     }
 
-    target.applyAction(
+    applyAction(
       ObservableListUpdateAction<E>(removeIndexes: indexToRemove),
     );
 
@@ -77,7 +98,7 @@ class ObservableListSyncHelper<E> {
         continue;
       }
 
-      final ObservableListChange<E>? resultChange = target.applyAction(
+      final ObservableListChange<E>? resultChange = applyAction(
         ObservableListUpdateAction<E>(
           insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
             MapEntry<int?, Iterable<E>>(null, <E>[entry.value]),
@@ -94,8 +115,8 @@ class ObservableListSyncHelper<E> {
     }
   }
 
-  Iterable<int> handleRemovedState(final ObservableList<E> activeObservable) {
-    final UnmodifiableListView<E> itemsToRemove = activeObservable.value.listView;
+  Iterable<int> handleRemovedState(final ObservableList<E> observable) {
+    final UnmodifiableListView<E> itemsToRemove = observable.value.listView;
     final List<int> removeIndexes = <int>[];
     for (int i = 0; i < itemsToRemove.length; i++) {
       final int index = $indexMapper.remove(i) ?? -1;
@@ -106,26 +127,7 @@ class ObservableListSyncHelper<E> {
     return removeIndexes;
   }
 
-  void handleInitialState({
-    required final ObservableList<E> state,
-  }) {
-    final UnmodifiableListView<E> itemsToAdd = state.value.listView;
-
-    for (int i = 0; i < itemsToAdd.length; i++) {
-      final ObservableListChange<E>? addedChange = target.applyAction(
-        ObservableListUpdateAction<E>(
-          insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
-            MapEntry<int?, Iterable<E>>(null, <E>[itemsToAdd[i]]),
-          ],
-        ),
-      );
-
-      if (addedChange != null) {
-        final MapEntry<int, E>? added = addedChange.added.entries.firstOrNull;
-        if (added != null) {
-          $indexMapper[i] = added.key;
-        }
-      }
-    }
+  void reset() {
+    $indexMapper.clear();
   }
 }

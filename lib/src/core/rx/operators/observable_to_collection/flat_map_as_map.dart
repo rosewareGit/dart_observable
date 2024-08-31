@@ -2,7 +2,7 @@ import 'dart:async';
 
 import '../../../../../dart_observable.dart';
 import '../../../../api/change_tracking_observable.dart';
-import '../../../collections/map/map.dart';
+import '../../../collections/map/rx_impl.dart';
 
 class OperatorFlatMapAsMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, K, V> extends RxMapImpl<K, V> {
   final ObservableMap<K, V> Function(Self source) mapper;

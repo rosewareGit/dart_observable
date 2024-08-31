@@ -2,7 +2,7 @@ import '../../../../dart_observable.dart';
 import '../../../api/collections/set/rx_actions.dart';
 
 mixin RxSetActionsImpl<E> implements RxSetActions<E> {
-  Set<E>? get data;
+  Set<E> get data;
 
   @override
   ObservableSetChange<E>? add(final E item) {
@@ -28,8 +28,8 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
 
   @override
   ObservableSetChange<E>? clear() {
-    final Set<E>? items = data;
-    if (items == null) {
+    final Set<E> items = data;
+    if (items.isEmpty) {
       return null;
     }
 
@@ -53,8 +53,8 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
 
   @override
   ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate) {
-    final Set<E>? data = this.data;
-    if (data == null) {
+    final Set<E> data = this.data;
+    if (data.isEmpty) {
       return null;
     }
 
@@ -69,5 +69,18 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
         removeItems: removed,
       ),
     );
+  }
+
+  @override
+  ObservableSetChange<E>? setData(final Set<E> data) {
+    final Set<E> current = this.data;
+
+    final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(current, data);
+    if (change.isEmpty) {
+      return null;
+    }
+
+    final ObservableSetUpdateAction<E> action = ObservableSetUpdateAction<E>.fromChange(change);
+    return applySetUpdateAction(action);
   }
 }

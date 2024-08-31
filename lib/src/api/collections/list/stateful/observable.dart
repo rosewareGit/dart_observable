@@ -4,7 +4,6 @@ abstract class ObservableListStateful<Self extends ObservableListStateful<Self, 
     implements
         ObservableCollectionStateful<
             Self, // Self type
-            E, // The type of the elements
             ObservableListChange<E>, // the collection change type
             S, // The custom state
             ObservableListStatefulState<E, S> // The state type
@@ -15,7 +14,12 @@ abstract class ObservableListStateful<Self extends ObservableListStateful<Self, 
 
   E? operator [](final int position);
 
-  Observable<StateOf<E?, S>> rxItem(final int position);
+  Self changeFactory(final FactoryList<E> factory);
 
-// T changeFactory(final FactoryList<E> factory);
+  Self filterItem(
+    final bool Function(E item) predicate, {
+    final FactoryList<E>? factory,
+  });
+
+  Observable<StateOf<E?, S>> rxItem(final int position);
 }

@@ -1,5 +1,5 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../core/collections/list/stateful/undefined_failure/list.dart';
+import '../../../../../core/collections/list/stateful/undefined_failure/rx_impl.dart';
 
 abstract class RxListUndefinedFailure<E, F>
     implements
@@ -24,4 +24,8 @@ abstract class RxListUndefinedFailure<E, F>
       factory: factory,
     );
   }
+
+  set failure(final F failure);
+
+  void setUndefined();
 }

@@ -9,5 +9,7 @@ abstract interface class RxSetStateful<Self extends ObservableSetStateful<Self, 
 
   ObservableSetChange<E>? applySetUpdateAction(final ObservableSetUpdateAction<E> action);
 
+  Self asObservable();
+
   StateOf<ObservableSetChange<E>, S>? setState(final S newState);
 }

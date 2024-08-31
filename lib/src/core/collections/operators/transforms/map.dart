@@ -1,4 +1,4 @@
-part of '../../map/map.dart';
+part of '../../map/rx_impl.dart';
 
 abstract class OperatorTransformAsMap<Self extends ChangeTrackingObservable<Self, CS, C>, C, CS, K, V>
     extends RxMapImpl<K, V>
@@ -16,11 +16,8 @@ abstract class OperatorTransformAsMap<Self extends ChangeTrackingObservable<Self
 
   OperatorTransformAsMap({
     required this.source,
-    final FactoryMap<K, V>? factory,
-  }) : super(factory: factory);
-
-  @override
-  ObservableMap<K, V> get current => this;
+    super.factory,
+  });
 }
 
 class OperatorTransformAsMapArg<
@@ -38,14 +35,10 @@ class OperatorTransformAsMapArg<
   }) : super(factory: factory);
 
   @override
-  ObservableMap<K, V> get current => this;
-
-  @override
   void transformChange(
-    final ObservableMap<K, V> state,
     final C change,
     final Emitter<ObservableMapUpdateAction<K, V>> updater,
   ) {
-    transformFn(state, change, updater);
+    transformFn(this, change, updater);
   }
 }

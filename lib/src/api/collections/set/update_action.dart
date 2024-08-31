@@ -9,6 +9,13 @@ class ObservableSetUpdateAction<E> {
     required this.addItems,
   });
 
+  factory ObservableSetUpdateAction.fromChange(final ObservableSetChange<E> change) {
+    return ObservableSetUpdateAction<E>(
+      removeItems: change.removed,
+      addItems: change.added,
+    );
+  }
+
   bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
 
   ObservableSetChange<E> apply(final Set<E> updatedSet) {

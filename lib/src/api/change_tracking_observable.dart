@@ -11,13 +11,13 @@ abstract interface class ChangeTrackingObservable<Self extends ChangeTrackingObs
 
   bool get distinct;
 
+  ObservableCollectionFlatMaps<C> get flatMapAs;
+
   T? get previous;
 
   ObservableState get state;
 
   ObservableCollectionTransforms<C> get transformAs;
-
-  ObservableCollectionFlatMaps<C> get flatMapAs;
 
   T get value;
 
@@ -58,28 +58,6 @@ abstract interface class ChangeTrackingObservable<Self extends ChangeTrackingObs
   Observable<T2> flatMap<T2>(
     final Observable<T2> Function(Self source) mapper,
   );
-
-  ObservableMap<K, V> flatMapAsMap<K, V>(
-    final ObservableMap<K, V> Function(Self source) mapper,
-  );
-
-  // ObservableMapResult<K, V, F> flatMapAsMapResult<K, V, F>({
-  //   required final ObservableMapResult<K, V, F> Function(Observable<T> source, FactoryMap<K, V>? factory) mapper,
-  //   final FactoryMap<K, V>? factory,
-  // });
-
-  ObservableSet<T2> flatMapAsSet<T2>(
-    final ObservableSet<T2> Function(Self source) mapper, {
-    final FactorySet<T2>? factory,
-  });
-
-  // ObservableSetResult<T2, F> flatMapAsSetResult<T2, F>({
-  //   required final ObservableSetResult<T2, F> Function(
-  //     Observable<T> source,
-  //     FactorySet<T2>? factory,
-  //   ) mapper,
-  //   final FactorySet<T2>? factory,
-  // });
 
   Observable<T> handleError(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
