@@ -96,7 +96,7 @@ void main() {
       });
 
       test('Should apply transform from set', () async {
-        final RxSet<int> source = RxSet<int>(<int>[1, 2]);
+        final RxSet<int> source = RxSet<int>(initial: <int>[1, 2]);
 
         final ObservableList<String> result = createListFromSet(source);
 
@@ -121,7 +121,7 @@ void main() {
       });
 
       test('Should dispose when base is disposed', () async {
-        final RxSet<int> source = RxSet<int>(<int>[1, 2]);
+        final RxSet<int> source = RxSet<int>(initial: <int>[1, 2]);
 
         final ObservableList<String> result = createListFromSet(source);
 

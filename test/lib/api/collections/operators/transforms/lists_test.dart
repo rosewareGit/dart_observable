@@ -48,7 +48,7 @@ void main() {
       }
 
       test('Should apply transform from set', () async {
-        final RxSet<int> source = RxSet<int>(<int>[1, 2]);
+        final RxSet<int> source = RxSet<int>(initial: <int>[1, 2]);
 
         final ObservableListUndefinedFailure<int, String> rxResult = createStateFromSet(source);
 

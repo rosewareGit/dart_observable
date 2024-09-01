@@ -13,5 +13,13 @@ abstract class RxListUndefined<E>
     );
   }
 
+  factory RxListUndefined.undefined({
+    final FactoryList<E>? factory,
+  }) {
+    return RxListUndefinedImpl<E>.undefined(
+      factory: factory,
+    );
+  }
+
   void setUndefined();
 }

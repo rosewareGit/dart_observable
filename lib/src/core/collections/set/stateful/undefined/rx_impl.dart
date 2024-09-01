@@ -22,15 +22,6 @@ class RxSetUndefinedImpl<E> extends RxSetStatefulImpl<RxSetUndefined<E>, Observa
           factory: factory,
         );
 
-  factory RxSetUndefinedImpl.undefined({
-    final FactorySet<E>? factory,
-  }) {
-    return RxSetUndefinedImpl<E>._(
-      state: RxSetStatefulState<E, Undefined>.custom(Undefined()),
-      factory: factory,
-    );
-  }
-
   RxSetUndefinedImpl._({
     required final ObservableSetStatefulState<E, Undefined> state,
     final FactorySet<E>? factory,

@@ -19,17 +19,17 @@ RxMapUndefinedFailureState<K, V, F> _initialState<K, V, F>({
 class RxMapUndefinedFailureImpl<K, V, F> extends RxMapStatefulImpl<RxMapUndefinedFailure<K, V, F>,
     ObservableMapUndefinedFailure<K, V, F>, K, V, UndefinedFailure<F>> implements RxMapUndefinedFailure<K, V, F> {
   RxMapUndefinedFailureImpl({
-    final FactoryMap<K, V>? factory,
+    final RxMapUndefinedFailureState<K, V, F>? state,
+    super.factory,
   }) : super(
-          RxMapUndefinedFailureState<K, V, F>.undefined(),
-          factory: factory,
+          state ?? RxMapUndefinedFailureState<K, V, F>.undefined(),
         );
 
   factory RxMapUndefinedFailureImpl.custom({
     final FactoryMap<K, V>? factory,
     final Map<K, V>? initial,
   }) {
-    return RxMapUndefinedFailureImpl<K, V, F>._(
+    return RxMapUndefinedFailureImpl<K, V, F>(
       state: _initialState<K, V, F>(
         initial: initial,
         factory: factory,
@@ -42,16 +42,11 @@ class RxMapUndefinedFailureImpl<K, V, F> extends RxMapStatefulImpl<RxMapUndefine
     required final F failure,
     final FactoryMap<K, V>? factory,
   }) {
-    return RxMapUndefinedFailureImpl<K, V, F>._(
+    return RxMapUndefinedFailureImpl<K, V, F>(
       state: RxMapUndefinedFailureState<K, V, F>.failure(failure),
       factory: factory,
     );
   }
-
-  RxMapUndefinedFailureImpl._({
-    required final RxMapUndefinedFailureState<K, V, F> state,
-    final FactoryMap<K, V>? factory,
-  }) : super(state, factory: factory);
 
   @override
   set failure(final F failure) {

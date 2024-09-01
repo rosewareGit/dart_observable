@@ -3,6 +3,20 @@ import 'package:test/test.dart';
 
 void main() {
   group('ObservableMapFailure', () {
+    group('factory', () {
+      test('Should create ObservableMapFailure with failure', () {
+        final ObservableMapFailure<int, String, String> rxMapFailure =
+            RxMapFailure<int, String, String>.failure(failure: 'failure');
+        expect(rxMapFailure.value.custom, 'failure');
+      });
+
+      test('Should create ObservableMapFailure with initial data', () {
+        final ObservableMapFailure<int, String, String> rxMapFailure =
+            RxMapFailure<int, String, String>(initial: <int, String>{1: 'value'});
+        expect(rxMapFailure[1], 'value');
+      });
+    });
+
     group('length', () {
       test('should return the length of the map', () {
         final RxMapFailure<int, String, String> rxMap = RxMapFailure<int, String, String>();
@@ -162,6 +176,18 @@ void main() {
     });
 
     group('mapItem', () {
+      test('Should map initial failure', () {
+        final ObservableMapFailure<int, String, String> rxMap =
+            RxMapFailure<int, String, String>.failure(failure: 'failure');
+        final ObservableMapFailure<int, String, String> rxMapped = rxMap.mapItem(
+          (final int key, final String value) => value.toUpperCase(),
+        );
+
+        rxMapped.listen();
+        expect(rxMapped[1], null);
+        expect(rxMapped.value.custom, 'failure');
+      });
+
       test('should map the items of the map', () async {
         final RxMapFailure<int, String, String> rxMap = RxMapFailure<int, String, String>(
           initial: <int, String>{

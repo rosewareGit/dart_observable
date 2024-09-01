@@ -3,6 +3,14 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxMapFailure', () {
+    group('factory-failure', () {
+      test('Should create RxMapFailure with failure', () {
+        final RxMapFailure<int, String, String> rxMapFailure =
+            RxMapFailure<int, String, String>.failure(failure: 'failure');
+        expect(rxMapFailure.value.custom, 'failure');
+      });
+    });
+
     group('set failure', () {
       test('Should set failure', () {
         final RxMapFailure<int, String, String> rxMapFailure = RxMapFailure<int, String, String>();

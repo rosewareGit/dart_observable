@@ -16,8 +16,6 @@ class ObservableSetUpdateAction<E> {
     );
   }
 
-  bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
-
   ObservableSetChange<E> apply(final Set<E> updatedSet) {
     return ObservableSetChange.fromAction(
       sourceToUpdate: updatedSet,

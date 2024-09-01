@@ -3,6 +3,13 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxMapUndefined', () {
+    group('factory-undefined', () {
+      test('Should create RxMapUndefined with undefined', () {
+        final RxMapUndefined<int, String> rxMapUndefined = RxMapUndefined<int, String>.undefined();
+        expect(rxMapUndefined.value.custom, Undefined());
+      });
+    });
+
     group('setUndefined', () {
       test('Should set undefined', () {
         final RxMapUndefined<int, String> rxMap = RxMapUndefined<int, String>();

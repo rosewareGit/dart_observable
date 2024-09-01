@@ -13,5 +13,13 @@ abstract class RxMapUndefined<K, V>
     );
   }
 
+  factory RxMapUndefined.undefined({
+    final FactoryMap<K, V>? factory,
+  }) {
+    return RxMapUndefinedImpl<K, V>.undefined(
+      factory: factory,
+    );
+  }
+
   void setUndefined();
 }

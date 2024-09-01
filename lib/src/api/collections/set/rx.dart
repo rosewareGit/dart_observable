@@ -3,14 +3,7 @@ import '../../../../src/core/collections/set/rx_impl.dart';
 import 'rx_actions.dart';
 
 abstract interface class RxSet<E> implements ObservableSet<E>, RxSetActions<E> {
-  factory RxSet([final Iterable<E>? initial]) {
-    return RxSetImpl<E>(initial: initial);
-  }
-
-  factory RxSet.custom({
-    required final Set<E> Function(Iterable<E>? items) factory,
-    final Iterable<E>? initial,
-  }) {
+  factory RxSet({final Iterable<E>? initial, final FactorySet<E>? factory}) {
     return RxSetImpl<E>(initial: initial, factory: factory);
   }
 

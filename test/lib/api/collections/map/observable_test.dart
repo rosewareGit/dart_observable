@@ -35,7 +35,7 @@ void main() {
       });
     });
     group('fromStream', () {
-      test('Should map data from stream', () {
+      test('Should map data from stream', () async {
         final StreamController<ObservableMapUpdateAction<String, int>> streamController =
             StreamController<ObservableMapUpdateAction<String, int>>.broadcast(sync: true);
         final ObservableMap<String, int> map = ObservableMap<String, int>.fromStream(
@@ -44,7 +44,7 @@ void main() {
 
         expect(map.length, 0);
 
-        map.listen();
+        final Disposable listener = map.listen();
 
         streamController.add(
           ObservableMapUpdateAction<String, int>(
@@ -73,12 +73,33 @@ void main() {
         expect(map['a'], null);
         expect(map['b'], 2);
         expect(map['c'], 3);
+
+        await listener.dispose();
+
+        streamController.add(
+          ObservableMapUpdateAction<String, int>(
+            removeItems: <String>{'b'},
+            addItems: <String, int>{
+              'd': 4,
+            },
+          ),
+        );
+
+        expect(map.length, 2);
+
+        map.listen();
+
+        expect(map.length, 2);
+        expect(map['a'], null);
+        expect(map['b'], null);
+        expect(map['c'], 3);
+        expect(map['d'], 4);
       });
     });
 
     group('operator []', () {
       test('should return the value for the given key', () {
-        final ObservableMap<String, int> map = ObservableMap<String, int>(<String, int>{
+        final ObservableMap<String, int> map = RxMap<String, int>(<String, int>{
           'a': 1,
           'b': 2,
         });
@@ -169,6 +190,19 @@ void main() {
       });
     });
 
+    group('containsKey', () {
+      test('Should return true if key is present', () {
+        final RxMap<String, int> rxMap = RxMap<String, int>(<String, int>{
+          'a': 1,
+          'b': 2,
+        });
+
+        expect(rxMap.containsKey('a'), true);
+        expect(rxMap.containsKey('b'), true);
+        expect(rxMap.containsKey('c'), false);
+      });
+    });
+
     group('filterMap', () {
       test('Should update state when source change', () async {
         final RxMap<String, int> rxMap = RxMap<String, int>(<String, int>{
@@ -191,10 +225,10 @@ void main() {
 
         final Disposable listener = filtered.listen();
 
-        expect(filtered['a'], 2, reason: 'Should be set');
-        expect(filtered['b'], null, reason: 'Should be removed by key');
-        expect(filtered['c'], 3, reason: 'Should be set');
-        expect(filtered.length, 2, reason: 'No other keys');
+        expect(filtered['a'], 2);
+        expect(filtered['b'], null);
+        expect(filtered['c'], 3);
+        expect(filtered.length, 2);
 
         await listener.dispose();
 
@@ -204,17 +238,20 @@ void main() {
         rxMap['c'] = 0;
         rxMap['d'] = 3;
 
-        expect(filtered['a'], 2, reason: 'Should be the old value');
-        expect(filtered['b'], null, reason: 'Should be removed');
-        expect(filtered['c'], 3, reason: 'Should be the old value');
-        expect(filtered['d'], null, reason: 'Should not be added');
+        expect(filtered['a'], 2);
+        expect(filtered['b'], null);
+        expect(filtered['c'], 3);
+        expect(filtered['d'], null);
 
         // Should be updated now
         filtered.listen();
-        expect(filtered['a'], null, reason: 'Should be removed now');
-        expect(filtered['b'], 5, reason: 'Should be added now');
-        expect(filtered['c'], null, reason: 'Should be removed now');
-        expect(filtered['d'], 3, reason: 'Should be added now');
+        expect(filtered['a'], null);
+        expect(filtered['b'], 5);
+        expect(filtered['c'], null);
+        expect(filtered['d'], 3);
+
+        rxMap.remove('b');
+        expect(filtered['b'], null);
       });
 
       test('Should dispose when source disposed', () async {
@@ -290,17 +327,17 @@ void main() {
         rxSource['c'] = 0;
         rxSource['d'] = 3;
 
-        expect(rxMapped['a'], 'a2', reason: 'Should be the old value');
-        expect(rxMapped['b'], null, reason: 'Should be removed');
-        expect(rxMapped['c'], 'c3', reason: 'Should be the old value');
-        expect(rxMapped['d'], null, reason: 'Should not be added');
+        expect(rxMapped['a'], 'a2');
+        expect(rxMapped['b'], null);
+        expect(rxMapped['c'], 'c3');
+        expect(rxMapped['d'], null);
 
         // Should be updated now
         rxMapped.listen();
-        expect(rxMapped['a'], 'a0', reason: 'Should be the new value');
-        expect(rxMapped['b'], 'b5', reason: 'Should be added now');
-        expect(rxMapped['c'], 'c0', reason: 'Should be the new value');
-        expect(rxMapped['d'], 'd3', reason: 'Should be added now');
+        expect(rxMapped['a'], 'a0');
+        expect(rxMapped['b'], 'b5');
+        expect(rxMapped['c'], 'c0');
+        expect(rxMapped['d'], 'd3');
       });
 
       test('Should dispose when source disposed', () async {
@@ -348,9 +385,12 @@ void main() {
 
         expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 2, 1]);
 
+        rxMap['a'] = 3;
+        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 2, 3]);
+
         rxMap.remove('b');
 
-        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 1]);
+        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 3]);
       });
     });
   });

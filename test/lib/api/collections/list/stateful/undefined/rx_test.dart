@@ -3,6 +3,13 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxListUndefined', () {
+    group('factory-undefined', () {
+      test('Should create RxListUndefined with initial values', () {
+        final RxListUndefined<int> rxList = RxListUndefined<int>.undefined();
+        expect(rxList.value.custom, Undefined());
+      });
+    });
+
     group('undefined', () {
       test('Should set to undefined', () {
         final RxListUndefined<int> rxList = RxListUndefined<int>();

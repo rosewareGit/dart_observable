@@ -9,14 +9,14 @@ void main() {
   group('ObservableSet', () {
     group('length', () {
       test('Should return the length of the set', () {
-        final RxSet<int> rx = RxSet<int>(<int>{1, 2, 3});
+        final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
         expect(rx.length, 3);
       });
     });
 
     group('changeFactory', () {
       test('Should return a new ObservableSet with the given factory', () async {
-        final RxSet<int> rxSource = RxSet<int>(<int>{1, 2, 3});
+        final RxSet<int> rxSource = RxSet<int>(initial: <int>{1, 2, 3});
         final ObservableSet<int> rx = rxSource.changeFactory(
           (final Iterable<int>? items) {
             return SplayTreeSet<int>.of(
@@ -44,7 +44,7 @@ void main() {
 
     group('contains', () {
       test('Should return true if the item is in the set', () {
-        final RxSet<int> rx = RxSet<int>(<int>{1, 2, 3});
+        final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
         expect(rx.contains(1), true);
         expect(rx.contains(2), true);
         expect(rx.contains(3), true);
@@ -54,7 +54,7 @@ void main() {
 
     group('filterItem', () {
       test('Should return a new ObservableSet with the items that match the predicate', () async {
-        final RxSet<int> rx = RxSet<int>(<int>{1, 2, 3});
+        final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
         final ObservableSet<int> rxFiltered = rx.filterItem(
           (final int item) {
             return item > 1;
@@ -147,6 +147,7 @@ void main() {
           },
         );
 
+        final Disposable listener = rxItem.listen();
         final TodoItem item1 = TodoItem(
           id: '1',
           title: 'title1',
@@ -156,8 +157,15 @@ void main() {
 
         rx.addAll(<TodoItem>[item1]);
 
-        final Disposable listener = rxItem.listen();
+        expect(rxItem.value, item1);
 
+        rx.remove(item1);
+        expect(rxItem.value, null);
+
+        rx.add(TodoItem(id: '2'));
+        expect(rxItem.value, null);
+
+        rx.add(item1);
         expect(rxItem.value, item1);
 
         await listener.dispose();

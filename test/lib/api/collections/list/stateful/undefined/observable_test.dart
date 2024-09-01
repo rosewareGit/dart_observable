@@ -135,6 +135,9 @@ void main() {
         rxList.removeAt(2);
         expect(rxItem.value.data, 5);
 
+        rxList[2] = 100;
+        expect(rxItem.value.data, 100);
+
         rxList.setUndefined();
         expect(rxItem.value.data, null);
         expect(rxItem.value.custom, Undefined());

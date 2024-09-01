@@ -158,6 +158,15 @@ void main() {
     });
 
     group('mapItem', () {
+      test('Should map initial failure state', () {
+        final RxListFailure<int, String> rxList = RxListFailure<int, String>.failure(failure: 'failure');
+        final ObservableListFailure<String, String> rxNew = rxList.mapItem((final int item) => item.toString());
+
+        rxNew.listen();
+        expect(rxNew.value.data, null);
+        expect(rxNew.value.custom, 'failure');
+      });
+
       test('Should map data change', () async {
         final RxListFailure<int, String> rxList = RxListFailure<int, String>(initial: <int>[1, 2, 3, 4, 5]);
         final ObservableListFailure<String, String> rxNew = rxList.mapItem((final int item) => item.toString());

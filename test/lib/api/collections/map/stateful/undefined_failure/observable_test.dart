@@ -166,5 +166,34 @@ void main() {
         expect(rxItem.disposed, true);
       });
     });
+
+    group('mapItem', () {
+      test('should return the observable of the item', () async {
+        final RxMapUndefinedFailure<int, String, String> rxMap = RxMapUndefinedFailure<int, String, String>(
+          initial: <int, String>{
+            1: 'value',
+            2: 'a',
+            3: 'b',
+          },
+        );
+
+        final ObservableMapUndefinedFailure<int, String, String> rxMapped = rxMap.mapItem(
+          (final int key, final String value) => value.toUpperCase(),
+        );
+
+        rxMapped.listen();
+
+        expect(rxMapped[1], 'VALUE');
+        expect(rxMapped[2], 'A');
+        expect(rxMapped[3], 'B');
+
+        rxMap.failure = 'failure';
+        expect(rxMapped[1], null);
+        expect(rxMapped.value.custom, UndefinedFailure<String>.failure('failure'));
+
+        await rxMap.dispose();
+        expect(rxMapped.disposed, true);
+      });
+    });
   });
 }

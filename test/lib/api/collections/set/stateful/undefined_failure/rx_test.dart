@@ -3,6 +3,19 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxSetUndefinedFailure', () {
+    group('factory', () {
+      test('Should create instance with initial data', () {
+        final RxSetUndefinedFailure<int, String> rxSetFailure =
+            RxSetUndefinedFailure<int, String>(initial: <int>[1, 2, 3]);
+        expect(rxSetFailure.value.data!.setView, <int>[1, 2, 3]);
+      });
+
+      test('Should create instance with failure', () {
+        final RxSetUndefinedFailure<int, String> rxSetFailure = RxSetUndefinedFailure<int, String>.failure('failure');
+        expect(rxSetFailure.value.custom, UndefinedFailure<String>.failure('failure'));
+      });
+    });
+
     group('failure', () {
       test('Should set failure', () {
         final RxSetUndefinedFailure<int, String> rxSetFailure = RxSetUndefinedFailure<int, String>();

@@ -3,6 +3,13 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxSetFailure', () {
+    group('factory', (){
+      test('Should create with initial failure', (){
+        final RxSetFailure<int, String> set = RxSetFailure<int, String>.failure(failure: 'failure');
+        expect(set.value.custom, 'failure');
+      });
+    });
+
     group('failure', () {
       test('Should set failure', () {
         final RxSetFailure<int, String> rxSetFailure = RxSetFailure<int, String>();

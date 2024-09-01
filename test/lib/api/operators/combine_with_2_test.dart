@@ -4,8 +4,8 @@ import 'package:test/test.dart';
 void main() {
   group('Observable.combineWith', () {
     test('should combine two observables', () {
-      final Observable<int> observable1 = Observable<int>(1);
-      final Observable<int> observable2 = Observable<int>(2);
+      final Observable<int> observable1 = Rx<int>(1);
+      final Observable<int> observable2 = Rx<int>(2);
 
       final Observable<int> combined = observable1.combineWith<int, int>(
         other: observable2,
@@ -17,7 +17,7 @@ void main() {
 
     test('should update when the first observable changes', () {
       final Rx<int> observable1 = Rx<int>(1);
-      final Observable<int> observable2 = Observable<int>(2);
+      final Observable<int> observable2 = Rx<int>(2);
 
       final Observable<int> combined = observable1.combineWith<int, int>(
         other: observable2,
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('should update when the second observable changes', () {
-      final Observable<int> observable1 = Observable<int>(1);
+      final Observable<int> observable1 = Rx<int>(1);
       final Rx<int> observable2 = Rx<int>(2);
 
       final Observable<int> combined = observable1.combineWith<int, int>(
@@ -48,8 +48,8 @@ void main() {
     });
 
     test('Should dispose only when all observables are disposed', () async {
-      final Observable<int> observable1 = Observable<int>(1);
-      final Observable<int> observable2 = Observable<int>(2);
+      final Observable<int> observable1 = Rx<int>(1);
+      final Observable<int> observable2 = Rx<int>(2);
 
       final Observable<int> combined = observable1.combineWith<int, int>(
         other: observable2,

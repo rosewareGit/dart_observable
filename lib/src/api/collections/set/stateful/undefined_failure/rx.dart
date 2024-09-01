@@ -9,7 +9,7 @@ abstract class RxSetUndefinedFailure<E, F>
     final Iterable<E>? initial,
     final FactorySet<E>? factory,
   }) {
-    return RxSetUndefinedFailureImpl<E, F>.custom(
+    return RxSetUndefinedFailureImpl<E, F>.from(
       initial: initial,
       factory: factory,
     );

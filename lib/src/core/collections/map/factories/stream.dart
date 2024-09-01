@@ -17,25 +17,40 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
         );
 
   @override
+  void onInit() {
+    addDisposeWorker(() {
+      return _subscription?.cancel().then((final _) {
+        _subscription = null;
+      });
+    });
+    super.onInit();
+  }
+
+  @override
   void onActive() {
     super.onActive();
     _startCollect();
   }
 
-  @override
-  Future<void> onInactive() async {
-    await super.onInactive();
-    _subscription?.cancel();
-    _subscription = null;
-  }
+  late final List<ObservableMapUpdateAction<K, V>> _bufferedActions = <ObservableMapUpdateAction<K, V>>[];
 
   void _startCollect() {
     if (_subscription != null) {
+      // apply buffered actions
+      for (final ObservableMapUpdateAction<K, V> action in _bufferedActions) {
+        applyAction(action);
+      }
+      _bufferedActions.clear();
       return;
     }
 
     _subscription = stream.listen(
       (final ObservableMapUpdateAction<K, V> action) {
+        if (state == ObservableState.inactive) {
+          _bufferedActions.add(action);
+          return;
+        }
+
         applyAction(action);
       },
       onError: (final Object error, final StackTrace stack) {
@@ -46,11 +61,5 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
       },
       cancelOnError: false,
     );
-
-    addDisposeWorker(() {
-      return _subscription?.cancel().then((final _) {
-        _subscription = null;
-      });
-    });
   }
 }

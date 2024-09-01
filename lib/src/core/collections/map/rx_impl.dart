@@ -49,19 +49,6 @@ class RxMapImpl<K, V> extends RxBaseTracking<ObservableMap<K, V>, ObservableMapS
   @override
   ObservableMap<K, V> get self => this;
 
-  @override
-  set value(final ObservableMapState<K, V> value) {
-    final ObservableMapChange<K, V> change = ObservableMapChange<K, V>.fromDiff(this.value.mapView, value.mapView);
-    if (change.isEmpty) {
-      return;
-    }
-
-    super.value = RxMapState<K, V>(
-      _value.data,
-      change,
-    );
-  }
-
   RxMapState<K, V> get _value => value as RxMapState<K, V>;
 
   @override
@@ -71,10 +58,6 @@ class RxMapImpl<K, V> extends RxBaseTracking<ObservableMap<K, V>, ObservableMapS
 
   @override
   ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action) {
-    if (disposed) {
-      throw ObservableDisposedError();
-    }
-
     final Map<K, V> updatedMap = _value.data;
     final ObservableMapChange<K, V> change = action.apply(updatedMap);
     if (change.isEmpty) {

@@ -5,7 +5,7 @@ void main() {
   group('ObservableList', () {
     group('operator []', () {
       test('Should return the item at the specified index', () {
-        final ObservableList<int> rxList = ObservableList<int>(<int>[1, 2, 3]);
+        final ObservableList<int> rxList = RxList<int>(<int>[1, 2, 3]);
 
         expect(rxList[0], 1);
         expect(rxList[1], 2);

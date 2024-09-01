@@ -10,16 +10,6 @@ typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FutureWorker = FutureOr<void> Function();
 
 abstract interface class Observable<T> implements ChangeTrackingObservable<Observable<T>, T, T> {
-  factory Observable(
-    final T value, {
-    final bool distinct = true,
-  }) {
-    return Rx<T>(
-      value,
-      distinct: distinct,
-    );
-  }
-
   factory Observable.combineLatest({
     required final Iterable<Observable<dynamic>> observables,
     required final T Function() combiner,

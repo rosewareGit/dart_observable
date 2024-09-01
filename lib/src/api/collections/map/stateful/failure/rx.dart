@@ -13,5 +13,15 @@ abstract class RxMapFailure<K, V, F>
     );
   }
 
+  factory RxMapFailure.failure({
+    required final F failure,
+    final FactoryMap<K, V>? factory,
+  }) {
+    return RxMapFailureImpl<K, V, F>.failure(
+      failure: failure,
+      factory: factory,
+    );
+  }
+
   set failure(final F failure);
 }

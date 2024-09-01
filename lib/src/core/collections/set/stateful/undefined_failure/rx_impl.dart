@@ -21,17 +21,28 @@ class RxSetUndefinedFailureImpl<E, F>
     extends RxSetStatefulImpl<RxSetUndefinedFailure<E, F>, ObservableSetUndefinedFailure<E, F>, E, UndefinedFailure<F>>
     implements RxSetUndefinedFailure<E, F> {
   RxSetUndefinedFailureImpl({
+    final ObservableSetStatefulState<E, UndefinedFailure<F>>? state,
     final FactorySet<E>? factory,
   }) : super(
-          RxSetUndefinedFailureState<E, F>.undefined(),
+          state ?? RxSetUndefinedFailureState<E, F>.undefined(),
           factory: factory,
         );
 
-  factory RxSetUndefinedFailureImpl.custom({
+  factory RxSetUndefinedFailureImpl.failure({
+    required final F failure,
+    final FactorySet<E>? factory,
+  }) {
+    return RxSetUndefinedFailureImpl<E, F>(
+      state: RxSetUndefinedFailureState<E, F>.failure(failure),
+      factory: factory,
+    );
+  }
+
+  factory RxSetUndefinedFailureImpl.from({
     final FactorySet<E>? factory,
     final Iterable<E>? initial,
   }) {
-    return RxSetUndefinedFailureImpl<E, F>._(
+    return RxSetUndefinedFailureImpl<E, F>(
       state: _initialState<E, F>(
         initial: initial,
         factory: factory,
@@ -40,20 +51,10 @@ class RxSetUndefinedFailureImpl<E, F>
     );
   }
 
-  factory RxSetUndefinedFailureImpl.failure({
-    required final F failure,
-    final FactorySet<E>? factory,
-  }) {
-    return RxSetUndefinedFailureImpl<E, F>._(
-      state: RxSetUndefinedFailureState<E, F>.failure(failure),
-      factory: factory,
-    );
+  @override
+  set failure(final F failure) {
+    setState(UndefinedFailure<F>.failure(failure));
   }
-
-  RxSetUndefinedFailureImpl._({
-    required final RxSetUndefinedFailureState<E, F> state,
-    final FactorySet<E>? factory,
-  }) : super(state, factory: factory);
 
   @override
   ObservableSetUndefinedFailure<E, F> get self => this;
@@ -63,7 +64,7 @@ class RxSetUndefinedFailureImpl<E, F>
     final Iterable<E>? items,
     final FactorySet<E>? factory,
   }) {
-    return RxSetUndefinedFailureImpl<E, F>.custom(
+    return RxSetUndefinedFailureImpl<E, F>.from(
       factory: factory,
       initial: items,
     );
@@ -74,7 +75,7 @@ class RxSetUndefinedFailureImpl<E, F>
     final E2 Function(E item) mapper, {
     final FactorySet<E2>? factory,
   }) {
-    final RxSetUndefinedFailure<E2, F> instance = RxSetUndefinedFailureImpl<E2, F>.custom(
+    final RxSetUndefinedFailure<E2, F> instance = RxSetUndefinedFailureImpl<E2, F>.from(
       factory: factory,
     );
     OperatorStatefulSetMapItem<RxSetUndefinedFailure<E2, F>, ObservableSetUndefinedFailure<E2, F>,
@@ -84,11 +85,6 @@ class RxSetUndefinedFailureImpl<E, F>
       instanceBuilder: () => instance,
     );
     return instance.asObservable();
-  }
-
-  @override
-  set failure(final F failure) {
-    setState(UndefinedFailure<F>.failure(failure));
   }
 
   @override

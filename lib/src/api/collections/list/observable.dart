@@ -2,13 +2,6 @@ import '../../../../dart_observable.dart';
 
 abstract interface class ObservableList<E>
     implements ObservableCollection<ObservableList<E>, ObservableListChange<E>, ObservableListState<E>> {
-  factory ObservableList([
-    final Iterable<E>? initial,
-    final List<E> Function(Iterable<E>? items)? factory,
-  ]) {
-    return RxList<E>(initial, factory);
-  }
-
   int get length;
 
   E? operator [](final int position);

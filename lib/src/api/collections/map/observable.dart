@@ -3,13 +3,6 @@ import '../../../core/collections/map/factories/stream.dart';
 
 abstract interface class ObservableMap<K, V>
     implements ObservableCollection<ObservableMap<K, V>, ObservableMapChange<K, V>, ObservableMapState<K, V>> {
-  factory ObservableMap([
-    final Map<K, V>? initial,
-    final Map<K, V> Function(Map<K, V>? items)? factory,
-  ]) {
-    return RxMap<K, V>(initial, factory);
-  }
-
   factory ObservableMap.fromStream({
     required final Stream<ObservableMapUpdateAction<K, V>> stream,
     final FactoryMap<K, V>? factory,

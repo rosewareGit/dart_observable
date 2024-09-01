@@ -6,7 +6,7 @@ void main() {
   group('RxSet', () {
     group('add', () {
       test('should add item', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.add(4);
 
         expect(change, isNotNull);
@@ -19,7 +19,7 @@ void main() {
 
     group('addAll', () {
       test('should add items', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.addAll(<int>[4, 5, 6]);
 
         expect(change, isNotNull);
@@ -32,7 +32,7 @@ void main() {
 
     group('clear', () {
       test('should clear items', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.clear();
 
         expect(change, isNotNull);
@@ -45,7 +45,7 @@ void main() {
 
     group('remove', () {
       test('should remove item', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.remove(2);
 
         expect(change, isNotNull);
@@ -58,7 +58,7 @@ void main() {
 
     group('removeWhere', () {
       test('should remove items', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.removeWhere((final int item) => item.isOdd);
 
         expect(change, isNotNull);
@@ -71,7 +71,7 @@ void main() {
 
     group('setData', () {
       test('should set data', () {
-        final RxSet<int> set = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = set.setData(<int>{2, 4, 6});
 
         expect(change, isNotNull);
@@ -100,7 +100,7 @@ void main() {
 
     group('set value', () {
       test('should set value', () {
-        final RxSet<int> rxSet = RxSet<int>(<int>[1, 2, 3]);
+        final RxSet<int> rxSet = RxSet<int>(initial: <int>[1, 2, 3]);
         rxSet.value = RxSetState<int>.initial(<int>{2, 4, 6});
 
         expect(rxSet.value.setView, <int>{2, 4, 6});

@@ -22,8 +22,6 @@ class ObservableMapUpdateAction<K, V> {
     );
   }
 
-  bool get isEmpty => removeItems.isEmpty && addItems.isEmpty;
-
   ObservableMapChange<K, V> apply(final Map<K, V> updatedMap) {
     return ObservableMapChange.fromAction(
       state: updatedMap,

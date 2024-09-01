@@ -120,17 +120,6 @@ class RxSetImpl<E> extends RxBaseTracking<ObservableSet<E>, ObservableSetState<E
     );
   }
 
-  // @override
-  // ObservableSetChange<E>? setData(final Set<E> data) {
-  //   final ObservableSetChange<E> change = ObservableSetChange<E>.fromDiff(_value.data, data);
-  //   if (change.isEmpty) {
-  //     return null;
-  //   }
-  //
-  //   final ObservableSetUpdateAction<E> action = ObservableSetUpdateAction<E>.fromChange(change);
-  //   return applyAction(action);
-  // }
-
   @override
   List<E> toList() {
     return _value.data.toList();

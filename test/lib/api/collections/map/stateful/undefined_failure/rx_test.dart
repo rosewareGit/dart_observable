@@ -3,6 +3,17 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxMapUndefinedFailure', () {
+    group('factory', () {
+      test('Should create undefined without passing state', () {
+        final RxMapUndefinedFailure<int, String, String> rxMapFailure = RxMapUndefinedFailure<int, String, String>();
+        expect(rxMapFailure.value.custom, UndefinedFailure<String>.undefined());
+      });
+      test('Should create RxMapUndefinedFailure with failure', () {
+        final RxMapUndefinedFailure<int, String, String> rxMapFailure =
+            RxMapUndefinedFailure<int, String, String>.failure('failure');
+        expect(rxMapFailure.value.custom, UndefinedFailure<String>.failure('failure'));
+      });
+    });
     group('set failure', () {
       test('Should set failure', () {
         final RxMapUndefinedFailure<int, String, String> rxMapFailure = RxMapUndefinedFailure<int, String, String>();

@@ -32,6 +32,16 @@ void main() {
       });
     });
 
+    group('contains', () {
+      test('should return true if the item is in the set', () {
+        final RxSetFailure<int, String> set = RxSetFailure<int, String>(initial: <int>[1, 2, 3]);
+        expect(set.contains(1), true);
+        expect(set.contains(2), true);
+        expect(set.contains(3), true);
+        expect(set.contains(4), false);
+      });
+    });
+
     group('changeFactory', () {
       test('should change the factory', () async {
         final RxSetFailure<int, String> rxSet = RxSetFailure<int, String>(initial: <int>[1, 2, 3]);
