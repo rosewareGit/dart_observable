@@ -1,28 +1,24 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
 import 'observable_to_observable/flat_map.dart';
 import 'observable_to_observable/transform.dart';
 
-mixin OperatorsObservableToObservable<Self extends ChangeTrackingObservable<Self, T, C>, T, C>
-    implements ChangeTrackingObservable<Self, T, C> {
-  Self get self;
-
+mixin OperatorsObservableToObservable<T> implements Observable<T> {
   @override
-  Observable<T?> filter(final bool Function(Self source) predicate) {
+  Observable<T?> filter(final bool Function(T value) predicate) {
     return transform<T?>(
-      initialProvider: (final Self source) {
-        if (predicate(source)) {
+      initialProvider: (final T value) {
+        if (predicate(value)) {
           return value;
         } else {
           return null;
         }
       },
       onChanged: (
-        final Self source,
+        final T value,
         final Emitter<T?> emitter,
       ) {
-        if (predicate(source)) {
-          emitter(source.value);
+        if (predicate(value)) {
+          emitter(value);
         }
       },
     );
@@ -30,37 +26,37 @@ mixin OperatorsObservableToObservable<Self extends ChangeTrackingObservable<Self
 
   @override
   Observable<T2> flatMap<T2>(
-    final Observable<T2> Function(Self source) mapper,
+    final Observable<T2> Function(T value) mapper,
   ) {
-    return OperatorFlatMap<Self, T, C, T2>(
-      source: self,
+    return OperatorFlatMap<T, T2>(
+      source: this,
       mapper: mapper,
     );
   }
 
   @override
-  Observable<T2> map<T2>(final T2 Function(Self source) onChanged) {
+  Observable<T2> map<T2>(final T2 Function(T value) onChanged) {
     return transform(
-      initialProvider: (final Self source) {
-        return onChanged(source);
+      initialProvider: (final T value) {
+        return onChanged(value);
       },
       onChanged: (
-        final Self source,
+        final T value,
         final Emitter<T2> emitter,
       ) {
-        emitter(onChanged(source));
+        emitter(onChanged(value));
       },
     );
   }
 
   @override
   Observable<T2> transform<T2>({
-    required final T2 Function(Self source) initialProvider,
-    required final void Function(Self source, Emitter<T2> emitter) onChanged,
+    required final T2 Function(T value) initialProvider,
+    required final void Function(T value, Emitter<T2> emitter) onChanged,
   }) {
-    return OperatorTransform<Self, T, C, T2>(
-      initialProvider(self),
-      source: self,
+    return OperatorTransform<T, T2>(
+      initialProvider(value),
+      source: this,
       handler: onChanged,
     );
   }

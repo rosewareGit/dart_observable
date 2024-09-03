@@ -48,7 +48,7 @@ class OperatorObservableMapRxItem<K, V> extends RxnImpl<V?> {
     value = source[key];
 
     _listener = source.listen(
-      onChange: (final ObservableMap<K, V> source) {
+      onChange: (final ObservableMapState<K, V> value) {
         if (state == ObservableState.inactive) {
           return;
         }

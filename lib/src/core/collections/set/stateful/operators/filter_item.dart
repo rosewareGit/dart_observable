@@ -8,9 +8,9 @@ class OperatorStatefulSetFilterItem<Self extends RxSetStateful<O, E, S>, O exten
   final Self result;
   final bool Function(E item) predicate;
 
-  late final BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
+  late final BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
           StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
+      BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
           StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>>(
     current: result,
     source: source,

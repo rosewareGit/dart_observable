@@ -1,25 +1,23 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
 import 'failure.dart';
 import 'undefined.dart';
 import 'undefined_failure.dart';
 
-class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS, C>, C, CS>
-    implements OperatorsTransformSets<C> {
-  final Self source;
+class OperatorsCollectionTransformSetsImpl<CS extends CollectionState<C>, C> implements OperatorsTransformSets<C> {
+  final Observable<CS> source;
 
-  OperatorsTransformSetsImpl(this.source);
+  OperatorsCollectionTransformSetsImpl(this.source);
 
   @override
-  ObservableSetFailure<E2, F> failure<E2, F>({
+  ObservableSetFailure<E, F> failure<E, F>({
     required final void Function(
-      ObservableSetFailure<E2, F> state,
-      C change,
-      Emitter<StateOf<ObservableSetUpdateAction<E2>, F>> updater,
+      ObservableSetFailure<E, F> state,
+      C value,
+      Emitter<StateOf<ObservableSetUpdateAction<E>, F>> updater,
     ) transform,
-    final FactorySet<E2>? factory,
+    final FactorySet<E>? factory,
   }) {
-    return TransformSetFailureImpl<Self, F, E2, C, CS>(
+    return TransformCollectionSetFailureImpl<F, E, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -27,15 +25,15 @@ class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS,
   }
 
   @override
-  ObservableSetUndefined<E2> undefined<E2>({
+  ObservableSetUndefined<E> undefined<E>({
     required final void Function(
-      ObservableSetUndefined<E2> state,
-      C change,
-      Emitter<StateOf<ObservableSetUpdateAction<E2>, Undefined>> updater,
+      ObservableSetUndefined<E> state,
+      C value,
+      Emitter<StateOf<ObservableSetUpdateAction<E>, Undefined>> updater,
     ) transform,
-    final FactorySet<E2>? factory,
+    final FactorySet<E>? factory,
   }) {
-    return TransformSetUndefinedImpl<Self, E2, C, CS>(
+    return TransformCollectionSetUndefinedImpl<E, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -43,15 +41,15 @@ class OperatorsTransformSetsImpl<Self extends ChangeTrackingObservable<Self, CS,
   }
 
   @override
-  ObservableSetUndefinedFailure<E2, F> undefinedFailure<E2, F>({
+  ObservableSetUndefinedFailure<E, F> undefinedFailure<E, F>({
     required final void Function(
-      ObservableSetUndefinedFailure<E2, F> state,
-      C change,
-      Emitter<StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> updater,
+      ObservableSetUndefinedFailure<E, F> state,
+      C value,
+      Emitter<StateOf<ObservableSetUpdateAction<E>, UndefinedFailure<F>>> updater,
     ) transform,
-    final FactorySet<E2>? factory,
+    final FactorySet<E>? factory,
   }) {
-    return TransformSetUndefinedFailureImpl<Self, E2, F, C, CS>(
+    return TransformCollectionSetUndefinedFailureImpl<E, F, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,

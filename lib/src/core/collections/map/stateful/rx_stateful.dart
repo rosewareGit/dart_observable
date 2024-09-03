@@ -1,5 +1,4 @@
 import '../../../../../dart_observable.dart';
-import '../../../rx/base_tracking.dart';
 import '../../_base.dart';
 import '../map_state.dart';
 import '../rx_actions.dart';
@@ -10,7 +9,7 @@ import 'operators/rx_item.dart';
 import 'state.dart';
 
 abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O extends ObservableMapStateful<O, K, V, S>, K,
-        V, S> extends RxBaseTracking<O, ObservableMapStatefulState<K, V, S>, StateOf<ObservableMapChange<K, V>, S>>
+        V, S> extends RxBase<ObservableMapStatefulState<K, V, S>>
     with
         ObservableCollectionBase<O, StateOf<ObservableMapChange<K, V>, S>, ObservableMapStatefulState<K, V, S>>,
         RxMapActionsImpl<K, V>

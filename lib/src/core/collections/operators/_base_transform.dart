@@ -1,18 +1,14 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
-import '../../rx/base_tracking.dart';
 import '_base_transform_proxy.dart';
 
 mixin BaseCollectionTransformOperator<
-    Self extends ChangeTrackingObservable<Self, CS, C>,
-    Current extends ChangeTrackingObservable<Current, CS2, C2>,
-    CS, // Collection state for this
-    CS2, // Collection state for the transformed
+    CR extends CollectionState<C>, // Collection state for this
+    CR2 extends CollectionState<C2>, // Collection state for the transformed
     C,
     C2,
-    U> on RxBaseTracking<Current, CS2, C2> {
-  late final BaseCollectionTransformOperatorProxy<Self, CS, CS2, C, C2> proxy =
-      BaseCollectionTransformOperatorProxy<Self, CS, CS2, C, C2>(
+    U> on RxBase<CR2> {
+  late final BaseCollectionTransformOperatorProxy<CR, CR2, C, C2> proxy =
+      BaseCollectionTransformOperatorProxy<CR, CR2, C, C2>(
     current: this,
     source: source,
     transformChange: (final C change) {
@@ -20,7 +16,7 @@ mixin BaseCollectionTransformOperator<
     },
   );
 
-  Self get source;
+  Observable<CR> get source;
 
   C2? applyAction(final U action);
 

@@ -1,21 +1,13 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
-import '../../../map/stateful/undefined/rx_impl.dart';
+import '../../../../collections/map/stateful/undefined/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class OperatorMapUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C>, K, V, C, CS>
-    extends RxMapUndefinedImpl<K, V>
+class OperatorCollectMapUndefinedImpl<K, V, CS extends CollectionState<C>, C> extends RxMapUndefinedImpl<K, V>
     with
-        BaseCollectionTransformOperator<
-            Self,
-            ObservableMapUndefined<K, V>,
-            CS,
-            ObservableMapStatefulState<K, V, Undefined>,
-            C,
-            StateOf<ObservableMapChange<K, V>, Undefined>,
-            StateOf<ObservableMapUpdateAction<K, V>, Undefined>> {
+        BaseCollectionTransformOperator<CS, ObservableMapStatefulState<K, V, Undefined>, C,
+            StateOf<ObservableMapChange<K, V>, Undefined>, StateOf<ObservableMapUpdateAction<K, V>, Undefined>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
   final void Function(
     ObservableMapUndefined<K, V> state,
@@ -23,7 +15,7 @@ class OperatorMapUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C
     Emitter<StateOf<ObservableMapUpdateAction<K, V>, Undefined>> updater,
   ) transformFn;
 
-  OperatorMapUndefinedImpl({
+  OperatorCollectMapUndefinedImpl({
     required this.source,
     required this.transformFn,
     final FactoryMap<K, V>? factory,

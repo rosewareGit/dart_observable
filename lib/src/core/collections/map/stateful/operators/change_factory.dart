@@ -8,12 +8,11 @@ class OperatorStatefulMapChangeFactory<Self extends RxMapStateful<O, K, V, S>,
   final Self result;
 
   late final BaseCollectionTransformOperatorProxy<
-          O,
           ObservableMapStatefulState<K, V, S>,
           ObservableMapStatefulState<K, V, S>,
           StateOf<ObservableMapChange<K, V>, S>,
           StateOf<ObservableMapChange<K, V>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<O, ObservableMapStatefulState<K, V, S>, ObservableMapStatefulState<K, V, S>,
+      BaseCollectionTransformOperatorProxy<ObservableMapStatefulState<K, V, S>, ObservableMapStatefulState<K, V, S>,
           StateOf<ObservableMapChange<K, V>, S>, StateOf<ObservableMapChange<K, V>, S>>(
     current: result,
     source: source,

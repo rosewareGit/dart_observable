@@ -1,6 +1,6 @@
 library dart_observable;
 
-export 'src/api/change_tracking_state.dart';
+export 'src/api/collections/collection_state.dart';
 export 'src/api/collections/item_change.dart';
 export 'src/api/collections/list/change.dart';
 export 'src/api/collections/list/observable.dart';
@@ -31,8 +31,7 @@ export 'src/api/collections/map/stateful/undefined_failure/observable.dart';
 export 'src/api/collections/map/stateful/undefined_failure/rx.dart';
 export 'src/api/collections/map/update_action.dart';
 export 'src/api/collections/observable_collection.dart';
-export 'src/api/collections/operators/flatmaps.dart';
-export 'src/api/collections/operators/transforms.dart';
+export 'src/api/operators/flatmaps.dart';
 export 'src/api/collections/set/change.dart';
 export 'src/api/collections/set/observable.dart';
 export 'src/api/collections/set/rx.dart';
@@ -52,6 +51,7 @@ export 'src/api/errors/completed_error.dart';
 export 'src/api/log/global_metrics.dart';
 export 'src/api/observable.dart';
 export 'src/api/observable_n.dart';
+export 'src/api/operators/transforms.dart';
 export 'src/api/rx.dart';
 export 'src/api/types/bool.dart';
 export 'src/api/types/num/_nums.dart';

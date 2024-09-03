@@ -1,20 +1,13 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
-import '../../../set/stateful/failure/rx_impl.dart';
+import '../../../../collections/set/stateful/failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class TransformSetFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, F, E2, C, CS> extends RxSetFailureImpl<E2, F>
+class TransformCollectionSetFailureImpl<F, E2, CS extends CollectionState<C>, C> extends RxSetFailureImpl<E2, F>
     with
-        BaseCollectionTransformOperator<
-            Self,
-            ObservableSetFailure<E2, F>,
-            CS, //
-            ObservableSetStatefulState<E2, F>,
-            C,
-            StateOf<ObservableSetChange<E2>, F>,
+        BaseCollectionTransformOperator<CS, ObservableSetStatefulState<E2, F>, C, StateOf<ObservableSetChange<E2>, F>,
             StateOf<ObservableSetUpdateAction<E2>, F>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
   final void Function(
     ObservableSetFailure<E2, F> state,
@@ -22,7 +15,7 @@ class TransformSetFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>
     Emitter<StateOf<ObservableSetUpdateAction<E2>, F>> updater,
   ) transformFn;
 
-  TransformSetFailureImpl({
+  TransformCollectionSetFailureImpl({
     required this.source,
     required this.transformFn,
     final FactorySet<E2>? factory,

@@ -8,10 +8,10 @@ class OperatorStatefulListFilterItem<Self extends RxListStateful<O, E, S>, O ext
   final Self result;
   final bool Function(E item) predicate;
 
-  late final BaseCollectionTransformOperatorProxy<O, ObservableListStatefulState<E, S>,
-          ObservableListStatefulState<E, S>, StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>
-      proxy = BaseCollectionTransformOperatorProxy<O, ObservableListStatefulState<E, S>,
-          ObservableListStatefulState<E, S>, StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>(
+  late final BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
+          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>> proxy =
+      BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
+          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>(
     current: result,
     source: source,
     transformChange: transformChange,

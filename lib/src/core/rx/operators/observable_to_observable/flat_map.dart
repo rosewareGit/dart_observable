@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import '../../../../../dart_observable.dart';
-import '../../../../api/change_tracking_observable.dart';
 import '../../_impl.dart';
 
-class OperatorFlatMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T2> extends RxImpl<T2> {
-  final Observable<T2> Function(Self source) mapper;
-  final Self source;
+class OperatorFlatMap<T, T2> extends RxImpl<T2> {
+  final Observable<T2> Function(T value) mapper;
+  final Observable<T> source;
 
   Disposable? _intermediateListener;
   Disposable? _listener;
@@ -15,7 +14,7 @@ class OperatorFlatMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T
   OperatorFlatMap({
     required this.source,
     required this.mapper,
-  }) : super(mapper(source).value);
+  }) : super(mapper(source.value).value);
 
   @override
   void onActive() {
@@ -44,23 +43,23 @@ class OperatorFlatMap<Self extends ChangeTrackingObservable<Self, T, C>, T, C, T
   }
 
   void _initListener() {
-    final Observable<T2> rxIntermediate = mapper(source);
+    final Observable<T2> rxIntermediate = mapper(source.value);
     _activeRxIntermediate = rxIntermediate;
 
     _intermediateListener = rxIntermediate.listen(
-      onChange: (final Observable<T2> source) {
-        value = source.value;
+      onChange: (final T2 value) {
+        this.value = value;
       },
     );
     _listener = source.listen(
-      onChange: (final Self source) {
-        final Observable<T2> rxIntermediate = mapper(source);
+      onChange: (final T value) {
+        final Observable<T2> rxIntermediate = mapper(value);
         if (_activeRxIntermediate != rxIntermediate) {
-          value = rxIntermediate.value;
+          this.value = rxIntermediate.value;
           _intermediateListener?.dispose();
           _intermediateListener = rxIntermediate.listen(
-            onChange: (final Observable<T2> source) {
-              value = source.value;
+            onChange: (final T2 value) {
+              this.value = value;
             },
           );
           _activeRxIntermediate = rxIntermediate;

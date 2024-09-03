@@ -23,8 +23,8 @@ void main() {
         rx.value = 2;
       });
       final int next = await rx.next(
-        predicate: (final Observable<int> source) {
-          return source.value % 2 == 0;
+        predicate: (final int value) {
+          return value % 2 == 0;
         },
       );
       expect(next, 2);
@@ -51,7 +51,7 @@ void main() {
       });
 
       rx.listen();
-      
+
       expect(
         () async {
           await rx.next(

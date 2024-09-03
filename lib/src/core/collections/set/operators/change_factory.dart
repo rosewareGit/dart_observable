@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
 class ObservableSetFactoryOperator<E>
-    extends OperatorTransformAsSet<ObservableSet<E>, E, ObservableSetChange<E>, ObservableSetState<E>> {
+    extends OperatorCollectionTransformAsSet<E, ObservableSetChange<E>, ObservableSetState<E>> {
   ObservableSetFactoryOperator({
     required super.factory,
     required super.source,

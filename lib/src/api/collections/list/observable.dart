@@ -1,7 +1,7 @@
 import '../../../../dart_observable.dart';
 
 abstract interface class ObservableList<E>
-    implements ObservableCollection<ObservableList<E>, ObservableListChange<E>, ObservableListState<E>> {
+    implements ObservableCollection<ObservableListChange<E>, ObservableListState<E>> {
   int get length;
 
   E? operator [](final int position);

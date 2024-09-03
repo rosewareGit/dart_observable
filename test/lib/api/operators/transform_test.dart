@@ -6,14 +6,14 @@ void main() {
     test('Should return transformed value', () async {
       final Rx<int> rx = Rx<int>(0);
       final Observable<double> transformed = rx.transform<double>(
-        initialProvider: (final Observable<int> source) {
-          return source.value * 2.5;
+        initialProvider: (final int value) {
+          return value * 2.5;
         },
         onChanged: (
-          final Observable<int> source,
+          final int value,
           final Emitter<double> emitter,
         ) {
-          emitter(source.value * 2.5);
+          emitter(value * 2.5);
         },
       );
       transformed.listen();

@@ -88,11 +88,10 @@ class OperatorObservableSetStatefulRxItem<Self extends ObservableSetStateful<Sel
     }
 
     _listener = source.listen(
-      onChange: (final Self source) {
-        final ObservableSetStatefulState<E, S> state = source.value;
-        final StateOf<E?, S>? newState = _getStateByPredicate(state: state, predicate: predicate, isInitial: false);
+      onChange: (final ObservableSetStatefulState<E, S> value) {
+        final StateOf<E?, S>? newState = _getStateByPredicate(state: value, predicate: predicate, isInitial: false);
         if (newState != null) {
-          value = newState;
+          this.value = newState;
         }
       },
     );

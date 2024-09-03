@@ -1,34 +1,32 @@
-part of '../../map/rx_impl.dart';
+import '../../../../../dart_observable.dart';
+import '../../map/rx_impl.dart';
+import '../_base_transform.dart';
 
-abstract class OperatorTransformAsMap<Self extends ChangeTrackingObservable<Self, CS, C>, C, CS, K, V>
-    extends RxMapImpl<K, V>
+abstract class OperatorCollectionTransformAsMap<C, CS extends CollectionState<C>, K, V> extends RxMapImpl<K, V>
     with
         BaseCollectionTransformOperator<
-            Self,
-            ObservableMap<K, V>,
             CS, //
             ObservableMapState<K, V>,
             C,
             ObservableMapChange<K, V>,
             ObservableMapUpdateAction<K, V>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
-  OperatorTransformAsMap({
+  OperatorCollectionTransformAsMap({
     required this.source,
     super.factory,
   });
 }
 
-class OperatorTransformAsMapArg<
-    Self extends ChangeTrackingObservable<Self, CS, C>,
+class OperatorCollectionTransformAsMapArg<
     C, //
-    CS,
+    CS extends CollectionState<C>,
     K,
-    V> extends OperatorTransformAsMap<Self, C, CS, K, V> {
+    V> extends OperatorCollectionTransformAsMap<C, CS, K, V> {
   final MapUpdater<K, V, C> transformFn;
 
-  OperatorTransformAsMapArg({
+  OperatorCollectionTransformAsMapArg({
     required super.source,
     required this.transformFn,
     final FactoryMap<K, V>? factory,

@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
 class ObservableSetFilterOperator<E>
-    extends OperatorTransformAsSet<ObservableSet<E>, E, ObservableSetChange<E>, ObservableSetState<E>> {
+    extends OperatorCollectionTransformAsSet<E, ObservableSetChange<E>, ObservableSetState<E>> {
   final bool Function(E item) predicate;
 
   ObservableSetFilterOperator({

@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/list.dart';
 
 class ObservableListMapItemOperator<E, E2>
-    extends OperatorTransformAsList<ObservableList<E>, E2, ObservableListChange<E>, ObservableListState<E>> {
+    extends OperatorCollectionTransformAsList<E2, ObservableListChange<E>, ObservableListState<E>> {
   final E2 Function(E item) mapper;
 
   ObservableListMapItemOperator({

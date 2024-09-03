@@ -1,7 +1,7 @@
 import '../../../../../dart_observable.dart';
 
 abstract class ObservableMapStatefulState<K, V, S> extends StateOf<ObservableMapState<K, V>, S>
-    implements ChangeTrackingState<StateOf<ObservableMapChange<K, V>, S>> {
+    implements CollectionState<StateOf<ObservableMapChange<K, V>, S>> {
   const ObservableMapStatefulState.custom(super.custom) : super.custom();
 
   const ObservableMapStatefulState.data(super.data) : super.data();

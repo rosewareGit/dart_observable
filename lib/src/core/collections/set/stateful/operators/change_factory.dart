@@ -7,9 +7,9 @@ class OperatorStatefulSetChangeFactory<Self extends RxSetStateful<O, E, S>, O ex
 
   final Self result;
 
-  late final BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
+  late final BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
           StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
+      BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
           StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>>(
     current: result,
     source: source,

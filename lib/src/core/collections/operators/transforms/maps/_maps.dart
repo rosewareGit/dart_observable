@@ -1,14 +1,12 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
 import 'failure.dart';
 import 'undefined.dart';
 import 'undefined_failure.dart';
 
-class OperatorsTransformMapsImpl<Self extends ChangeTrackingObservable<Self, CS, C>, C, CS>
-    implements OperatorsTransformMaps<C> {
-  final Self source;
+class OperatorsCollectTransformMapsImpl<CS extends CollectionState<C>, C> implements OperatorsTransformMaps<C> {
+  final Observable<CS> source;
 
-  OperatorsTransformMapsImpl(this.source);
+  OperatorsCollectTransformMapsImpl(this.source);
 
   @override
   ObservableMapFailure<K, V, F> failure<K, V, F>({
@@ -19,7 +17,7 @@ class OperatorsTransformMapsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactoryMap<K, V>? factory,
   }) {
-    return OperatorMapFailureImpl<Self, K, V, F, C, CS>(
+    return OperatorCollectMapFailureImpl<K, V, F, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -35,7 +33,7 @@ class OperatorsTransformMapsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactoryMap<K, V>? factory,
   }) {
-    return OperatorMapUndefinedImpl<Self, K, V, C, CS>(
+    return OperatorCollectMapUndefinedImpl<K, V, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -51,7 +49,7 @@ class OperatorsTransformMapsImpl<Self extends ChangeTrackingObservable<Self, CS,
     ) transform,
     final FactoryMap<K, V>? factory,
   }) {
-    return OperatorMapUndefinedFailureImpl<Self, K, V, F, C, CS>(
+    return OperatorCollectionMapUndefinedFailureImpl<K, V, F, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,

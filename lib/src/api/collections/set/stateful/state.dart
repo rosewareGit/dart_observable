@@ -1,7 +1,7 @@
 import '../../../../../dart_observable.dart';
 
 abstract class ObservableSetStatefulState<E, S> extends StateOf<ObservableSetState<E>, S>
-    implements ChangeTrackingState<StateOf<ObservableSetChange<E>, S>> {
+    implements CollectionState<StateOf<ObservableSetChange<E>, S>> {
   const ObservableSetStatefulState.custom(super.custom) : super.custom();
 
   const ObservableSetStatefulState.data(super.data) : super.data();

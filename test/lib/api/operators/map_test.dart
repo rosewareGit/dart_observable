@@ -5,8 +5,8 @@ void main() {
   group('map', () {
     test('Should return mapped value', () async {
       final Rx<int> rx = Rx<int>(0);
-      final Observable<int> mapped = rx.map<int>((final Observable<int> source) {
-        return source.value * 2;
+      final Observable<int> mapped = rx.map<int>((final int value) {
+        return value * 2;
       });
 
       mapped.listen();

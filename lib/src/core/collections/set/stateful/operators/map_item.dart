@@ -8,10 +8,10 @@ class OperatorStatefulSetMapItem<Self extends RxSetStateful<O2, E2, S>, O2 exten
   final Self result;
   final E2 Function(E item) mapper;
 
-  late final BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
-          StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<O, ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E, S>,
-          StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E>, S>>(
+  late final BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E2, S>,
+          StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E2>, S>> proxy =
+      BaseCollectionTransformOperatorProxy<ObservableSetStatefulState<E, S>, ObservableSetStatefulState<E2, S>,
+          StateOf<ObservableSetChange<E>, S>, StateOf<ObservableSetChange<E2>, S>>(
     current: result,
     source: source,
     transformChange: transformChange,

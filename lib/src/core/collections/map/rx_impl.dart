@@ -1,8 +1,6 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
-import '../../rx/base_tracking.dart';
+import '../../rx/operators/_base_transform.dart';
 import '../_base.dart';
-import '../operators/_base_transform.dart';
 import 'map_state.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
@@ -10,7 +8,7 @@ import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'rx_actions.dart';
 
-part '../operators/transforms/map.dart';
+part '../../rx/operators/transforms/map.dart';
 
 Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   return (final Map<K, V>? items) {
@@ -18,7 +16,7 @@ Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   };
 }
 
-class RxMapImpl<K, V> extends RxBaseTracking<ObservableMap<K, V>, ObservableMapState<K, V>, ObservableMapChange<K, V>>
+class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
     with
         ObservableCollectionBase<ObservableMap<K, V>, ObservableMapChange<K, V>, ObservableMapState<K, V>>,
         RxMapActionsImpl<K, V>

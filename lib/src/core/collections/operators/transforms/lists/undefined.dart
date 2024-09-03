@@ -1,38 +1,30 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
-import '../../../list/stateful/undefined/rx_impl.dart';
+import '../../../../collections/list/stateful/undefined/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class TransformListUndefinedImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, C, CS>
-    extends RxListUndefinedImpl<E2>
+class TransformCollectListUndefinedImpl<E, CS extends CollectionState<C>, C> extends RxListUndefinedImpl<E>
     with
-        BaseCollectionTransformOperator<
-            Self,
-            ObservableListUndefined<E2>,
-            CS,
-            ObservableListStatefulState<E2, Undefined>,
-            C,
-            StateOf<ObservableListChange<E2>, Undefined>,
-            StateOf<ObservableListUpdateAction<E2>, Undefined>> {
+        BaseCollectionTransformOperator<CS, ObservableListStatefulState<E, Undefined>, C,
+            StateOf<ObservableListChange<E>, Undefined>, StateOf<ObservableListUpdateAction<E>, Undefined>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
   final void Function(
-    ObservableListUndefined<E2> state,
+    ObservableListUndefined<E> state,
     C change,
-    Emitter<StateOf<ObservableListUpdateAction<E2>, Undefined>> updater,
+    Emitter<StateOf<ObservableListUpdateAction<E>, Undefined>> updater,
   ) transformFn;
 
-  TransformListUndefinedImpl({
+  TransformCollectListUndefinedImpl({
     required this.source,
     required this.transformFn,
-    final FactoryList<E2>? factory,
+    final FactoryList<E>? factory,
   }) : super(factory: factory);
 
   @override
   void transformChange(
     final C change,
-    final Emitter<StateOf<ObservableListUpdateAction<E2>, Undefined>> updater,
+    final Emitter<StateOf<ObservableListUpdateAction<E>, Undefined>> updater,
   ) {
     transformFn(this, change, updater);
   }

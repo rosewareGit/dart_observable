@@ -1,21 +1,18 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
-import '../../../map/stateful/undefined_failure/rx_impl.dart';
+import '../../../../collections/map/stateful/undefined_failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class OperatorMapUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, K, V, F, C, CS>
+class OperatorCollectionMapUndefinedFailureImpl<K, V, F, CS extends CollectionState<C>, C>
     extends RxMapUndefinedFailureImpl<K, V, F>
     with
         BaseCollectionTransformOperator<
-            Self,
-            ObservableMapUndefinedFailure<K, V, F>,
             CS,
             ObservableMapStatefulState<K, V, UndefinedFailure<F>>,
             C,
             StateOf<ObservableMapChange<K, V>, UndefinedFailure<F>>,
             StateOf<ObservableMapUpdateAction<K, V>, UndefinedFailure<F>>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
   final void Function(
     ObservableMapUndefinedFailure<K, V, F> state,
@@ -23,7 +20,7 @@ class OperatorMapUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self
     Emitter<StateOf<ObservableMapUpdateAction<K, V>, UndefinedFailure<F>>> updater,
   ) transformFn;
 
-  OperatorMapUndefinedFailureImpl({
+  OperatorCollectionMapUndefinedFailureImpl({
     required this.source,
     required this.transformFn,
     final FactoryMap<K, V>? factory,

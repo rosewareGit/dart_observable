@@ -54,25 +54,24 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
     _handleInitialState();
 
     _listener = source.listen(
-      onChange: (final ObservableList<E> source) {
-        final ObservableListState<E> state = source.value;
-        final ObservableListChange<E> change = state.lastChange;
+      onChange: (final ObservableListState<E> value) {
+        final ObservableListChange<E> change = value.lastChange;
 
         final E? added = change.added[index];
         if (added != null) {
-          value = added;
+          this.value = added;
           return;
         }
 
         final ObservableItemChange<E>? updated = change.updated[index];
         if (updated != null) {
-          value = updated.newValue;
+          this.value = updated.newValue;
           return;
         }
 
         final E? removed = change.removed[index];
         if (removed != null) {
-          value = state.listView.length > index ? state.listView[index] : null;
+          this.value = value.listView.length > index ? value.listView[index] : null;
         }
       },
     );

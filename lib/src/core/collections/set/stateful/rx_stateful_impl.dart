@@ -1,5 +1,4 @@
 import '../../../../../dart_observable.dart';
-import '../../../rx/base_tracking.dart';
 import '../../_base.dart';
 import '../rx_actions.dart';
 import '../rx_impl.dart';
@@ -10,7 +9,7 @@ import 'operators/rx_item.dart';
 import 'state.dart';
 
 abstract class RxSetStatefulImpl<Self extends RxSetStateful<O, E, S>, O extends ObservableSetStateful<O, E, S>, E, S>
-    extends RxBaseTracking<O, ObservableSetStatefulState<E, S>, StateOf<ObservableSetChange<E>, S>>
+    extends RxBase<ObservableSetStatefulState<E, S>>
     with
         ObservableCollectionBase<O, StateOf<ObservableSetChange<E>, S>, ObservableSetStatefulState<E, S>>,
         RxSetActionsImpl<E>

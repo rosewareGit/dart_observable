@@ -9,13 +9,12 @@ class OperatorStatefulMapMapItem<Self extends RxMapStateful<O2, K, V2, S>,
   final V2 Function(K key, V value) mapper;
 
   late final BaseCollectionTransformOperatorProxy<
-          O,
           ObservableMapStatefulState<K, V, S>,
-          ObservableMapStatefulState<K, V, S>,
+          ObservableMapStatefulState<K, V2, S>,
           StateOf<ObservableMapChange<K, V>, S>,
-          StateOf<ObservableMapChange<K, V>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<O, ObservableMapStatefulState<K, V, S>, ObservableMapStatefulState<K, V, S>,
-          StateOf<ObservableMapChange<K, V>, S>, StateOf<ObservableMapChange<K, V>, S>>(
+          StateOf<ObservableMapChange<K, V2>, S>> proxy =
+      BaseCollectionTransformOperatorProxy<ObservableMapStatefulState<K, V, S>, ObservableMapStatefulState<K, V2, S>,
+          StateOf<ObservableMapChange<K, V>, S>, StateOf<ObservableMapChange<K, V2>, S>>(
     current: result,
     source: source,
     transformChange: transformChange,

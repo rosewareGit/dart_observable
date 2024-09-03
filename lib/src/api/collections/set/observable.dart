@@ -1,7 +1,7 @@
 import '../../../../dart_observable.dart';
 
 abstract interface class ObservableSet<E>
-    implements ObservableCollection<ObservableSet<E>, ObservableSetChange<E>, ObservableSetState<E>> {
+    implements ObservableCollection<ObservableSetChange<E>, ObservableSetState<E>> {
   int get length;
 
   ObservableSet<E> changeFactory(final FactorySet<E> factory);

@@ -10,11 +10,11 @@ void main() {
         return source.transformAs.list<String>(
           transform: (
             final ObservableList<String> state,
-            final ObservableSetChange<int> change,
+            final ObservableSetState<int> value,
             final Emitter<ObservableListUpdateAction<String>> updater,
           ) {
-            final Set<int> added = change.added;
-            final Set<int> removed = change.removed;
+            final Set<int> added = value.lastChange.added;
+            final Set<int> removed = value.lastChange.removed;
 
             final List<String> addItems = <String>[];
             final Set<int> removePositions = <int>{};

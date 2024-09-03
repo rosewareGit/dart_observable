@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
 class ObservableSetMapItemOperator<E, E2>
-    extends OperatorTransformAsSet<ObservableSet<E>, E2, ObservableSetChange<E>, ObservableSetState<E>> {
+    extends OperatorCollectionTransformAsSet<E2, ObservableSetChange<E>, ObservableSetState<E>> {
   final E2 Function(E item) mapper;
 
   ObservableSetMapItemOperator({

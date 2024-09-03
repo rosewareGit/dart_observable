@@ -1,4 +1,4 @@
-import '../../../../dart_observable.dart';
+import '../../../dart_observable.dart';
 
 /// Transforms [this] collection values into a new [ObservableList] of type [E2].
 /// Listens on the changes of the added ObservableList and updates the resulting ObservableList accordingly.
@@ -8,19 +8,19 @@ import '../../../../dart_observable.dart';
 /// Given type of vehicles. When a new type is added, the result list will be updated with the new items.
 /// When a new item is added to the source collection, the result list will be updated with the new item as well.
 /// When a type is removed, the items of that type will be removed from the result list.
-abstract interface class ObservableCollectionFlatMaps<C> {
+abstract interface class ObservableFlatMaps<T> {
   ObservableList<E2> list<E2>({
-    required final ObservableCollectionFlatMapUpdate<ObservableList<E2>>? Function(C change) sourceProvider,
+    required final ObservableCollectionFlatMapUpdate<ObservableList<E2>>? Function(T value) sourceProvider,
     final FactoryList<E2>? factory,
   });
 
   ObservableMap<K, V> map<K, V>({
-    required final ObservableCollectionFlatMapUpdate<ObservableMap<K, V>> Function(C change) sourceProvider,
+    required final ObservableCollectionFlatMapUpdate<ObservableMap<K, V>> Function(T value) sourceProvider,
     final FactoryMap<K, V>? factory,
   });
 
   ObservableSet<E2> set<E2>({
-    required final ObservableCollectionFlatMapUpdate<ObservableSet<E2>> Function(C change) sourceProvider,
+    required final ObservableCollectionFlatMapUpdate<ObservableSet<E2>> Function(T value) sourceProvider,
     final Set<E2> Function(Iterable<E2>? items)? factory,
   });
 }

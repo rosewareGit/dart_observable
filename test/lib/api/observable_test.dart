@@ -78,7 +78,7 @@ void main() {
         final Rx<int> rxInt = Rx<int>(0);
         bool called = false;
         rxInt.listen(
-          onChange: (final Observable<int> source) {
+          onChange: (final int value) {
             called = true;
           },
         );

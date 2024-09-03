@@ -1,10 +1,10 @@
-import '../../../../../dart_observable.dart';
+import '../../../../dart_observable.dart';
 
-abstract interface class OperatorsTransformSets<C> {
+abstract interface class OperatorsTransformSets<T> {
   ObservableSetFailure<E2, F> failure<E2, F>({
     required final void Function(
       ObservableSetFailure<E2, F> state,
-      C change,
+      T value,
       Emitter<StateOf<ObservableSetUpdateAction<E2>, F>> updater,
     ) transform,
     final FactorySet<E2>? factory,
@@ -13,7 +13,7 @@ abstract interface class OperatorsTransformSets<C> {
   ObservableSetUndefined<E2> undefined<E2>({
     required final void Function(
       ObservableSetUndefined<E2> state,
-      C change,
+      T value,
       Emitter<StateOf<ObservableSetUpdateAction<E2>, Undefined>> updater,
     ) transform,
     final FactorySet<E2>? factory,
@@ -22,7 +22,7 @@ abstract interface class OperatorsTransformSets<C> {
   ObservableSetUndefinedFailure<E2, F> undefinedFailure<E2, F>({
     required final void Function(
       ObservableSetUndefinedFailure<E2, F> state,
-      C change,
+      T value,
       Emitter<StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> updater,
     ) transform,
     final FactorySet<E2>? factory,

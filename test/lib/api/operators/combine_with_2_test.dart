@@ -58,8 +58,8 @@ void main() {
 
       final List<int> values = <int>[];
       final Disposable listener = combined.listen(
-        onChange: (final Observable<int> source) {
-          values.add(source.value);
+        onChange: (final int value) {
+          values.add(value);
         },
       );
 
@@ -83,8 +83,6 @@ void main() {
 
       final List<dynamic> errors = <Object>[];
       final Disposable listener = combined.listen(
-        onChange: (final Observable<int> source) {
-        },
         onError: (final dynamic error, final StackTrace stack) {
           errors.add(error);
         },
@@ -93,8 +91,8 @@ void main() {
       observable1.dispatchError(error: StateError('Error 1'));
       observable2.dispatchError(error: StateError('Error 2'));
 
-      expect((errors[0] as StateError).message,  'Error 1');
-      expect((errors[1] as StateError).message,  'Error 2');
+      expect((errors[0] as StateError).message, 'Error 1');
+      expect((errors[1] as StateError).message, 'Error 2');
 
       listener.dispose();
     });

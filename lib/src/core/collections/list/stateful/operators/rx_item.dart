@@ -74,11 +74,10 @@ class OperatorObservableListStatefulRxItem<Self extends ObservableListStateful<S
     }
 
     _listener = source.listen(
-      onChange: (final Self source) {
-        final ObservableListStatefulState<E, S> state = source.value;
-        final StateOf<E?, S>? newState = _getStateForIndex(state: state, position: position, isInitial: false);
+      onChange: (final ObservableListStatefulState<E, S> value) {
+        final StateOf<E?, S>? newState = _getStateForIndex(state: value, position: position, isInitial: false);
         if (newState != null) {
-          value = newState;
+          this.value = newState;
         }
       },
     );

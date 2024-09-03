@@ -64,10 +64,9 @@ class OperatorObservableMapStatefulRxItem<Self extends ObservableMapStateful<Sel
     value = newState;
 
     _listener = source.listen(
-      onChange: (final Self source) {
-        final ObservableMapStatefulState<K, V, S> state = source.value;
-        final StateOf<V?, S> newState = _getStateForKey(state: state, key: key, isInitial: false);
-        value = newState;
+      onChange: (final ObservableMapStatefulState<K, V, S> value) {
+        final StateOf<V?, S> newState = _getStateForKey(state: value, key: key, isInitial: false);
+        this.value = newState;
       },
     );
   }

@@ -7,7 +7,7 @@ void main() {
       int updateCount = 0;
       final RxInt rxInt = RxInt(0);
       rxInt.listen(
-        onChange: (final Observable<int> source) {
+        onChange: (final int value) {
           ++updateCount;
         },
       );

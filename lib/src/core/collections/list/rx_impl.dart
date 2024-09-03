@@ -1,5 +1,4 @@
 import '../../../../dart_observable.dart';
-import '../../rx/base_tracking.dart';
 import '../_base.dart';
 import 'list_state.dart';
 import 'operators/change_factory.dart';
@@ -14,7 +13,7 @@ FactoryList<E> defaultListFactory<E>() {
   };
 }
 
-class RxListImpl<E> extends RxBaseTracking<ObservableList<E>, ObservableListState<E>, ObservableListChange<E>>
+class RxListImpl<E> extends RxBase<ObservableListState<E>>
     with
         ObservableCollectionBase<ObservableList<E>, ObservableListChange<E>, ObservableListState<E>>,
         RxListActionsImpl<E>

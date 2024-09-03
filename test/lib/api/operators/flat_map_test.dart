@@ -10,8 +10,8 @@ void main() {
       final Rx<String> producerOdd = Rx<String>('1');
 
       final Observable<String> mapped = rx.flatMap<String>(
-        (final Observable<int> source) {
-          if (source.value.isEven) {
+        (final int value) {
+          if (value.isEven) {
             return producerEven;
           }
           return producerOdd;
@@ -31,8 +31,8 @@ void main() {
       final Rx<String> producerOdd = Rx<String>('1');
 
       final Observable<String> mapped = rx.flatMap<String>(
-        (final Observable<int> source) {
-          if (source.value.isEven) {
+        (final int value) {
+          if (value.isEven) {
             return producerEven;
           }
           return producerOdd;
@@ -62,8 +62,8 @@ void main() {
       final Rx<String> producerOdd = Rx<String>('1');
 
       final Observable<String> mapped = rx.flatMap<String>(
-        (final Observable<int> source) {
-          if (source.value.isEven) {
+        (final int value) {
+          if (value.isEven) {
             return producerEven;
           }
           return producerOdd;
@@ -84,8 +84,8 @@ void main() {
       final Rx<String> producerOdd = Rx<String>('1');
 
       final Observable<String> mapped = rx.flatMap<String>(
-        (final Observable<int> source) {
-          if (source.value.isEven) {
+        (final int value) {
+          if (value.isEven) {
             return producerEven;
           }
           return producerOdd;

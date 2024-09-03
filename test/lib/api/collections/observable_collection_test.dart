@@ -14,7 +14,7 @@ void main() {
           2: source2,
         };
 
-        return base.flatMapAs.list<int>(
+        return base.flatMapChangeAs.list<int>(
           sourceProvider: (final ObservableSetChange<int> change) {
             final Set<int> added = change.added;
             final Set<ObservableList<int>> removed = <ObservableList<int>>{};
@@ -219,7 +219,7 @@ void main() {
           };
 
           final RxSet<int> set = RxSet<int>();
-          final ObservableMap<String, int> result = set.flatMapAs.map<String, int>(
+          final ObservableMap<String, int> result = set.flatMapChangeAs.map<String, int>(
             sourceProvider: (final ObservableSetChange<int> change) {
               final Set<int> added = change.added;
 
@@ -322,7 +322,7 @@ void main() {
 
         final RxSet<int> set = RxSet<int>();
 
-        final ObservableSet<String> result = set.flatMapAs.set<String>(
+        final ObservableSet<String> result = set.flatMapChangeAs.set<String>(
           sourceProvider: (final ObservableSetChange<int> change) {
             final Set<int> added = change.added;
 

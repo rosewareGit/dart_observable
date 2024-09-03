@@ -1,40 +1,32 @@
 import '../../../../../dart_observable.dart';
-import '../../../../api/change_tracking_observable.dart';
 import '../../list/rx_impl.dart';
 import '../_base_transform.dart';
 
-abstract class OperatorTransformAsList<
-        Self extends ChangeTrackingObservable<Self, CS, C>,
+abstract class OperatorCollectionTransformAsList<
         E2, //
         C,
-        CS> extends RxListImpl<E2>
+        CS extends CollectionState<C>> extends RxListImpl<E2>
     with
-        BaseCollectionTransformOperator<
-            Self,
-            ObservableList<E2>,
-            CS, //
-            ObservableListState<E2>,
-            C,
-            ObservableListChange<E2>,
+        BaseCollectionTransformOperator<CS, ObservableListState<E2>, C, ObservableListChange<E2>,
             ObservableListUpdateAction<E2>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
-  OperatorTransformAsList({
+  OperatorCollectionTransformAsList({
     required this.source,
     super.factory,
   });
 }
 
-class OperatorTransformAsListArg<Self extends ChangeTrackingObservable<Self, CS, C>, E, C, CS>
-    extends OperatorTransformAsList<Self, E, C, CS> {
+class OperatorCollectionTransformAsListArg<E, C, CS extends CollectionState<C>>
+    extends OperatorCollectionTransformAsList<E, C, CS> {
   final void Function(
     ObservableList<E> state,
     C change,
     Emitter<ObservableListUpdateAction<E>> updater,
   ) transformFn;
 
-  OperatorTransformAsListArg({
+  OperatorCollectionTransformAsListArg({
     required this.transformFn,
     required super.source,
     super.factory,

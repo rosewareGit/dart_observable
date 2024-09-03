@@ -1,10 +1,9 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
 import '../_impl.dart';
 
 class ObservableCombineWith2<R, T1, T2> extends RxImpl<R> {
-  final ChangeTrackingObservable<dynamic, T1, dynamic> observable1;
-  final ChangeTrackingObservable<dynamic, T2, dynamic> observable2;
+  final Observable<T1> observable1;
+  final Observable<T2> observable2;
   final R Function(T1 value1, T2 value2) combiner;
   final List<Disposable> _listeners = <Disposable>[];
 
@@ -29,8 +28,7 @@ class ObservableCombineWith2<R, T1, T2> extends RxImpl<R> {
     super.onInit();
     // When all disposed, dispose this
     int disposeCount = 0;
-    for (final ChangeTrackingObservable<dynamic, Object?, dynamic> observable
-        in <ChangeTrackingObservable<dynamic, Object?, dynamic>>[
+    for (final Observable<dynamic> observable in <Observable<dynamic>>[
       observable1,
       observable2,
     ]) {
@@ -43,7 +41,7 @@ class ObservableCombineWith2<R, T1, T2> extends RxImpl<R> {
     }
   }
 
-  void _initListener<T>(final ChangeTrackingObservable<dynamic, T, dynamic> observable) {
+  void _initListener(final Observable<dynamic> observable) {
     _listeners.add(
       observable.listen(
         onChange: (final _) {

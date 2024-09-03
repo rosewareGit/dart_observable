@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import '../../../../dart_observable.dart';
-import '../../rx/base_tracking.dart';
 import '../_base.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
@@ -22,7 +21,7 @@ Set<E> Function(Iterable<E>? items) _splayTreeSetFactory<E>(final Comparator<E> 
   };
 }
 
-class RxSetImpl<E> extends RxBaseTracking<ObservableSet<E>, ObservableSetState<E>, ObservableSetChange<E>>
+class RxSetImpl<E> extends RxBase<ObservableSetState<E>>
     with ObservableCollectionBase<ObservableSet<E>, ObservableSetChange<E>, ObservableSetState<E>>, RxSetActionsImpl<E>
     implements RxSet<E> {
   RxSetImpl({

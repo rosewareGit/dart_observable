@@ -50,18 +50,17 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
     value = initial;
 
     _listener = source.listen(
-      onChange: (final ObservableSet<E> source) {
-        final ObservableSetState<E> state = source.value;
-        final ObservableSetChange<E> change = state.lastChange;
+      onChange: (final ObservableSetState<E> value) {
+        final ObservableSetChange<E> change = value.lastChange;
 
         final E? added = change.added.firstWhereOrNull(predicate);
         if (added != null) {
-          value = added;
+          this.value = added;
           return;
         }
         final E? removed = change.removed.firstWhereOrNull(predicate);
         if (removed != null) {
-          value = null;
+          this.value = null;
         }
       },
     );

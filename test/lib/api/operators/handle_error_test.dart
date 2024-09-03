@@ -25,11 +25,11 @@ void main() {
         },
       );
 
-      final Observable<int> catching = fromStream.map((final Observable<int> source) {
-        if (source.value == 2) {
+      final Observable<int> catching = fromStream.map((final int value) {
+        if (value == 2) {
           throw 'errorMap';
         }
-        return source.value * 2;
+        return value * 2;
       }).handleError((final dynamic error, final Emitter<int> emit) {
         errors.add(error);
       });
@@ -72,11 +72,11 @@ void main() {
 
       final List<dynamic> errors = <dynamic>[];
       final List<dynamic> errors2 = <dynamic>[];
-      int mapper(final Observable<int> source) {
-        if (source.value % 2 == 0) {
-          throw ArgumentError(source.value);
+      int mapper(final int value) {
+        if (value % 2 == 0) {
+          throw ArgumentError(value);
         }
-        return source.value;
+        return value;
       }
 
       void errorHandler(final dynamic error, final Emitter<int> emit) {
@@ -188,23 +188,23 @@ void main() {
     test('Should pass unhandled exceptions down the chain', () async {
       final Rx<int> rx = Rx<int>(0);
 
-      int mapper(final Observable<int> source) {
-        if (source.value == 1) {
+      int mapper(final int value) {
+        if (value == 1) {
           throw StateError('1');
         }
-        if (source.value == 2) {
+        if (value == 2) {
           throw ArgumentError('2');
         }
-        return source.value;
+        return value;
       }
 
       final Observable<String> base = rx //
           .map(mapper)
-          .map((final Observable<int> source) {
-        if (source.value == 3) {
+          .map((final int value) {
+        if (value == 3) {
           throw '3';
         }
-        return source.value.toString();
+        return value.toString();
       });
 
       final List<dynamic> errorsGuarded = <dynamic>[];
@@ -241,14 +241,14 @@ void main() {
       final List<dynamic> guardErrors = <dynamic>[];
       final List<dynamic> subscriptionErrors = <dynamic>[];
 
-      final Observable<double> guarded = rx.map((final Observable<int> source) {
-        if (source.value == 1) {
+      final Observable<double> guarded = rx.map((final int value) {
+        if (value == 1) {
           throw ArgumentError('1');
         }
-        if (source.value == 3) {
+        if (value == 3) {
           throw 'error-3';
         }
-        return source.value * 2.0;
+        return value * 2.0;
       }).handleError(
         (final dynamic error, final Emitter<double> emit) {
           emit(1);
@@ -261,8 +261,8 @@ void main() {
 
       final List<double> values = <double>[];
       guarded.listen(
-        onChange: (final Observable<double> source) {
-          values.add(source.value);
+        onChange: (final double value) {
+          values.add(value);
         },
         onError: (final dynamic error, final StackTrace stack) {
           subscriptionErrors.add(error);

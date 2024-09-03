@@ -1,23 +1,22 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
-import '../../rx/base_tracking.dart';
 
-mixin BaseCollectionFlatMapOperator<
-    Self extends ChangeTrackingObservable<Self, CS, C>,
-    Current extends ChangeTrackingObservable<Current, CS2, C2>,
-    CS, // Collection state for this
-    CS2, // Collection state for the transformed
-    C,
-    C2> on RxBaseTracking<Current, CS2, C2> {
+mixin BaseFlatMapOperator<
+    Current extends Observable<T2>,
+    T, // Collection state for this
+    C, // The change to handle
+    T2 // Collection state for the transformed
+    > on RxBase<T2> {
   Disposable? _listener;
   final Set<Current> _activeObservables = <Current>{};
   final Map<Current, Disposable> _activeObservablesDisposables = <Current, Disposable>{};
 
-  late final List<C> _bufferedChanges = <C>[];
+  late final List<T> _bufferedChanges = <T>[];
 
-  Self get source;
+  Observable<T> get source;
 
-  ObservableCollectionFlatMapUpdate<Current>? Function(C change) get sourceProvider;
+  C fromValue(final T value, final bool initial);
+
+  ObservableCollectionFlatMapUpdate<Current>? Function(C value) get sourceProvider;
 
   void handleChange(final Current source);
 
@@ -47,8 +46,8 @@ mixin BaseCollectionFlatMapOperator<
     });
   }
 
-  void _handleChange(final C change) {
-    final ObservableCollectionFlatMapUpdate<Current>? sourceByValue = sourceProvider(change);
+  void _handleValue(final T value, final bool initial) {
+    final ObservableCollectionFlatMapUpdate<Current>? sourceByValue = sourceProvider(fromValue(value, initial));
     if (sourceByValue == null) {
       // Change was ignored
       return;
@@ -69,8 +68,8 @@ mixin BaseCollectionFlatMapOperator<
     for (final Current state in registerObservables) {
       _activeObservables.add(state);
       _activeObservablesDisposables[state] = state.listen(
-        onChange: (final Current source) {
-          handleChange(source);
+        onChange: (final T2 value) {
+          handleChange(state);
         },
       );
     }
@@ -79,26 +78,24 @@ mixin BaseCollectionFlatMapOperator<
   void _initListener() {
     if (_listener != null) {
       // apply buffered changes
-      for (final C change in _bufferedChanges) {
-        _handleChange(change);
+      for (final T change in _bufferedChanges) {
+        _handleValue(change, false);
       }
       _bufferedChanges.clear();
       return;
     }
 
-    final C initial = source.asChange(source.value);
-    _handleChange(initial);
+    final T value = source.value;
+    _handleValue(value, true);
 
     _listener = source.listen(
-      onChange: (final Self source) {
-        final CS value = source.value;
-        final C change = source.lastChange(value);
+      onChange: (final T value) {
         if (state == ObservableState.inactive) {
           // store changes to apply when active
-          _bufferedChanges.add(change);
+          _bufferedChanges.add(value);
           return;
         }
-        _handleChange(change);
+        _handleValue(value, false);
       },
     );
   }

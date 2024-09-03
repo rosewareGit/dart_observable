@@ -7,10 +7,10 @@ class OperatorStatefulListChangeFactory<Self extends RxListStateful<O, E, S>, O 
 
   final Self result;
 
-  late final BaseCollectionTransformOperatorProxy<O, ObservableListStatefulState<E, S>,
-          ObservableListStatefulState<E, S>, StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>
-      proxy = BaseCollectionTransformOperatorProxy<O, ObservableListStatefulState<E, S>,
-          ObservableListStatefulState<E, S>, StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>(
+  late final BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
+          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>> proxy =
+      BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
+          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>(
     current: result,
     source: source,
     transformChange: transformChange,

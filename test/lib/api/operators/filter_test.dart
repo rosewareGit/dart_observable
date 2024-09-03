@@ -6,7 +6,7 @@ void main() {
     test('Should filter initial value', () {
       final Rx<int> rx = Rx<int>(0, distinct: false);
       final Observable<int?> filtered = rx.filter(
-        (final Observable<int> source) => source.value % 3 == 1,
+        (final int value) => value % 3 == 1,
       );
 
       expect(filtered.value, null);
@@ -16,20 +16,20 @@ void main() {
       final Rx<int> rx = Rx<int>(0, distinct: false);
 
       final Observable<int?> filtered = rx.filter(
-        (final Observable<int> source) => source.value % 3 == 1,
+        (final int value) => value % 3 == 1,
       );
 
       int baseCount = 0;
       int filteredCount = 0;
 
       rx.listen(
-        onChange: (final Observable<int> source) {
+        onChange: (final int value) {
           ++baseCount;
         },
       );
 
       filtered.listen(
-        onChange: (final Observable<int?> source) {
+        onChange: (final int? value) {
           ++filteredCount;
         },
       );

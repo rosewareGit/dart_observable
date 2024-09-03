@@ -7,10 +7,11 @@ void main() {
       ObservableListUndefinedFailure<int, String> createStateFromSet(final RxSet<int> source) {
         return source.transformAs.lists.undefinedFailure<int, String>(
           transform: (
-            final ObservableListUndefinedFailure<int, String> state,
-            final ObservableSetChange<int> change,
+            final ObservableListUndefinedFailure<int, String> current,
+            final ObservableSetState<int> state,
             final Emitter<StateOf<ObservableListUpdateAction<int>, UndefinedFailure<String>>> updater,
           ) {
+            final ObservableSetChange<int> change = state.lastChange;
             final Set<int> added = change.added;
             final Set<int> removed = change.removed;
 
@@ -21,7 +22,7 @@ void main() {
               addItems.add(key * 2);
             }
 
-            final ObservableListStatefulState<int, UndefinedFailure<String>> currentData = state.value;
+            final ObservableListStatefulState<int, UndefinedFailure<String>> currentData = current.value;
             currentData.when(
               onData: (final ObservableListState<int> data) {
                 for (final int key in removed) {

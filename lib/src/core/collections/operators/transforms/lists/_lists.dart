@@ -1,14 +1,12 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
 import 'failure.dart';
 import 'undefined.dart';
 import 'undefined_failure.dart';
 
-class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS, C>, C, CS>
-    implements OperatorsTransformLists<C> {
-  final Self source;
+class OperatorsCollectionTransformListsImpl<CS extends CollectionState<C>, C> implements OperatorsTransformLists<C> {
+  final Observable<CS> source;
 
-  OperatorsTransformListsImpl(this.source);
+  OperatorsCollectionTransformListsImpl(this.source);
 
   @override
   ObservableListFailure<E2, F> failure<E2, F>({
@@ -19,7 +17,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return TransformListFailureImpl<Self, F, E2, C, CS>(
+    return TransformCollectListFailureImpl<E2, F, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -35,7 +33,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return TransformListUndefinedImpl<Self, E2, C, CS>(
+    return TransformCollectListUndefinedImpl<E2, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -51,7 +49,7 @@ class OperatorsTransformListsImpl<Self extends ChangeTrackingObservable<Self, CS
     ) transform,
     final FactoryList<E2>? factory,
   }) {
-    return TransformListUndefinedFailureImpl<Self, E2, F, C, CS>(
+    return TransformCollectListUndefinedFailureImpl<E2, F, CS, C>(
       source: source,
       transformFn: transform,
       factory: factory,

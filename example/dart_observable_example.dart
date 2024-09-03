@@ -12,8 +12,8 @@ class Counter {
 void main() {
   final Counter counter = Counter();
   counter.rxCounter.listen(
-    onChange: (final Observable<int> source) {
-      print('Counter changed to ${source.value}');
+    onChange: (final int value) {
+      print('Counter changed to $value');
     },
   );
 

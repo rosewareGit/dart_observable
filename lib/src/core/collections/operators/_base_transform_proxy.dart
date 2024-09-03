@@ -1,68 +1,36 @@
 import '../../../../dart_observable.dart';
-import '../../../api/change_tracking_observable.dart';
+import '../../rx/operators/_base_transform_proxy.dart';
 
 class BaseCollectionTransformOperatorProxy<
-    Self extends ChangeTrackingObservable<Self, CS, C>,
-    CS, // Collection state for this
-    CS2, // Collection state for the transformed
+    T extends CollectionState<C>, // Collection state for this
+    T2 extends CollectionState<C2>, // Collection state for the transformed
     C,
     C2> {
-  Disposable? _listener;
+  bool _initialChange = true;
 
-  late final List<C> _bufferedChanges = <C>[];
-
-  final Self source;
-  final ChangeTrackingObservable<dynamic, dynamic, dynamic> _current;
+  late final BaseTransformOperatorProxy<T, T2> _valueProxy = BaseTransformOperatorProxy<T, T2>(
+    current: _current,
+    source: source,
+    transform: (final T value) {
+      if (_initialChange) {
+        transformChange(value.asChange());
+        _initialChange = false;
+      } else {
+        transformChange(value.lastChange);
+      }
+    },
+  );
+  final Observable<T> source;
+  final Observable<T2> _current;
   final Function(C change) transformChange;
 
   BaseCollectionTransformOperatorProxy({
-    required final ChangeTrackingObservable<dynamic, dynamic, dynamic> current,
+    required final Observable<T2> current,
     required this.source,
     required this.transformChange,
   }) : _current = current;
 
   void init() {
-    final Disposable activeListener = _current.onActivityChanged(
-      onActive: (final _) {
-        _initListener();
-      },
-    );
-
-    source.addDisposeWorker(() async {
-      await activeListener.dispose();
-      final Disposable? changeListener = _listener;
-      if (changeListener != null) {
-        await changeListener.dispose();
-        _listener = null;
-      }
-      return _current.dispose();
-    });
-  }
-
-  void _initListener() {
-    if (_listener != null) {
-      // apply buffered changes
-      for (final C change in _bufferedChanges) {
-        transformChange(change);
-      }
-      _bufferedChanges.clear();
-      return;
-    }
-
-    transformChange(source.asChange(source.value));
-
-    _listener = source.listen(
-      onChange: (final Self _) {
-        final CS value = source.value;
-        final C change = source.lastChange(value);
-        if (_current.state == ObservableState.inactive) {
-          // store changes to apply when active
-          _bufferedChanges.add(change);
-          return;
-        }
-
-        transformChange(change);
-      },
-    );
+    _valueProxy.init();
   }
 }

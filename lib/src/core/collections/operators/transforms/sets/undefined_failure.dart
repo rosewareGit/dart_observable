@@ -1,38 +1,35 @@
 import '../../../../../../dart_observable.dart';
-import '../../../../../api/change_tracking_observable.dart';
-import '../../../set/stateful/undefined_failure/rx_impl.dart';
+import '../../../../collections/set/stateful/undefined_failure/rx_impl.dart';
 import '../../_base_transform.dart';
 
-class TransformSetUndefinedFailureImpl<Self extends ChangeTrackingObservable<Self, CS, C>, E2, F, C, CS>
-    extends RxSetUndefinedFailureImpl<E2, F>
+class TransformCollectionSetUndefinedFailureImpl<E, F, CS extends CollectionState<C>, C>
+    extends RxSetUndefinedFailureImpl<E, F>
     with
         BaseCollectionTransformOperator<
-            Self, //
-            ObservableSetUndefinedFailure<E2, F>,
             CS,
-            ObservableSetStatefulState<E2, UndefinedFailure<F>>,
+            ObservableSetStatefulState<E, UndefinedFailure<F>>,
             C,
-            StateOf<ObservableSetChange<E2>, UndefinedFailure<F>>,
-            StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> {
+            StateOf<ObservableSetChange<E>, UndefinedFailure<F>>,
+            StateOf<ObservableSetUpdateAction<E>, UndefinedFailure<F>>> {
   @override
-  final Self source;
+  final Observable<CS> source;
 
   final void Function(
-    ObservableSetUndefinedFailure<E2, F> state,
+    ObservableSetUndefinedFailure<E, F> state,
     C change,
-    Emitter<StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> updater,
+    Emitter<StateOf<ObservableSetUpdateAction<E>, UndefinedFailure<F>>> updater,
   ) transformFn;
 
-  TransformSetUndefinedFailureImpl({
+  TransformCollectionSetUndefinedFailureImpl({
     required this.source,
     required this.transformFn,
-    final FactorySet<E2>? factory,
+    final FactorySet<E>? factory,
   }) : super(factory: factory);
 
   @override
   void transformChange(
     final C change,
-    final Emitter<StateOf<ObservableSetUpdateAction<E2>, UndefinedFailure<F>>> updater,
+    final Emitter<StateOf<ObservableSetUpdateAction<E>, UndefinedFailure<F>>> updater,
   ) {
     transformFn(this, change, updater);
   }
