@@ -1,25 +1,35 @@
 import '../../../../../dart_observable.dart';
 
-abstract class ObservableListStateful<Self extends ObservableListStateful<Self, E, S>, E, S>
+enum CustomState {
+  loading,
+  loginError,
+  parsingError,
+  success,
+  secondaryList,
+}
+
+abstract class ObservableStatefulList<E, S>
     implements
         ObservableCollectionStateful<
-            Self, // Self type
             ObservableListChange<E>, // the collection change type
             S, // The custom state
-            ObservableListStatefulState<E, S> // The state type
+            ObservableStatefulListState<E, S> // The state type
             > {
-  StateOf<int, S> get length;
-
-  int? get lengthOrNull;
+  int? get length;
 
   E? operator [](final int position);
 
-  Self changeFactory(final FactoryList<E> factory);
+  ObservableStatefulList<E, S> changeFactory(final FactoryList<E> factory);
 
-  Self filterItem(
+  ObservableStatefulList<E, S> filterItem(
     final bool Function(E item) predicate, {
     final FactoryList<E>? factory,
   });
 
-  Observable<StateOf<E?, S>> rxItem(final int position);
+  ObservableStatefulList<E2, S> mapItem<E2>(
+    final E2 Function(E item) mapper, {
+    final FactoryList<E2>? factory,
+  });
+
+  Observable<Either<E?, S>> rxItem(final int position);
 }

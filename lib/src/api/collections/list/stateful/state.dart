@@ -1,24 +1,11 @@
 import '../../../../../dart_observable.dart';
+import '../../../../core/collections/list/list_state.dart';
 
-abstract class ObservableListStatefulState<E, S> extends StateOf<ObservableListState<E>, S>
-    implements CollectionState<StateOf<ObservableListChange<E>, S>> {
-  const ObservableListStatefulState.custom(super.custom) : super.custom();
+abstract class ObservableStatefulListState<E, S>
+    extends ObservableCollectionState<ObservableListState<E>, ObservableListChange<E>, S> {
+  ObservableStatefulListState.custom(final S custom) : super.custom(custom);
 
-  const ObservableListStatefulState.data(super.data) : super.data();
+  ObservableStatefulListState.fromList(final List<E> data) : super.data(RxListState<E>.initial(data));
 
-  @override
-  StateOf<ObservableListChange<E>, S> get lastChange {
-    return fold(
-      onData: (final ObservableListState<E> state) => StateOf<ObservableListChange<E>, S>.data(state.lastChange),
-      onCustom: (final S state) => StateOf<ObservableListChange<E>, S>.custom(state),
-    );
-  }
-
-  @override
-  StateOf<ObservableListChange<E>, S> asChange() {
-    return fold(
-      onData: (final ObservableListState<E> state) => StateOf<ObservableListChange<E>, S>.data(state.asChange()),
-      onCustom: (final S state) => StateOf<ObservableListChange<E>, S>.custom(state),
-    );
-  }
+  ObservableStatefulListState.fromState(final ObservableListState<E> state) : super.data(state);
 }

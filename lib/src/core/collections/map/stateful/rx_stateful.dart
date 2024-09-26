@@ -5,21 +5,44 @@ import '../rx_actions.dart';
 import '../rx_impl.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
+import 'operators/map_item.dart';
+import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
 import 'state.dart';
 
-abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O extends ObservableMapStateful<O, K, V, S>, K,
-        V, S> extends RxBase<ObservableMapStatefulState<K, V, S>>
-    with
-        ObservableCollectionBase<O, StateOf<ObservableMapChange<K, V>, S>, ObservableMapStatefulState<K, V, S>>,
-        RxMapActionsImpl<K, V>
-    implements RxMapStateful<O, K, V, S> {
+class RxStatefulMapImpl<K, V, S>
+    extends RxCollectionBase<Either<ObservableMapChange<K, V>, S>, ObservableStatefulMapState<K, V, S>>
+    with RxMapActionsImpl<K, V>
+    implements RxStatefulMap<K, V, S> {
   final FactoryMap<K, V> _factory;
 
-  RxMapStatefulImpl(
-    super.value, {
+  RxStatefulMapImpl(
+    final Map<K, V> data, {
     final FactoryMap<K, V>? factory,
-  }) : _factory = factory ?? defaultMapFactory<K, V>();
+  }) : this._(
+          () {
+            final FactoryMap<K, V> $factory = factory ?? defaultMapFactory<K, V>();
+            final Map<K, V> updatedMap = $factory(data);
+            return RxStatefulMapState<K, V, S>.fromState(RxMapState<K, V>.initial(updatedMap));
+          }(),
+          factory: factory,
+        );
+
+  factory RxStatefulMapImpl.custom(
+    final S state, {
+    final FactoryMap<K, V>? factory,
+  }) {
+    return RxStatefulMapImpl<K, V, S>._(
+      RxStatefulMapState<K, V, S>.custom(state),
+      factory: factory,
+    );
+  }
+
+  RxStatefulMapImpl._(
+    final ObservableStatefulMapState<K, V, S> state, {
+    final FactoryMap<K, V>? factory,
+  })  : _factory = factory ?? defaultMapFactory<K, V>(),
+        super(state);
 
   @override
   Map<K, V> get data => value.fold(
@@ -28,13 +51,10 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
       );
 
   @override
-  StateOf<int, S> get length => value.fold(
-        onData: (final ObservableMapState<K, V> data) => StateOf<int, S>.data(data.mapView.length),
-        onCustom: (final S state) => StateOf<int, S>.custom(state),
+  int? get length => value.fold(
+        onData: (final ObservableMapState<K, V> data) => data.mapView.length,
+        onCustom: (final S state) => null,
       );
-
-  @override
-  int? get lengthOrNull => length.data;
 
   @override
   V? operator [](final K key) {
@@ -47,12 +67,12 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
   }
 
   @override
-  StateOf<ObservableMapChange<K, V>, S>? applyAction(
-    final StateOf<ObservableMapUpdateAction<K, V>, S> action,
+  Either<ObservableMapChange<K, V>, S>? applyAction(
+    final Either<ObservableMapUpdateAction<K, V>, S> action,
   ) {
-    final ObservableMapStatefulState<K, V, S> currentValue = value;
-    return action.fold<StateOf<ObservableMapChange<K, V>, S>?>(
-      onData: (final ObservableMapUpdateAction<K, V> listUpdateAction) {
+    final ObservableStatefulMapState<K, V, S> currentValue = value;
+    return action.fold<Either<ObservableMapChange<K, V>, S>?>(
+      onLeft: (final ObservableMapUpdateAction<K, V> listUpdateAction) {
         return currentValue.fold(
           onData: (final ObservableMapState<K, V> data) {
             final RxMapState<K, V> state = data as RxMapState<K, V>;
@@ -63,7 +83,7 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
               return null;
             }
 
-            final RxMapStatefulState<K, V, S> newState = RxMapStatefulState<K, V, S>.data(
+            final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
               RxMapState<K, V>(updatedMap, change),
             );
 
@@ -74,7 +94,7 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
             final Map<K, V> updatedMap = _factory(<K, V>{});
             final ObservableMapChange<K, V> change = listUpdateAction.apply(updatedMap);
 
-            final RxMapStatefulState<K, V, S> newState = RxMapStatefulState<K, V, S>.data(
+            final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
               RxMapState<K, V>(updatedMap, change),
             );
 
@@ -83,8 +103,8 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
           },
         );
       },
-      onCustom: (final S action) {
-        final RxMapStatefulState<K, V, S> newState = RxMapStatefulState<K, V, S>.custom(action);
+      onRight: (final S action) {
+        final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.custom(action);
         super.value = newState;
         return newState.lastChange;
       },
@@ -94,25 +114,16 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
   @override
   ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action) {
     return applyAction(
-      StateOf<ObservableMapUpdateAction<K, V>, S>.data(action),
-    )?.data;
+      Either<ObservableMapUpdateAction<K, V>, S>.left(action),
+    )?.leftOrNull;
   }
 
   @override
-  O asObservable() {
-    return self;
-  }
-
-  Self builder({final Map<K, V>? items, final FactoryMap<K, V>? factory});
-
-  @override
-  O changeFactory(final FactoryMap<K, V> factory) {
-    final Self instance = builder(items: <K, V>{}, factory: factory);
-    OperatorStatefulMapChangeFactory<Self, O, K, V, S>(
-      source: self,
-      instanceBuilder: () => instance,
+  ObservableStatefulMap<K, V, S> changeFactory(final FactoryMap<K, V> factory) {
+    return OperatorStatefulMapChangeFactory<K, V, S>(
+      source: this,
+      factory: factory,
     );
-    return instance.asObservable();
   }
 
   @override
@@ -124,27 +135,54 @@ abstract class RxMapStatefulImpl<Self extends RxMapStateful<O, K, V, S>, O exten
   }
 
   @override
-  O filterItem(final bool Function(K key, V value) predicate, {final FactoryMap<K, V>? factory}) {
-    final Self instance = builder(items: <K, V>{}, factory: factory);
-    OperatorStatefulMapFilterItem<Self, O, K, V, S>(
-      source: self,
+  ObservableStatefulMap<K, V, S> filterItem(
+    final bool Function(K key, V value) predicate, {
+    final FactoryMap<K, V>? factory,
+  }) {
+    return OperatorStatefulMapFilterItem<K, V, S>(
+      source: this,
       predicate: predicate,
-      instanceBuilder: () => instance,
+      factory: factory,
     );
-    return instance.asObservable();
   }
 
   @override
-  Observable<StateOf<V?, S>> rxItem(final K key) {
-    return OperatorObservableMapStatefulRxItem<O, K, V, S>(
-      source: self,
+  ObservableStatefulMap<K, V2, S> mapItem<V2>(
+    final V2 Function(K key, V value) valueMapper, {
+    final FactoryMap<K, V2>? factory,
+  }) {
+    return OperatorStatefulMapMapItem<K, V, V2, S>(
+      source: this,
+      mapper: valueMapper,
+      factory: factory,
+    );
+  }
+
+  @override
+  ObservableStatefulMap<K, V2, S2> mapItemWithState<V2, S2>({
+    required final V2 Function(K key, V value) valueMapper,
+    required final S2 Function(S state) stateMapper,
+    final FactoryMap<K, V2>? factory,
+  }) {
+    return OperatorStatefulMapMapItemWithState<K, V, V2, S, S2>(
+      source: this,
+      mapper: valueMapper,
+      stateMapper: stateMapper,
+      factory: factory,
+    );
+  }
+
+  @override
+  Observable<Either<V?, S>> rxItem(final K key) {
+    return OperatorObservableMapStatefulRxItem<K, V, S>(
+      source: this,
       key: key,
     );
   }
 
   @override
-  StateOf<ObservableMapChange<K, V>, S>? setState(final S newState) {
-    return applyAction(StateOf<ObservableMapUpdateAction<K, V>, S>.custom(newState));
+  Either<ObservableMapChange<K, V>, S>? setState(final S newState) {
+    return applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(newState));
   }
 
   @override

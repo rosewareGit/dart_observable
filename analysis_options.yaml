@@ -15,3 +15,4 @@ linter:
     avoid_function_literals_in_foreach_calls: true
     require_trailing_commas: true
     prefer_relative_imports: true
+    void_checks: false

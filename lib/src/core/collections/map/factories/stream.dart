@@ -7,6 +7,8 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
   final Stream<ObservableMapUpdateAction<K, V>> stream;
   StreamSubscription<ObservableMapUpdateAction<K, V>>? _subscription;
 
+  late final List<ObservableMapUpdateAction<K, V>> _bufferedActions = <ObservableMapUpdateAction<K, V>>[];
+
   ObservableMapFromStream({
     required this.stream,
     final Map<K, V>? initial,
@@ -17,6 +19,12 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
         );
 
   @override
+  void onActive() {
+    super.onActive();
+    _startCollect();
+  }
+
+  @override
   void onInit() {
     addDisposeWorker(() {
       return _subscription?.cancel().then((final _) {
@@ -25,14 +33,6 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
     });
     super.onInit();
   }
-
-  @override
-  void onActive() {
-    super.onActive();
-    _startCollect();
-  }
-
-  late final List<ObservableMapUpdateAction<K, V>> _bufferedActions = <ObservableMapUpdateAction<K, V>>[];
 
   void _startCollect() {
     if (_subscription != null) {

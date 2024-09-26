@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
 class ObservableSetMapItemOperator<E, E2>
-    extends OperatorCollectionTransformAsSet<E2, ObservableSetChange<E>, ObservableSetState<E>> {
+    extends SetChangeTransform<E2, ObservableSetChange<E>, ObservableSetState<E>> {
   final E2 Function(E item) mapper;
 
   ObservableSetMapItemOperator({
@@ -12,11 +12,10 @@ class ObservableSetMapItemOperator<E, E2>
   });
 
   @override
-  void transformChange(
+  void handleChange(
     final ObservableSetChange<E> change,
-    final Emitter<ObservableSetUpdateAction<E2>> updater,
   ) {
-    mapChange(change, updater, mapper);
+    mapChange(change, applyAction, mapper);
   }
 
   static void mapChange<E, E2>(

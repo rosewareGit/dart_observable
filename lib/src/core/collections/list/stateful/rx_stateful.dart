@@ -5,21 +5,43 @@ import '../rx_actions.dart';
 import '../rx_impl.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
+import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'state.dart';
 
-abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extends ObservableListStateful<O, E, S>, E, S>
-    extends RxBase<ObservableListStatefulState<E, S>>
-    with
-        ObservableCollectionBase<O, StateOf<ObservableListChange<E>, S>, ObservableListStatefulState<E, S>>,
-        RxListActionsImpl<E>
-    implements RxListStateful<O, E, S> {
+class RxStatefulListImpl<E, S>
+    extends RxCollectionBase<Either<ObservableListChange<E>, S>, ObservableStatefulListState<E, S>>
+    with RxListActionsImpl<E>
+    implements RxStatefulList<E, S> {
   final FactoryList<E> _factory;
 
-  RxListStatefulImpl(
-    super.value, {
+  RxStatefulListImpl(
+    final List<E> data, {
+    required final FactoryList<E>? factory,
+  }) : this._(
+          () {
+            final FactoryList<E> $factory = factory ?? defaultListFactory<E>();
+            final List<E> updatedList = $factory(data);
+            return RxStatefulListState<E, S>.fromState(RxListState<E>(updatedList, ObservableListChange<E>()));
+          }(),
+          factory: factory,
+        );
+
+  factory RxStatefulListImpl.custom(
+    final S state, {
     final FactoryList<E>? factory,
-  }) : _factory = factory ?? defaultListFactory<E>();
+  }) {
+    return RxStatefulListImpl<E, S>._(
+      RxStatefulListState<E, S>.custom(state),
+      factory: factory,
+    );
+  }
+
+  RxStatefulListImpl._(
+    final ObservableStatefulListState<E, S> state, {
+    final FactoryList<E>? factory,
+  })  : _factory = factory ?? defaultListFactory<E>(),
+        super(state);
 
   @override
   List<E> get data => value.fold(
@@ -28,13 +50,10 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
       );
 
   @override
-  StateOf<int, S> get length => value.fold(
-        onData: (final ObservableListState<E> data) => StateOf<int, S>.data(data.listView.length),
-        onCustom: (final S state) => StateOf<int, S>.custom(state),
+  int? get length => value.fold(
+        onData: (final ObservableListState<E> data) => data.listView.length,
+        onCustom: (final S state) => null,
       );
-
-  @override
-  int? get lengthOrNull => length.data;
 
   @override
   E? operator [](final int position) {
@@ -51,12 +70,12 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
   }
 
   @override
-  StateOf<ObservableListChange<E>, S>? applyAction(
-    final StateOf<ObservableListUpdateAction<E>, S> action,
+  Either<ObservableListChange<E>, S>? applyAction(
+    final Either<ObservableListUpdateAction<E>, S> action,
   ) {
-    final ObservableListStatefulState<E, S> currentValue = value;
-    return action.fold<StateOf<ObservableListChange<E>, S>?>(
-      onData: (final ObservableListUpdateAction<E> listUpdateAction) {
+    final ObservableStatefulListState<E, S> currentValue = value;
+    return action.fold<Either<ObservableListChange<E>, S>?>(
+      onLeft: (final ObservableListUpdateAction<E> listUpdateAction) {
         return currentValue.fold(
           onData: (final ObservableListState<E> data) {
             final RxListState<E> state = data as RxListState<E>;
@@ -67,7 +86,7 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
               return null;
             }
 
-            final RxListStatefulState<E, S> newState = RxListStatefulState<E, S>.data(
+            final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.fromState(
               RxListState<E>(updatedList, change),
             );
 
@@ -78,7 +97,7 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
             final List<E> updatedList = _factory(<E>[]);
             final ObservableListChange<E> change = listUpdateAction.apply(updatedList);
 
-            final RxListStatefulState<E, S> newState = RxListStatefulState<E, S>.data(
+            final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.fromState(
               RxListState<E>(updatedList, change),
             );
 
@@ -87,8 +106,8 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
           },
         );
       },
-      onCustom: (final S action) {
-        final RxListStatefulState<E, S> newState = RxListStatefulState<E, S>.custom(action);
+      onRight: (final S action) {
+        final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.custom(action);
         super.value = newState;
         return newState.lastChange;
       },
@@ -98,45 +117,46 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
   @override
   ObservableListChange<E>? applyListUpdateAction(final ObservableListUpdateAction<E> action) {
     return applyAction(
-      StateOf<ObservableListUpdateAction<E>, S>.data(action),
-    )?.data;
+      Either<ObservableListUpdateAction<E>, S>.left(action),
+    )?.leftOrNull;
   }
 
   @override
-  O asObservable() {
-    return self;
-  }
-
-  Self builder({final List<E>? items, final FactoryList<E>? factory});
-
-  @override
-  O changeFactory(final FactoryList<E> factory) {
-    final Self instance = builder(items: <E>[], factory: factory);
-    OperatorStatefulListChangeFactory<Self, O, E, S>(
-      source: self,
-      instanceBuilder: () => instance,
+  ObservableStatefulList<E, S> changeFactory(final FactoryList<E> factory) {
+    return OperatorStatefulListChangeFactory<E, S>(
+      source: this,
+      factory: factory,
     );
-    return instance.asObservable();
   }
 
   @override
-  O filterItem(
+  ObservableStatefulList<E, S> filterItem(
     final bool Function(E item) predicate, {
     final FactoryList<E>? factory,
   }) {
-    final Self instance = builder(items: <E>[], factory: factory);
-    OperatorStatefulListFilterItem<Self, O, E, S>(
-      source: self,
+    return StatefulListFilterOperator<E, S>(
+      source: this,
       predicate: predicate,
-      instanceBuilder: () => instance,
+      factory: factory,
     );
-    return instance.asObservable();
+  }
+
+  @override
+  ObservableStatefulList<E2, S> mapItem<E2>(
+    final E2 Function(E item) mapper, {
+    final FactoryList<E2>? factory,
+  }) {
+    return OperatorStatefulListMapItem<E, E2, S>(
+      source: this,
+      mapper: mapper,
+      factory: factory,
+    );
   }
 
   @override
   void onEmptyData() {
     final List<E> updatedList = _factory(<E>[]);
-    final RxListStatefulState<E, S> newState = RxListStatefulState<E, S>.data(
+    final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.fromState(
       RxListState<E>(updatedList, ObservableListChange<E>()),
     );
 
@@ -144,15 +164,15 @@ abstract class RxListStatefulImpl<Self extends RxListStateful<O, E, S>, O extend
   }
 
   @override
-  Observable<StateOf<E?, S>> rxItem(final int position) {
-    return OperatorObservableListStatefulRxItem<O, E, S>(
-      source: self,
+  Observable<Either<E?, S>> rxItem(final int position) {
+    return OperatorObservableListStatefulRxItem<E, S>(
+      source: this,
       position: position,
     );
   }
 
   @override
-  StateOf<ObservableListChange<E>, S>? setState(final S newState) {
-    return applyAction(StateOf<ObservableListUpdateAction<E>, S>.custom(newState));
+  Either<ObservableListChange<E>, S>? setState(final S newState) {
+    return applyAction(Either<ObservableListUpdateAction<E>, S>.right(newState));
   }
 }

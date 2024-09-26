@@ -1,40 +1,23 @@
 import '../../../../../../dart_observable.dart';
-import '../../../operators/_base_transform_proxy.dart';
+import '../../../operators/transforms/map_stateful.dart';
 
-class OperatorStatefulMapChangeFactory<Self extends RxMapStateful<O, K, V, S>,
-    O extends ObservableMapStateful<O, K, V, S>, K, V, S> {
-  final O source;
-
-  final Self result;
-
-  late final BaseCollectionTransformOperatorProxy<
-          ObservableMapStatefulState<K, V, S>,
-          ObservableMapStatefulState<K, V, S>,
-          StateOf<ObservableMapChange<K, V>, S>,
-          StateOf<ObservableMapChange<K, V>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<ObservableMapStatefulState<K, V, S>, ObservableMapStatefulState<K, V, S>,
-          StateOf<ObservableMapChange<K, V>, S>, StateOf<ObservableMapChange<K, V>, S>>(
-    current: result,
-    source: source,
-    transformChange: transformChange,
-  );
-
+class OperatorStatefulMapChangeFactory<K, V, S> extends OperatorCollectionTransformMapStateful<K, V, S,
+    ObservableStatefulMapState<K, V, S>, Either<ObservableMapChange<K, V>, S>> {
   OperatorStatefulMapChangeFactory({
-    required this.source,
-    required final Self Function() instanceBuilder,
-  }) : result = instanceBuilder() {
-    proxy.init();
-  }
+    required super.source,
+    required super.factory,
+  });
 
-  void transformChange(final StateOf<ObservableMapChange<K, V>, S> change) {
+  @override
+  void handleChange(final Either<ObservableMapChange<K, V>, S> change) {
     change.fold(
-      onData: (final ObservableMapChange<K, V> change) {
-        result.applyAction(
-          StateOf<ObservableMapUpdateAction<K, V>, S>.data(ObservableMapUpdateAction<K, V>.fromChange(change)),
+      onLeft: (final ObservableMapChange<K, V> change) {
+        applyAction(
+          Either<ObservableMapUpdateAction<K, V>, S>.left(ObservableMapUpdateAction<K, V>.fromChange(change)),
         );
       },
-      onCustom: (final S state) {
-        result.applyAction(StateOf<ObservableMapUpdateAction<K, V>, S>.custom(state));
+      onRight: (final S state) {
+        applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(state));
       },
     );
   }

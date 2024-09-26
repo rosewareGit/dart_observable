@@ -1,5 +1,4 @@
 import '../../../../dart_observable.dart';
-import '../../rx/operators/_base_transform.dart';
 import '../_base.dart';
 import 'map_state.dart';
 import 'operators/change_factory.dart';
@@ -8,18 +7,14 @@ import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'rx_actions.dart';
 
-part '../../rx/operators/transforms/map.dart';
-
 Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   return (final Map<K, V>? items) {
     return Map<K, V>.of(items ?? <K, V>{});
   };
 }
 
-class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
-    with
-        ObservableCollectionBase<ObservableMap<K, V>, ObservableMapChange<K, V>, ObservableMapState<K, V>>,
-        RxMapActionsImpl<K, V>
+class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapChange<K, V>, ObservableMapState<K, V>>
+    with RxMapActionsImpl<K, V>
     implements RxMap<K, V> {
   RxMapImpl({
     final Map<K, V>? initial,
@@ -43,9 +38,6 @@ class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
 
   @override
   int get length => _value.data.length;
-
-  @override
-  ObservableMap<K, V> get self => this;
 
   RxMapState<K, V> get _value => value as RxMapState<K, V>;
 
@@ -80,7 +72,7 @@ class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
   ObservableMap<K, V> changeFactory(final FactoryMap<K, V> factory) {
     return OperatorMapFactory<K, V>(
       factory: factory,
-      source: self,
+      source: this,
     );
   }
 
@@ -96,7 +88,7 @@ class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
   }) {
     return OperatorMapFilter<K, V>(
       predicate: predicate,
-      source: self,
+      source: this,
       factory: factory,
     );
   }
@@ -108,7 +100,7 @@ class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
   }) {
     return OperatorMapMap<K, V, V2>(
       valueMapper: valueMapper,
-      source: self,
+      source: this,
       factory: factory,
     );
   }
@@ -116,7 +108,7 @@ class RxMapImpl<K, V> extends RxBase<ObservableMapState<K, V>>
   @override
   Observable<V?> rxItem(final K key) {
     return OperatorObservableMapRxItem<K, V>(
-      source: self,
+      source: this,
       key: key,
     );
   }

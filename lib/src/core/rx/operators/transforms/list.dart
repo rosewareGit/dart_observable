@@ -2,40 +2,29 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/list/rx_impl.dart';
 import '../_base_transform.dart';
 
-abstract class OperatorTransformAsList<T, E> extends RxListImpl<E>
-    with BaseTransformOperator<T, ObservableListState<E>, ObservableListUpdateAction<E>> {
+class ListTransform<T, E> extends RxListImpl<E> with BaseTransformOperator<T, ObservableListState<E>, List<E>> {
   @override
   final Observable<T> source;
+  final ListUpdater<E, T>? transformFn;
 
-  OperatorTransformAsList({
+  ListTransform({
     required this.source,
-    super.factory,
+    required super.factory,
+    this.transformFn,
   });
 
   @override
-  void handleUpdate(final ObservableListUpdateAction<E> action) {
-    applyAction(action);
+  void handleUpdate(final List<E> action) {
+    setData(action);
   }
-}
-
-class OperatorTransformAsListArg<T, E2> extends OperatorTransformAsList<T, E2> {
-  final void Function(
-    ObservableList<E2> state,
-    T change,
-    Emitter<ObservableListUpdateAction<E2>> updater,
-  ) transformFn;
-
-  OperatorTransformAsListArg({
-    required this.transformFn,
-    required super.source,
-    super.factory,
-  });
 
   @override
   void transformChange(
     final T value,
-    final Emitter<ObservableListUpdateAction<E2>> updater,
+    final Emitter<List<E>> updater,
   ) {
-    transformFn(this, value, updater);
+    assert(transformFn != null, 'override transformChange or provide a transformFn');
+
+    transformFn?.call(this, value, updater);
   }
 }

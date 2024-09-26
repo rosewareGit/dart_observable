@@ -7,10 +7,10 @@ import 'factories/combine_latest_2.dart';
 import 'factories/combine_latest_3.dart';
 import 'factories/combine_latest_4.dart';
 import 'factories/combine_latest_5.dart';
-import 'operators/flatmaps.dart';
 import 'operators/handle_error.dart';
 import 'operators/next.dart';
 import 'operators/observable_to_observable.dart';
+import 'operators/switch_maps.dart';
 import 'operators/transforms.dart';
 
 abstract class RxBase<T>
@@ -53,11 +53,6 @@ abstract class RxBase<T>
   @override
   bool get distinct => _distinct;
 
-  @override
-  ObservableFlatMaps<T> get flatMapAs {
-    return ObservableFlatMapsImpl<T>(this);
-  }
-
   int get listenerCount => _listeners.length;
 
   @override
@@ -74,6 +69,11 @@ abstract class RxBase<T>
     }
 
     return ObservableState.active;
+  }
+
+  @override
+  ObservableSwitchMaps<T> get switchMapAs {
+    return ObservableSwitchMapsImpl<T>(this);
   }
 
   @override

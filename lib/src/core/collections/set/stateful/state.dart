@@ -1,7 +1,9 @@
 import '../../../../../dart_observable.dart';
 
-class RxSetStatefulState<E, S> extends ObservableSetStatefulState<E, S> {
-  const RxSetStatefulState.custom(super.custom) : super.custom();
+class RxStatefulSetState<E, S> extends ObservableStatefulSetState<E, S> {
+  RxStatefulSetState.custom(super.custom) : super.custom();
 
-  const RxSetStatefulState.data(super.data) : super.data();
+  RxStatefulSetState.fromSet(final Set<E> data) : super.fromSet(data);
+
+  RxStatefulSetState.fromState(final ObservableSetState<E> state) : super.fromState(state);
 }

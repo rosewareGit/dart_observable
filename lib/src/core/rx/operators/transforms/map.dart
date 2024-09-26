@@ -1,35 +1,29 @@
-part of '../../../collections/map/rx_impl.dart';
+import '../../../../../dart_observable.dart';
+import '../../../collections/map/rx_impl.dart';
+import '../_base_transform.dart';
 
-abstract class OperatorTransformAsMap<T, K, V> extends RxMapImpl<K, V>
-    with BaseTransformOperator<T, ObservableMapState<K, V>, ObservableMapUpdateAction<K, V>> {
+class MapTransform<T, K, V> extends RxMapImpl<K, V> with BaseTransformOperator<T, ObservableMapState<K, V>, Map<K, V>> {
   @override
   final Observable<T> source;
+  final MapUpdater<K, V, T>? transformFn;
 
-  OperatorTransformAsMap({
+  MapTransform({
     required this.source,
-    super.factory,
+    required super.factory,
+    this.transformFn,
   });
 
   @override
-  void handleUpdate(final ObservableMapUpdateAction<K, V> action) {
-    applyAction(action);
+  void handleUpdate(final Map<K, V> action) {
+    setData(action);
   }
-}
-
-class OperatorTransformAsMapArg<T, K, V> extends OperatorTransformAsMap<T, K, V> {
-  final MapUpdater<K, V, T> transformFn;
-
-  OperatorTransformAsMapArg({
-    required super.source,
-    required this.transformFn,
-    final FactoryMap<K, V>? factory,
-  }) : super(factory: factory);
 
   @override
   void transformChange(
     final T value,
-    final Emitter<ObservableMapUpdateAction<K, V>> updater,
+    final Emitter<Map<K, V>> updater,
   ) {
-    transformFn(this, value, updater);
+    assert(transformFn != null, 'override transformChange or provide a transformFn');
+    transformFn?.call(this, value, updater);
   }
 }

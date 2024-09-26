@@ -1,25 +1,24 @@
 import '../../../../../../dart_observable.dart';
 import '../../../../rx/_impl.dart';
 
-StateOf<V?, S> _getStateForKey<K, V, S>({
-  required final ObservableMapStatefulState<K, V, S> state,
+Either<V?, S> _getStateForKey<K, V, S>({
+  required final ObservableStatefulMapState<K, V, S> state,
   required final K key,
   required final bool isInitial,
 }) {
   return state.fold(
     onData: (final ObservableMapState<K, V> map) {
-      return StateOf<V?, S>.data(map.mapView[key]);
+      return Either<V?, S>.left(map.mapView[key]);
     },
     onCustom: (final S state) {
-      return StateOf<V?, S>.custom(state);
+      return Either<V?, S>.right(state);
     },
   );
 }
 
-class OperatorObservableMapStatefulRxItem<Self extends ObservableMapStateful<Self, K, V, S>, K, V, S>
-    extends RxImpl<StateOf<V?, S>> {
+class OperatorObservableMapStatefulRxItem<K, V, S> extends RxImpl<Either<V?, S>> {
   final K key;
-  final Self source;
+  final ObservableStatefulMap<K, V, S> source;
 
   Disposable? _listener;
 
@@ -60,12 +59,12 @@ class OperatorObservableMapStatefulRxItem<Self extends ObservableMapStateful<Sel
       return;
     }
 
-    final StateOf<V?, S> newState = _getStateForKey(state: source.value, key: key, isInitial: true);
+    final Either<V?, S> newState = _getStateForKey(state: source.value, key: key, isInitial: true);
     value = newState;
 
     _listener = source.listen(
-      onChange: (final ObservableMapStatefulState<K, V, S> value) {
-        final StateOf<V?, S> newState = _getStateForKey(state: value, key: key, isInitial: false);
+      onChange: (final ObservableStatefulMapState<K, V, S> value) {
+        final Either<V?, S> newState = _getStateForKey(state: value, key: key, isInitial: false);
         this.value = newState;
       },
     );

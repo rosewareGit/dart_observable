@@ -1,24 +1,26 @@
 import '../../../../../dart_observable.dart';
 
-abstract class ObservableSetStateful<Self extends ObservableSetStateful<Self, E, S>, E, S>
+abstract class ObservableStatefulSet<E, S>
     implements
         ObservableCollectionStateful<
-            Self, // The collection type
             ObservableSetChange<E>, // the collection type
             S, // The custom state
-            ObservableSetStatefulState<E, S>> {
-  StateOf<int, S> get length;
+            ObservableStatefulSetState<E, S>> {
+  int? get length;
 
-  int? get lengthOrNull;
-
-  Self changeFactory(final FactorySet<E> factory);
+  ObservableStatefulSet<E, S> changeFactory(final FactorySet<E> factory);
 
   bool contains(final E item);
 
-  Self filterItem(
+  ObservableStatefulSet<E, S> filterItem(
     final bool Function(E item) predicate, {
     final FactorySet<E>? factory,
   });
 
-  Observable<StateOf<E?, S>> rxItem(final bool Function(E item) predicate);
+  ObservableStatefulSet<E2, S> mapItem<E2>(
+    final E2 Function(E item) mapper, {
+    final FactorySet<E2>? factory,
+  });
+
+  Observable<Either<E?, S>> rxItem(final bool Function(E item) predicate);
 }

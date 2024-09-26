@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
 class ObservableSetFilterOperator<E>
-    extends OperatorCollectionTransformAsSet<E, ObservableSetChange<E>, ObservableSetState<E>> {
+    extends SetChangeTransform<E, ObservableSetChange<E>, ObservableSetState<E>> {
   final bool Function(E item) predicate;
 
   ObservableSetFilterOperator({
@@ -12,11 +12,10 @@ class ObservableSetFilterOperator<E>
   });
 
   @override
-  void transformChange(
+  void handleChange(
     final ObservableSetChange<E> change,
-    final Emitter<ObservableSetUpdateAction<E>> updater,
   ) {
-    filterItems(change, updater, predicate);
+    filterItems(change, applyAction, predicate);
   }
 
   static filterItems<E>(

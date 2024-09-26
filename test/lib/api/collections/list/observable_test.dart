@@ -238,5 +238,122 @@ void main() {
         expect(rxMapped.disposed, true);
       });
     });
+
+    group('switchMap', () {
+      test('Should switch to the new observable and listen', () async {
+        final RxInt rxType1 = RxInt(1);
+        final RxInt rxType2 = RxInt(2);
+        final RxInt rxType3 = RxInt(3);
+
+        final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3]);
+
+        final Observable<int> rxSwitched = rxSource.switchMap<int>(
+          (final ObservableListState<int> state) {
+            final int mod = state.listView.length % 3;
+            if (mod == 0) {
+              return rxType1;
+            } else if (mod == 1) {
+              return rxType2;
+            } else {
+              return rxType3;
+            }
+          },
+        );
+
+        final Disposable listener = rxSwitched.listen();
+
+        expect(rxSwitched.value, 1);
+        rxType1.value = 4;
+        expect(rxSwitched.value, 4);
+
+        rxSource.add(4);
+        expect(rxSwitched.value, 2, reason: 'Should switch to rxType2 because 4 % 3 == 1');
+        rxType2.value = 5;
+        expect(rxSwitched.value, 5);
+
+        rxSource.add(5);
+        expect(rxSwitched.value, 3, reason: 'Should switch to rxType3 because 5 % 3 == 2');
+        rxType3.value = 6;
+        expect(rxSwitched.value, 6);
+
+        rxSource.removeAt(0);
+        expect(rxSwitched.value, 5, reason: 'Should switch to rxType2 because 5 % 3 == 2');
+
+        await listener.dispose();
+
+        rxSource.add(6);
+        expect(rxSwitched.value, 5, reason: 'Should not switch because listener is disposed');
+
+        rxSwitched.listen();
+        // Should switch after listening again
+        expect(rxSwitched.value, 6, reason: 'Should switch to rxType3 because 6 % 3 == 0');
+
+        final Observable<int> rxSwitched2 = rxSource.switchMap<int>(
+          (final ObservableListState<int> state) {
+            final int mod = state.listView.length % 3;
+            if (mod == 0) {
+              return rxType1;
+            } else if (mod == 1) {
+              return rxType2;
+            } else {
+              return rxType3;
+            }
+          },
+        );
+
+        rxSwitched2.listen();
+        expect(rxSwitched2.value, 6, reason: 'Should switch to rxType3 because 6 % 3 == 0');
+
+        await rxSource.dispose();
+        expect(rxSwitched.disposed, true);
+        expect(rxSwitched2.disposed, true);
+      });
+    });
+
+    group('switchMapAs', () {
+      group('map', () {
+        test('Should switch to the new observable and listen', () async {
+          final RxMap<int, String> rxType1 = RxMap<int, String>(<int, String>{1: '1'});
+          final RxMap<int, String> rxType2 = RxMap<int, String>(<int, String>{2: '2'});
+          final RxMap<int, String> rxType3 = RxMap<int, String>(<int, String>{3: '3'});
+
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3]);
+
+          final ObservableMap<int, String> rxSwitched = rxSource.switchMapAs.map<int, String>(
+            mapper: (final ObservableListState<int> state) {
+              final int mod = state.listView.length % 3;
+              if (mod == 0) {
+                return rxType1;
+              } else if (mod == 1) {
+                return rxType2;
+              } else {
+                return rxType3;
+              }
+            },
+          );
+
+          rxSwitched.listen();
+
+          expect(rxSwitched.length, 1);
+          expect(rxSwitched.value.mapView, <int, String>{1: '1'});
+
+          rxType1[1] = '4';
+          expect(rxSwitched.value.mapView, <int, String>{1: '4'});
+          rxType1[2] = '5';
+          expect(rxSwitched.value.mapView, <int, String>{1: '4', 2: '5'});
+
+          rxSource.add(4);
+          expect(rxSwitched.length, 1);
+          expect(rxSwitched.value.mapView, <int, String>{2: '2'});
+
+          rxSource.remove(4);
+          expect(rxSwitched.length, 2);
+          expect(rxSwitched.value.mapView, <int, String>{1: '4', 2: '5'});
+
+          await rxSource.dispose();
+          expect(rxSwitched.disposed, true);
+        });
+      });
+    });
   });
 }

@@ -1,37 +1,25 @@
 import '../../../../../../dart_observable.dart';
-import '../../../operators/_base_transform_proxy.dart';
+import '../../../operators/transforms/list_stateful.dart';
 
-class OperatorStatefulListChangeFactory<Self extends RxListStateful<O, E, S>, O extends ObservableListStateful<O, E, S>,
-    E, S> {
-  final O source;
-
-  final Self result;
-
-  late final BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
-          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>> proxy =
-      BaseCollectionTransformOperatorProxy<ObservableListStatefulState<E, S>, ObservableListStatefulState<E, S>,
-          StateOf<ObservableListChange<E>, S>, StateOf<ObservableListChange<E>, S>>(
-    current: result,
-    source: source,
-    transformChange: transformChange,
-  );
-
+class OperatorStatefulListChangeFactory<E, S> extends StatefulListChangeTransform<E, S,
+    ObservableStatefulListState<E, S>, Either<ObservableListChange<E>, S>> {
   OperatorStatefulListChangeFactory({
-    required this.source,
-    required final Self Function() instanceBuilder,
-  }) : result = instanceBuilder() {
-    proxy.init();
-  }
+    required super.source,
+    required final FactoryList<E> factory,
+  }) : super(factory: factory);
 
-  void transformChange(final StateOf<ObservableListChange<E>, S> change) {
+  @override
+  void handleChange(
+    final Either<ObservableListChange<E>, S> change,
+  ) {
     change.fold(
-      onData: (final ObservableListChange<E> change) {
-        result.applyAction(
-          StateOf<ObservableListUpdateAction<E>, S>.data(ObservableListUpdateAction<E>.fromChange(change)),
+      onLeft: (final ObservableListChange<E> change) {
+        applyAction(
+          Either<ObservableListUpdateAction<E>, S>.left(ObservableListUpdateAction<E>.fromChange(change)),
         );
       },
-      onCustom: (final S state) {
-        result.applyAction(StateOf<ObservableListUpdateAction<E>, S>.custom(state));
+      onRight: (final S state) {
+        applyAction(Either<ObservableListUpdateAction<E>, S>.right(state));
       },
     );
   }

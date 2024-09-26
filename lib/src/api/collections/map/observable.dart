@@ -1,4 +1,5 @@
 import '../../../../dart_observable.dart';
+import '../../../core/collections/map/factories/merged.dart';
 import '../../../core/collections/map/factories/stream.dart';
 
 abstract interface class ObservableMap<K, V>
@@ -10,6 +11,18 @@ abstract interface class ObservableMap<K, V>
     return ObservableMapFromStream<K, V>(
       stream: stream,
       factory: factory,
+    );
+  }
+
+  factory ObservableMap.merged({
+    required final List<ObservableMap<K, V>> collections,
+    final FactoryMap<K, V>? factory,
+    final V? Function(K key, V current, V conflict)? conflictResolver,
+  }) {
+    return ObservableMapMerged<K, V>(
+      collections: collections,
+      factory: factory,
+      conflictResolver: conflictResolver,
     );
   }
 

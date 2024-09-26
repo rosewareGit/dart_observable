@@ -2,40 +2,26 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/set/rx_impl.dart';
 import '../_base_transform.dart';
 
-abstract class OperatorTransformAsSet<T, E2> extends RxSetImpl<E2>
-    with BaseTransformOperator<T, ObservableSetState<E2>, ObservableSetUpdateAction<E2>> {
+class SetTransform<T, E> extends RxSetImpl<E> with BaseTransformOperator<T, ObservableSetState<E>, Set<E>> {
   @override
   final Observable<T> source;
+  final SetUpdater<E, T>? transformFn;
 
-  OperatorTransformAsSet({
+  SetTransform({
     required this.source,
-    super.factory,
+    required super.factory,
+    this.transformFn,
   });
 
   @override
-  void handleUpdate(final ObservableSetUpdateAction<E2> action) {
-    applyAction(action);
+  void handleUpdate(final Set<E> action) {
+    setData(action);
   }
-}
-
-class OperatorTransformAsSetArg<T, E> extends OperatorTransformAsSet<T, E> {
-  final void Function(
-    ObservableSet<E> state,
-    T value,
-    Emitter<ObservableSetUpdateAction<E>> updater,
-  ) transformFn;
-
-  OperatorTransformAsSetArg({
-    required super.source,
-    required this.transformFn,
-    super.factory,
-  });
 
   @override
-  void transformChange(
-    final T value,
-    final Emitter<ObservableSetUpdateAction<E>> updater,
-  ) {
-    transformFn(this, value, updater);
+  void transformChange(final T value, final Emitter<Set<E>> updater) {
+    assert(transformFn != null, 'override transformChange or provide a transformFn');
+
+    transformFn?.call(this, value, updater);
   }
 }

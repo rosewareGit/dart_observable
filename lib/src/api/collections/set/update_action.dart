@@ -5,9 +5,10 @@ class ObservableSetUpdateAction<E> {
   final Set<E> removeItems;
 
   ObservableSetUpdateAction({
-    required this.removeItems,
-    required this.addItems,
-  });
+    final Set<E>? addItems,
+    final Set<E>? removeItems,
+  })  : addItems = addItems ?? <E>{},
+        removeItems = removeItems ?? <E>{};
 
   factory ObservableSetUpdateAction.fromChange(final ObservableSetChange<E> change) {
     return ObservableSetUpdateAction<E>(

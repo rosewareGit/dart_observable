@@ -20,15 +20,13 @@ class ObservableListSyncHelper<E> {
   });
 
   void handleInitialState({
-    required final ObservableList<E> state,
+    required final List<E> state,
   }) {
-    final UnmodifiableListView<E> itemsToAdd = state.value.listView;
-
-    for (int i = 0; i < itemsToAdd.length; i++) {
+    for (int i = 0; i < state.length; i++) {
       final ObservableListChange<E>? addedChange = applyAction(
         ObservableListUpdateAction<E>(
           insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
-            MapEntry<int?, Iterable<E>>(null, <E>[itemsToAdd[i]]),
+            MapEntry<int?, Iterable<E>>(null, <E>[state[i]]),
           ],
         ),
       );
@@ -115,8 +113,7 @@ class ObservableListSyncHelper<E> {
     }
   }
 
-  Iterable<int> handleRemovedState(final ObservableList<E> observable) {
-    final UnmodifiableListView<E> itemsToRemove = observable.value.listView;
+  Iterable<int> handleRemovedState(final List<E> itemsToRemove) {
     final List<int> removeIndexes = <int>[];
     for (int i = 0; i < itemsToRemove.length; i++) {
       final int index = $indexMapper.remove(i) ?? -1;

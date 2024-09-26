@@ -1,24 +1,11 @@
 import '../../../../../dart_observable.dart';
+import '../../../../core/collections/map/map_state.dart';
 
-abstract class ObservableMapStatefulState<K, V, S> extends StateOf<ObservableMapState<K, V>, S>
-    implements CollectionState<StateOf<ObservableMapChange<K, V>, S>> {
-  const ObservableMapStatefulState.custom(super.custom) : super.custom();
+abstract class ObservableStatefulMapState<K, V, S>
+    extends ObservableCollectionState<ObservableMapState<K, V>, ObservableMapChange<K, V>, S> {
+  ObservableStatefulMapState.custom(final S custom) : super.custom(custom);
 
-  const ObservableMapStatefulState.data(super.data) : super.data();
+  ObservableStatefulMapState.fromMap(final Map<K, V> data) : super.data(RxMapState<K, V>.initial(data));
 
-  @override
-  StateOf<ObservableMapChange<K, V>, S> get lastChange {
-    return fold(
-      onData: (final ObservableMapState<K, V> state) => StateOf<ObservableMapChange<K, V>, S>.data(state.lastChange),
-      onCustom: (final S state) => StateOf<ObservableMapChange<K, V>, S>.custom(state),
-    );
-  }
-
-  @override
-  StateOf<ObservableMapChange<K, V>, S> asChange() {
-    return fold(
-      onData: (final ObservableMapState<K, V> state) => StateOf<ObservableMapChange<K, V>, S>.data(state.asChange()),
-      onCustom: (final S state) => StateOf<ObservableMapChange<K, V>, S>.custom(state),
-    );
-  }
+  ObservableStatefulMapState.fromState(final ObservableMapState<K, V> state) : super.data(state);
 }

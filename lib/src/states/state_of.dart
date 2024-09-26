@@ -1,62 +1,97 @@
-class StateOf<L, R> {
-  final L? data;
-  final R? custom;
+sealed class Either<L, R> {
+  const Either();
 
-  final bool _isData;
+  const factory Either.left(final L left) = _Left<L, R>;
 
-  const StateOf.custom(this.custom)
-      : data = null,
-        _isData = false;
-
-  const StateOf.data(this.data)
-      : custom = null,
-        _isData = true;
-
-  R? get customOrNull => isCustom ? custom : null;
-
-  R get customOrThrow => customOrNull ?? (throw Exception('Right is null'));
-
-  L? get dataOrNull => isData ? data : null;
-
-  L get dataOrThrow => dataOrNull ?? (throw Exception('Left is null'));
+  const factory Either.right(final R right) = _Right<L, R>;
 
   @override
-  int get hashCode => data.hashCode ^ custom.hashCode;
+  int get hashCode;
 
-  bool get isCustom => !_isData;
+  bool get isLeft => fold(
+        onLeft: (final _) => true,
+        onRight: (final _) => false,
+      );
 
-  bool get isData => _isData;
+  bool get isRight => fold(
+        onLeft: (final _) => false,
+        onRight: (final _) => true,
+      );
+
+  L? get leftOrNull => fold(
+        onLeft: (final L left) => left,
+        onRight: (final _) => null,
+      );
+
+  L get leftOrThrow => fold(
+        onLeft: (final L left) => left,
+        onRight: (final _) => (throw Exception('Not in left')),
+      );
+
+  R? get rightOrNull => fold(
+        onLeft: (final _) => null,
+        onRight: (final R right) => right,
+      );
+
+  R get rightOrThrow => fold(
+        onLeft: (final _) => (throw Exception('Not right')),
+        onRight: (final R right) => right,
+      );
+
+  @override
+  bool operator ==(final Object other);
+
+  T fold<T>({
+    required final T Function(L left) onLeft,
+    required final T Function(R right) onRight,
+  }) {
+    return switch (this) {
+      final _Right<L, R> state => onRight(state.data),
+      final _Left<L, R> state => onLeft(state.data),
+    };
+  }
+
+  void when({
+    final void Function(L left)? onLeft,
+    final void Function(R right)? onRight,
+  }) {
+    switch (this) {
+      case final _Right<L, R> state:
+        onRight?.call(state.data);
+        break;
+      case final _Left<L, R> state:
+        onLeft?.call(state.data);
+        break;
+    }
+  }
+}
+
+class _Left<L, R> extends Either<L, R> {
+  final L data;
+
+  const _Left(this.data);
+
+  @override
+  int get hashCode => data.hashCode;
 
   @override
   bool operator ==(final Object other) {
     if (identical(this, other)) return true;
-    return other is StateOf<L, R> && other.data == data && other.custom == custom;
+    return other is _Left<L, R> && other.data == data;
   }
+}
 
-  T fold<T>({
-    required final T Function(L data) onData,
-    required final T Function(R custom) onCustom,
-  }) {
-    if (isData) {
-      return onData(dataOrThrow);
-    } else {
-      return onCustom(customOrThrow);
-    }
-  }
+class _Right<L, R> extends Either<L, R> {
+  final R data;
+
+  const _Right(this.data);
 
   @override
-  String toString() {
-    return isData ? 'Data($data)' : 'Custom($custom)';
-  }
+  int get hashCode => data.hashCode;
 
-  void when({
-    final void Function(L data)? onData,
-    final void Function(R custom)? onCustom,
-  }) {
-    if (isData) {
-      onData?.call(dataOrThrow);
-    } else {
-      onCustom?.call(customOrThrow);
-    }
+  @override
+  bool operator ==(final Object other) {
+    if (identical(this, other)) return true;
+    return other is _Right<L, R> && other.data == data;
   }
 }

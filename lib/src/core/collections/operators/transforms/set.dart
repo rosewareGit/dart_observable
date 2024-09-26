@@ -1,46 +1,32 @@
 import '../../../../../dart_observable.dart';
+import '../../../../api/collections/collection_transforms.dart';
 import '../../set/rx_impl.dart';
 import '../_base_transform.dart';
 
-abstract class OperatorCollectionTransformAsSet<
-        E2, //
+class SetChangeTransform<
+        E, //
         C,
-        CS extends CollectionState<C>> extends RxSetImpl<E2>
+        CS extends CollectionState<C>> extends RxSetImpl<E>
     with
         BaseCollectionTransformOperator<
             CS, //
-            ObservableSetState<E2>,
+            ObservableSetState<E>,
             C,
-            ObservableSetChange<E2>,
-            ObservableSetUpdateAction<E2>> {
+            ObservableSetChange<E>> {
   @override
   final Observable<CS> source;
+  final SetChangeUpdater<E, C>? transformFn;
 
-  OperatorCollectionTransformAsSet({
+  SetChangeTransform({
     required this.source,
-    super.factory,
-  });
-}
-
-class OperatorCollectionTransformAsSetArg<E2, C, CS extends CollectionState<C>>
-    extends OperatorCollectionTransformAsSet<E2, C, CS> {
-  final void Function(
-    ObservableSet<E2> state,
-    C change,
-    Emitter<ObservableSetUpdateAction<E2>> updater,
-  ) transformFn;
-
-  OperatorCollectionTransformAsSetArg({
-    required super.source,
-    required this.transformFn,
-    super.factory,
+    required super.factory,
+    this.transformFn,
   });
 
   @override
-  void transformChange(
-    final C change,
-    final Emitter<ObservableSetUpdateAction<E2>> updater,
-  ) {
-    transformFn(this, change, updater);
+  void handleChange(final C change) {
+    assert(transformFn != null, 'override handleChange or provide a transformFn');
+
+    transformFn?.call(this, change, applyAction);
   }
 }

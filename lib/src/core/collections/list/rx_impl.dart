@@ -13,10 +13,8 @@ FactoryList<E> defaultListFactory<E>() {
   };
 }
 
-class RxListImpl<E> extends RxBase<ObservableListState<E>>
-    with
-        ObservableCollectionBase<ObservableList<E>, ObservableListChange<E>, ObservableListState<E>>,
-        RxListActionsImpl<E>
+class RxListImpl<E> extends RxCollectionBase<ObservableListChange<E>, ObservableListState<E>>
+    with RxListActionsImpl<E>
     implements RxList<E> {
   RxListImpl({
     final Iterable<E>? initial,
@@ -28,9 +26,6 @@ class RxListImpl<E> extends RxBase<ObservableListState<E>>
 
   @override
   int get length => data.length;
-
-  @override
-  ObservableList<E> get self => this;
 
   RxListState<E> get _value => value as RxListState<E>;
 

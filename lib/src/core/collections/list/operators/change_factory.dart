@@ -3,7 +3,7 @@ import '../../operators/transforms/list.dart';
 import '../list_sync_helper.dart';
 
 class ObservableListFactoryOperator<E>
-    extends OperatorCollectionTransformAsList<E, ObservableListChange<E>, ObservableListState<E>> {
+    extends ListChangeTransform<E, ObservableListChange<E>, ObservableListState<E>> {
   late final ObservableListSyncHelper<E> _helper = ObservableListSyncHelper<E>(
     applyAction: applyAction,
   );
@@ -14,10 +14,7 @@ class ObservableListFactoryOperator<E>
   });
 
   @override
-  void transformChange(
-    final ObservableListChange<E> change,
-    final Emitter<ObservableListUpdateAction<E>> updater,
-  ) {
+  void handleChange(final ObservableListChange<E> change) {
     _helper.handleListChange(sourceChange: change);
   }
 }

@@ -34,6 +34,7 @@ void main() {
         expect(rxSorted.toList(), <int>[3, 2, 1]);
       });
     });
+
     group('fromStream', () {
       test('Should map data from stream', () async {
         final StreamController<ObservableMapUpdateAction<String, int>> streamController =
@@ -270,7 +271,7 @@ void main() {
       });
     });
 
-    group('mapMap', () {
+    group('mapItem', () {
       test('Should map initial data on listening', () {
         final RxMap<String, int> rxSource = RxMap<String, int>(<String, int>{
           'a': 1,
@@ -391,6 +392,184 @@ void main() {
         rxMap.remove('b');
 
         expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 3]);
+      });
+    });
+
+    group('transform', () {
+      test('Should transform value', () async {
+        final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+          1: 'a',
+          2: 'b',
+          3: 'c',
+        });
+        rxSource.add(4, 'd');
+        rxSource[1] = 'a2';
+
+        String transformer(final ObservableMapState<int, String> state) {
+          return state.mapView.values.join(',');
+        }
+
+        final Observable<String> rxTransformed = rxSource.transform<String>(
+          initialProvider: transformer,
+          onChanged: (final ObservableMapState<int, String> value, final Emitter<String> emitter) {
+            emitter(transformer(value));
+          },
+        );
+        final Disposable listener = rxTransformed.listen();
+        expect(rxTransformed.value, 'a2,b,c,d');
+
+        rxSource.add(5, 'e');
+        expect(rxTransformed.value, 'a2,b,c,d,e');
+
+        rxSource.remove(2);
+        expect(rxTransformed.value, 'a2,c,d,e');
+
+        rxSource[3] = 'c2';
+        expect(rxTransformed.value, 'a2,c2,d,e');
+
+        rxSource.clear();
+        expect(rxTransformed.value, '');
+
+        await listener.dispose();
+
+        rxSource.add(1, 'a');
+        expect(rxTransformed.value, '');
+
+        rxTransformed.listen();
+        expect(rxTransformed.value, 'a');
+
+        rxSource.add(2, 'b');
+        expect(rxTransformed.value, 'a,b');
+
+        await rxSource.dispose();
+        expect(rxTransformed.disposed, true);
+      });
+    });
+
+    group('transformAs', () {
+      test('Should transform change', () async {
+        final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+          1: 'a',
+          2: 'b',
+          3: 'c',
+        });
+        rxSource.add(4, 'd');
+        rxSource[1] = 'a2';
+
+        final ObservableSet<String> rxReversedUpperCased = rxSource.transformAs.set<String>(
+          factory: (final Iterable<String>? items) {
+            return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
+              return right.compareTo(left);
+            });
+          },
+          transform: (
+            final ObservableSet<String> current,
+            final ObservableMapState<int, String> value,
+            final Emitter<Set<String>> emitter,
+          ) {
+            // map change to list while transforming the value to uppercase
+            final Set<String> newItems = value.mapView.values.map((final String item) {
+              return item.toUpperCase();
+            }).toSet();
+
+            emitter(newItems);
+          },
+        );
+
+        final Disposable listener = rxReversedUpperCased.listen();
+
+        expect(rxReversedUpperCased.value.setView, <String>{'D', 'C', 'B', 'A2'});
+
+        rxSource.add(5, 'e');
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+        rxSource.remove(2);
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+
+        await listener.dispose();
+
+        rxSource[3] = 'c2';
+        rxSource.add(6, 'f');
+
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+
+        rxReversedUpperCased.listen();
+
+        expect(rxReversedUpperCased.value.setView, <String>{'F', 'E', 'D', 'C2', 'A2'});
+      });
+    });
+
+    group('transformChangeAs', () {
+      test('Should transform change', () async {
+        final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+          1: 'a',
+          2: 'b',
+          3: 'c',
+        });
+        rxSource.add(4, 'd');
+        rxSource[1] = 'a2';
+
+        final ObservableSet<String> rxReversedUpperCased = rxSource.transformChangeAs.set<String>(
+          factory: (final Iterable<String>? items) {
+            return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
+              return right.compareTo(left);
+            });
+          },
+          transform: (
+            final ObservableSet<String> current,
+            final ObservableMapChange<int, String> change,
+            final Emitter<ObservableSetUpdateAction<String>> emitter,
+          ) {
+            // map change to list while transforming the value to uppercase
+            final Map<int, String> added = change.added;
+            final Map<int, String> removed = change.removed;
+            final Map<int, ObservableItemChange<String>> updated = change.updated;
+
+            final Set<String> newItems = <String>{};
+            final Set<String> removedItems = <String>{};
+
+            for (final MapEntry<int, String> entry in added.entries) {
+              newItems.add(entry.value.toUpperCase());
+            }
+
+            for (final MapEntry<int, String> entry in removed.entries) {
+              removedItems.add(entry.value.toUpperCase());
+            }
+
+            for (final MapEntry<int, ObservableItemChange<String>> entry in updated.entries) {
+              newItems.add(entry.value.newValue.toUpperCase());
+              removedItems.add(entry.value.oldValue.toUpperCase());
+            }
+
+            emitter(
+              ObservableSetUpdateAction<String>(
+                addItems: newItems,
+                removeItems: removedItems,
+              ),
+            );
+          },
+        );
+
+        final Disposable listener = rxReversedUpperCased.listen();
+
+        expect(rxReversedUpperCased.value.setView, <String>{'D', 'C', 'B', 'A2'});
+
+        rxSource.add(5, 'e');
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+        rxSource.remove(2);
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+
+        await listener.dispose();
+
+        rxSource[3] = 'c2';
+        rxSource.add(6, 'f');
+
+        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+
+        rxReversedUpperCased.listen();
+
+        expect(rxReversedUpperCased.value.setView, <String>{'F', 'E', 'D', 'C2', 'A2'});
       });
     });
   });

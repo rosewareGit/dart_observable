@@ -1,7 +1,9 @@
 import '../../../../../dart_observable.dart';
 
-class RxMapStatefulState<K, V, S> extends ObservableMapStatefulState<K, V, S> {
-  const RxMapStatefulState.custom(super.custom) : super.custom();
+class RxStatefulMapState<K, V, S> extends ObservableStatefulMapState<K, V, S> {
+  RxStatefulMapState.custom(super.custom) : super.custom();
 
-  const RxMapStatefulState.data(super.data) : super.data();
+  RxStatefulMapState.fromMap(final Map<K, V> data) : super.fromMap(data);
+
+  RxStatefulMapState.fromState(final ObservableMapState<K, V> state) : super.fromState(state);
 }

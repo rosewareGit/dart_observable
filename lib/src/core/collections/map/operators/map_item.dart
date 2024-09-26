@@ -11,11 +11,10 @@ class OperatorMapMap<K, V, V2> extends OperatorMapTransform<K, V, K, V2> {
   });
 
   @override
-  void transformChange(
+  void handleChange(
     final ObservableMapChange<K, V> change,
-    final Emitter<ObservableMapUpdateAction<K, V2>> updater,
   ) {
-    mapChange<K, V, V2>(change, updater, valueMapper);
+    mapChange<K, V, V2>(change, applyAction, valueMapper);
   }
 
   static mapChange<K, V, V2>(

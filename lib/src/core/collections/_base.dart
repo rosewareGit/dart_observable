@@ -1,16 +1,16 @@
 import '../../../dart_observable.dart';
-import 'operators/flatmaps.dart';
+import '../../api/collections/collection_transforms.dart';
+import 'operators/switch_maps.dart';
 import 'operators/transforms.dart';
 
-mixin ObservableCollectionBase<Self extends ObservableCollection<C, CS>, C, CS extends CollectionState<C>>
+abstract class RxCollectionBase<C, CS extends CollectionState<C>> extends RxBase<CS>
     implements ObservableCollection<C, CS> {
-  @override
-  ObservableFlatMaps<C> get flatMapChangeAs {
-    return ObservableCollectionFlatMapsImpl<Self, CS, C>(self);
-  }
 
-  Self get self;
+  RxCollectionBase(super.value, {super.distinct});
 
   @override
-  ObservableTransforms<C> get transformChangeAs => ObservableTransformsImpl<CS, C>(self);
+  ObservableCollectionTransforms<C> get transformChangeAs => ObservableCollectionTransformsImpl<CS, C>(this);
+
+  @override
+  ObservableCollectionSwitchMaps<C> get switchMapChangeAs => ObservableCollectionFlatMapsImpl<CS, C>(this);
 }

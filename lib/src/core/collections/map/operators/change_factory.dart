@@ -11,10 +11,7 @@ class OperatorMapFactory<K, V> extends OperatorMapTransform<K, V, K, V> {
   }) : super(factory: factory);
 
   @override
-  void transformChange(
-    final ObservableMapChange<K, V> change,
-    final Emitter<ObservableMapUpdateAction<K, V>> updater,
-  ) {
+  void handleChange(final ObservableMapChange<K, V> change) {
     final Map<K, V> addItems = Map<K, V>.fromEntries(<MapEntry<K, V>>[
       ...change.added.entries,
       ...change.updated
@@ -27,7 +24,7 @@ class OperatorMapFactory<K, V> extends OperatorMapTransform<K, V, K, V> {
           .entries,
     ]);
     final Set<K> removeKey = <K>{...change.removed.keys};
-    updater.call(
+    applyAction(
       ObservableMapUpdateAction<K, V>(
         addItems: addItems,
         removeItems: removeKey,

@@ -11,11 +11,8 @@ class OperatorMapFilter<K, V> extends OperatorMapTransform<K, V, K, V> {
   });
 
   @override
-  void transformChange(
-    final ObservableMapChange<K, V> change,
-    final Emitter<ObservableMapUpdateAction<K, V>> updater,
-  ) {
-    filterChange(change, updater, predicate);
+  void handleChange(final ObservableMapChange<K, V> change) {
+    filterChange(change, applyAction, predicate);
   }
 
   static void filterChange<K, V>(

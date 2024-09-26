@@ -9,6 +9,16 @@ typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FutureWorker = FutureOr<void> Function();
 
 abstract interface class Observable<T> {
+  factory Observable.just(
+    final T value, {
+    final bool distinct = true,
+  }) {
+    return Rx<T>(
+      value,
+      distinct: distinct,
+    );
+  }
+
   factory Observable.combineLatest({
     required final Iterable<Observable<dynamic>> observables,
     required final T Function() combiner,
@@ -53,11 +63,11 @@ abstract interface class Observable<T> {
 
   bool get distinct;
 
-  ObservableFlatMaps<T> get flatMapAs;
-
   T? get previous;
 
   ObservableState get state;
+
+  ObservableSwitchMaps<T> get switchMapAs;
 
   ObservableTransforms<T> get transformAs;
 
@@ -97,10 +107,6 @@ abstract interface class Observable<T> {
     final bool Function(T value) predicate,
   );
 
-  Observable<T2> flatMap<T2>(
-    final Observable<T2> Function(T value) mapper,
-  );
-
   Observable<T> handleError(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
     final bool Function(dynamic error)? predicate,
@@ -125,6 +131,10 @@ abstract interface class Observable<T> {
     final void Function(T value)? onActive,
     final void Function(T value)? onInactive,
   });
+
+  Observable<T2> switchMap<T2>(
+    final Observable<T2> Function(T value) mapper,
+  );
 
   Observable<T2> transform<T2>({
     required final T2 Function(T value) initialProvider,

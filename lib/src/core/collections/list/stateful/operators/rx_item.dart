@@ -1,8 +1,8 @@
 import '../../../../../../dart_observable.dart';
 import '../../../../rx/_impl.dart';
 
-StateOf<E?, S>? _getStateForIndex<E, S>({
-  required final ObservableListStatefulState<E, S> state,
+Either<E?, S>? _getStateForIndex<E, S>({
+  required final ObservableStatefulListState<E, S> state,
   required final int position,
   required final bool isInitial,
 }) {
@@ -10,24 +10,23 @@ StateOf<E?, S>? _getStateForIndex<E, S>({
     onData: (final ObservableListState<E> list) {
       final ObservableListChange<E> change = isInitial ? list.asChange() : list.lastChange;
       if (change.removed.containsKey(position)) {
-        return StateOf<E?, S>.data(state.data?.listView.elementAtOrNull(position));
+        return Either<E?, S>.left(state.leftOrNull?.listView.elementAtOrNull(position));
       } else if (change.added.containsKey(position)) {
-        return StateOf<E?, S>.data(change.added[position]);
+        return Either<E?, S>.left(change.added[position]);
       } else if (change.updated.containsKey(position)) {
-        return StateOf<E?, S>.data(change.updated[position]?.newValue);
+        return Either<E?, S>.left(change.updated[position]?.newValue);
       }
       return null;
     },
     onCustom: (final S state) {
-      return StateOf<E?, S>.custom(state);
+      return Either<E?, S>.right(state);
     },
   );
 }
 
-class OperatorObservableListStatefulRxItem<Self extends ObservableListStateful<Self, E, S>, E, S>
-    extends RxImpl<StateOf<E?, S>> {
+class OperatorObservableListStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
   final int position;
-  final Self source;
+  final ObservableStatefulList<E, S> source;
 
   Disposable? _listener;
 
@@ -35,7 +34,7 @@ class OperatorObservableListStatefulRxItem<Self extends ObservableListStateful<S
     required this.source,
     required this.position,
   }) : super(
-          _getStateForIndex(state: source.value, position: position, isInitial: true) ?? StateOf<E?, S>.data(null),
+          _getStateForIndex(state: source.value, position: position, isInitial: true) ?? Either<E?, S>.left(null),
         );
 
   @override
@@ -68,14 +67,14 @@ class OperatorObservableListStatefulRxItem<Self extends ObservableListStateful<S
       return;
     }
 
-    final StateOf<E?, S>? newState = _getStateForIndex(state: source.value, position: position, isInitial: true);
+    final Either<E?, S>? newState = _getStateForIndex(state: source.value, position: position, isInitial: true);
     if (newState != null) {
       value = newState;
     }
 
     _listener = source.listen(
-      onChange: (final ObservableListStatefulState<E, S> value) {
-        final StateOf<E?, S>? newState = _getStateForIndex(state: value, position: position, isInitial: false);
+      onChange: (final ObservableStatefulListState<E, S> value) {
+        final Either<E?, S>? newState = _getStateForIndex(state: value, position: position, isInitial: false);
         if (newState != null) {
           this.value = newState;
         }

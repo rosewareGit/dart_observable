@@ -1,5 +1,5 @@
 import '../../../../dart_observable.dart';
-import 'observable_to_observable/flat_map.dart';
+import 'observable_to_observable/switch_map.dart';
 import 'observable_to_observable/transform.dart';
 
 mixin OperatorsObservableToObservable<T> implements Observable<T> {
@@ -25,16 +25,6 @@ mixin OperatorsObservableToObservable<T> implements Observable<T> {
   }
 
   @override
-  Observable<T2> flatMap<T2>(
-    final Observable<T2> Function(T value) mapper,
-  ) {
-    return OperatorFlatMap<T, T2>(
-      source: this,
-      mapper: mapper,
-    );
-  }
-
-  @override
   Observable<T2> map<T2>(final T2 Function(T value) onChanged) {
     return transform(
       initialProvider: (final T value) {
@@ -46,6 +36,16 @@ mixin OperatorsObservableToObservable<T> implements Observable<T> {
       ) {
         emitter(onChanged(value));
       },
+    );
+  }
+
+  @override
+  Observable<T2> switchMap<T2>(
+    final Observable<T2> Function(T value) mapper,
+  ) {
+    return OperatorSwitchMap<T, T2>(
+      source: this,
+      mapper: mapper,
     );
   }
 

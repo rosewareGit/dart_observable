@@ -2,8 +2,8 @@ import '../../../../../../dart_observable.dart';
 import '../../../../../utils/extensions/iterable.dart';
 import '../../../../rx/_impl.dart';
 
-StateOf<E?, S>? _getStateByPredicate<E, S>({
-  required final ObservableSetStatefulState<E, S> state,
+Either<E?, S>? _getStateByPredicate<E, S>({
+  required final ObservableStatefulSetState<E, S> state,
   required final bool Function(E item) predicate,
   required final bool isInitial,
 }) {
@@ -23,25 +23,24 @@ StateOf<E?, S>? _getStateByPredicate<E, S>({
       if (added.isNotEmpty) {
         final E? matched = added.firstWhereOrNull((final E element) => predicate(element));
         if (matched != null) {
-          return StateOf<E?, S>.data(matched);
+          return Either<E?, S>.left(matched);
         }
       }
 
       if (itemRemoved) {
-        return StateOf<E?, S>.data(null);
+        return Either<E?, S>.left(null);
       }
       return null;
     },
     onCustom: (final S state) {
-      return StateOf<E?, S>.custom(state);
+      return Either<E?, S>.right(state);
     },
   );
 }
 
-class OperatorObservableSetStatefulRxItem<Self extends ObservableSetStateful<Self, E, S>, E, S>
-    extends RxImpl<StateOf<E?, S>> {
+class OperatorObservableSetStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
   final bool Function(E item) predicate;
-  final Self source;
+  final ObservableStatefulSet<E, S> source;
 
   Disposable? _listener;
 
@@ -49,7 +48,7 @@ class OperatorObservableSetStatefulRxItem<Self extends ObservableSetStateful<Sel
     required this.source,
     required this.predicate,
   }) : super(
-          _getStateByPredicate(state: source.value, predicate: predicate, isInitial: true) ?? StateOf<E?, S>.data(null),
+          _getStateByPredicate(state: source.value, predicate: predicate, isInitial: true) ?? Either<E?, S>.left(null),
         );
 
   @override
@@ -82,14 +81,14 @@ class OperatorObservableSetStatefulRxItem<Self extends ObservableSetStateful<Sel
       return;
     }
 
-    final StateOf<E?, S>? newState = _getStateByPredicate(state: source.value, predicate: predicate, isInitial: true);
+    final Either<E?, S>? newState = _getStateByPredicate(state: source.value, predicate: predicate, isInitial: true);
     if (newState != null) {
       value = newState;
     }
 
     _listener = source.listen(
-      onChange: (final ObservableSetStatefulState<E, S> value) {
-        final StateOf<E?, S>? newState = _getStateByPredicate(state: value, predicate: predicate, isInitial: false);
+      onChange: (final ObservableStatefulSetState<E, S> value) {
+        final Either<E?, S>? newState = _getStateByPredicate(state: value, predicate: predicate, isInitial: false);
         if (newState != null) {
           this.value = newState;
         }

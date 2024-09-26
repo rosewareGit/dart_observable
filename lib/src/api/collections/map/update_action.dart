@@ -3,12 +3,13 @@ import 'change.dart';
 
 class ObservableMapUpdateAction<K, V> {
   final Map<K, V> addItems;
-  final Iterable<K> removeItems;
+  final Iterable<K> removeKeys;
 
   ObservableMapUpdateAction({
-    required this.removeItems,
-    required this.addItems,
-  });
+    final Map<K, V>? addItems,
+    final Iterable<K>? removeItems,
+  })  : addItems = addItems ?? <K, V>{},
+        removeKeys = removeItems ?? <K>[];
 
   factory ObservableMapUpdateAction.fromChange(final ObservableMapChange<K, V> change) {
     return ObservableMapUpdateAction<K, V>(
@@ -26,7 +27,7 @@ class ObservableMapUpdateAction<K, V> {
     return ObservableMapChange.fromAction(
       state: updatedMap,
       addItems: addItems,
-      removeItems: removeItems,
+      removeItems: removeKeys,
     );
   }
 }

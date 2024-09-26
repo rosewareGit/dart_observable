@@ -1,33 +1,65 @@
 import '../../../../dart_observable.dart';
-import '_base_transform_proxy.dart';
 
 mixin BaseCollectionTransformOperator<
-    CR extends CollectionState<C>, // Collection state for this
-    CR2 extends CollectionState<C2>, // Collection state for the transformed
+    CS extends CollectionState<C>, // Collection state for this
+    CS2 extends CollectionState<C2>, // Collection state for the transformed
     C,
-    C2,
-    U> on RxBase<CR2> {
-  late final BaseCollectionTransformOperatorProxy<CR, CR2, C, C2> proxy =
-      BaseCollectionTransformOperatorProxy<CR, CR2, C, C2>(
-    current: this,
-    source: source,
-    transformChange: (final C change) {
-      transformChange(change, applyAction);
-    },
-  );
+    C2> on RxBase<CS2> {
+  Disposable? _listener;
 
-  Observable<CR> get source;
+  late final List<C> _buffer = <C>[];
 
-  C2? applyAction(final U action);
+  Observable<CS> get source;
+
+  void handleChange(final C change);
 
   @override
   void onInit() {
-    proxy.init();
+    _init();
     super.onInit();
   }
 
-  void transformChange(
-    final C change,
-    final Emitter<U> updater,
-  );
+  void _init() {
+    final Disposable activeListener = onActivityChanged(
+      onActive: (final _) {
+        _initListener();
+      },
+    );
+
+    source.addDisposeWorker(() async {
+      await activeListener.dispose();
+      final Disposable? changeListener = _listener;
+      if (changeListener != null) {
+        await changeListener.dispose();
+        _listener = null;
+      }
+      return dispose();
+    });
+  }
+
+  void _initListener() {
+    if (_listener != null) {
+      // apply buffered changes
+      for (final C change in _buffer) {
+        handleChange(change);
+      }
+      _buffer.clear();
+      return;
+    }
+
+    handleChange(source.value.asChange());
+
+    _listener = source.listen(
+      onChange: (final CS value) {
+        final C change = value.lastChange;
+        if (state == ObservableState.inactive) {
+          // store changes to apply when active
+          _buffer.add(change);
+          return;
+        }
+
+        handleChange(change);
+      },
+    );
+  }
 }

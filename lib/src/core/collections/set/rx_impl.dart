@@ -21,8 +21,8 @@ Set<E> Function(Iterable<E>? items) _splayTreeSetFactory<E>(final Comparator<E> 
   };
 }
 
-class RxSetImpl<E> extends RxBase<ObservableSetState<E>>
-    with ObservableCollectionBase<ObservableSet<E>, ObservableSetChange<E>, ObservableSetState<E>>, RxSetActionsImpl<E>
+class RxSetImpl<E> extends RxCollectionBase<ObservableSetChange<E>, ObservableSetState<E>>
+    with RxSetActionsImpl<E>
     implements RxSet<E> {
   RxSetImpl({
     final Iterable<E>? initial,
@@ -43,9 +43,6 @@ class RxSetImpl<E> extends RxBase<ObservableSetState<E>>
 
   @override
   int get length => _value.data.length;
-
-  @override
-  ObservableSet<E> get self => this;
 
   @override
   set value(final ObservableSetState<E> value) {

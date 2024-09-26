@@ -1,42 +1,29 @@
 import '../../../../../dart_observable.dart';
+import '../../../../api/collections/collection_transforms.dart';
 import '../../list/rx_impl.dart';
 import '../_base_transform.dart';
 
-abstract class OperatorCollectionTransformAsList<
-        E2, //
+class ListChangeTransform<
+        E, //
         C,
-        CS extends CollectionState<C>> extends RxListImpl<E2>
-    with
-        BaseCollectionTransformOperator<CS, ObservableListState<E2>, C, ObservableListChange<E2>,
-            ObservableListUpdateAction<E2>> {
+        CS extends CollectionState<C>> extends RxListImpl<E>
+    with BaseCollectionTransformOperator<CS, ObservableListState<E>, C, ObservableListChange<E>> {
   @override
   final Observable<CS> source;
+  final ListChangeUpdater<E, C>? transformFn;
 
-  OperatorCollectionTransformAsList({
+  ListChangeTransform({
     required this.source,
-    super.factory,
-  });
-}
-
-class OperatorCollectionTransformAsListArg<E, C, CS extends CollectionState<C>>
-    extends OperatorCollectionTransformAsList<E, C, CS> {
-  final void Function(
-    ObservableList<E> state,
-    C change,
-    Emitter<ObservableListUpdateAction<E>> updater,
-  ) transformFn;
-
-  OperatorCollectionTransformAsListArg({
-    required this.transformFn,
-    required super.source,
-    super.factory,
+    required super.factory,
+    this.transformFn,
   });
 
   @override
-  void transformChange(
+  void handleChange(
     final C change,
-    final Emitter<ObservableListUpdateAction<E>> updater,
   ) {
-    transformFn(this, change, updater);
+    assert(transformFn != null, 'override handleChange or provide a transformFn');
+
+    transformFn?.call(this, change, applyAction);
   }
 }
