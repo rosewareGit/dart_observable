@@ -335,7 +335,7 @@ abstract class RxBase<T>
       caller = '';
     } else {
       for (final String line in lines) {
-        if (line.contains('package:dart_observable') == false) {
+        if (line.contains('package:dart_observable/') == false) {
           caller = line;
           break;
         }
