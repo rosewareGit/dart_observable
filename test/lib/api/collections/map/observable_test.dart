@@ -12,6 +12,57 @@ class TestModel {
 
 void main() {
   group('ObservableMap', () {
+    group('merged', () {
+      test('Should merge multiple maps', () {
+        final RxMap<String, int> rxMap1 = RxMap<String, int>(<String, int>{
+          'a': 1,
+          'b': 2,
+        });
+        final RxMap<String, int> rxMap2 = RxMap<String, int>(<String, int>{
+          'c': 3,
+          'd': 4,
+        });
+        final RxMap<String, int> rxMap3 = RxMap<String, int>(<String, int>{
+          'e': 5,
+          'f': 6,
+        });
+
+        final ObservableMap<String, int> merged = ObservableMap<String, int>.merged(
+          collections: <ObservableMap<String, int>>[rxMap1, rxMap2, rxMap3],
+        );
+
+        merged.listen();
+
+        expect(merged.length, 6);
+        expect(merged['a'], 1);
+        expect(merged['b'], 2);
+        expect(merged['c'], 3);
+        expect(merged['d'], 4);
+        expect(merged['e'], 5);
+        expect(merged['f'], 6);
+
+        rxMap1['a'] = 2;
+        rxMap2['c'] = 4;
+        rxMap3['e'] = 6;
+
+        expect(merged['a'], 2);
+        expect(merged['c'], 4);
+        expect(merged['e'], 6);
+
+        rxMap1.remove('a');
+        rxMap2.remove('c');
+        rxMap3.remove('e');
+
+        expect(merged['a'], null);
+        expect(merged['c'], null);
+        expect(merged['e'], null);
+
+        rxMap1['e'] = 7;
+
+        expect(merged['e'], 7);
+      });
+    });
+
     group('sorted', () {
       test('Should create an observable', () {
         final ObservableMap<String, int> rxSorted = ObservableMap<String, int>.sorted(

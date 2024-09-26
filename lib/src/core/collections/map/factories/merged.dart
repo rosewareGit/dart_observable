@@ -107,7 +107,7 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
 
     for (final K key in removed.keys) {
       // If the key exists in an other collection, then it is not removed
-      V? valueInOtherCollection = getOtherValueOnRemove(key);
+      final V? valueInOtherCollection = getOtherValueOnRemove(key);
       if (valueInOtherCollection == null) {
         removedKeys.add(key);
       } else {
