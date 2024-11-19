@@ -14,12 +14,10 @@ class ObservableSwitchMapsImpl<T> implements ObservableSwitchMaps<T> {
   @override
   ObservableList<E> list<E>({
     required final ObservableList<E> Function(T value) mapper,
-    final FactoryList<E>? factory,
   }) {
     return ListSwitchMap<E, T>(
       source: source,
       mapper: mapper,
-      factory: factory,
     );
   }
 
@@ -50,12 +48,10 @@ class ObservableSwitchMapsImpl<T> implements ObservableSwitchMaps<T> {
   @override
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final ObservableStatefulList<E, S> Function(T value) mapper,
-    final FactoryList<E>? factory,
   }) {
     return StatefulListSwitchMap<E, S, T>(
       source: source,
       mapper: mapper,
-      factory: factory,
     );
   }
 

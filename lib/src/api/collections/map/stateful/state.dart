@@ -1,11 +1,18 @@
 import '../../../../../dart_observable.dart';
-import '../../../../core/collections/map/map_state.dart';
+import '../../../../core/collections/map/stateful/state.dart';
 
-abstract class ObservableStatefulMapState<K, V, S>
-    extends ObservableCollectionState<ObservableMapState<K, V>, ObservableMapChange<K, V>, S> {
-  ObservableStatefulMapState.custom(final S custom) : super.custom(custom);
+abstract class ObservableStatefulMapState<K, V, S> extends ObservableCollectionState<ObservableMapState<K, V>, S> {
+  ObservableStatefulMapState(final Either<ObservableMapState<K, V>, S> state) : super(state);
 
-  ObservableStatefulMapState.fromMap(final Map<K, V> data) : super.data(RxMapState<K, V>.initial(data));
+  factory ObservableStatefulMapState.custom(final S custom) {
+    return RxStatefulMapState<K, V, S>.custom(custom);
+  }
 
-  ObservableStatefulMapState.fromState(final ObservableMapState<K, V> state) : super.data(state);
+  factory ObservableStatefulMapState.fromMap(final Map<K, V> data) {
+    return RxStatefulMapState<K, V, S>.fromMap(data);
+  }
+
+  factory ObservableStatefulMapState.fromState(final ObservableMapState<K, V> state) {
+    return RxStatefulMapState<K, V, S>.fromState(state);
+  }
 }

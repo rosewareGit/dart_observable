@@ -24,11 +24,14 @@ class OperatorMapFactory<K, V> extends OperatorMapTransform<K, V, K, V> {
           .entries,
     ]);
     final Set<K> removeKey = <K>{...change.removed.keys};
-    applyAction(
-      ObservableMapUpdateAction<K, V>(
-        addItems: addItems,
-        removeItems: removeKey,
-      ),
-    );
+
+    if (removeKey.isNotEmpty || addItems.isNotEmpty) {
+      applyAction(
+        ObservableMapUpdateAction<K, V>(
+          removeKeys: removeKey,
+          addItems: addItems,
+        ),
+      );
+    }
   }
 }

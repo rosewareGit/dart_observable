@@ -39,7 +39,6 @@ typedef StatefulSetChangeUpdater<E, S, C> = void Function(
 abstract interface class ObservableCollectionTransforms<C> {
   ObservableList<E> list<E>({
     required final ListChangeUpdater<E, C> transform,
-    final FactoryList<E>? factory,
   });
 
   ObservableMap<K, V> map<K, V>({
@@ -54,7 +53,6 @@ abstract interface class ObservableCollectionTransforms<C> {
 
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final StatefulListChangeUpdater<E, S, C> transform,
-    final FactoryList<E>? factory,
   });
 
   ObservableStatefulMap<K, V, S> statefulMap<K, V, S>({

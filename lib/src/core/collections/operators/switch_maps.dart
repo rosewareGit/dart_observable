@@ -6,20 +6,18 @@ import 'switch_maps/stateful_list.dart';
 import 'switch_maps/stateful_map.dart';
 import 'switch_maps/stateful_set.dart';
 
-class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> implements ObservableCollectionSwitchMaps<C> {
-  final ObservableCollection<C, CS> source;
+class ObservableCollectionFlatMapsImpl<T, C> implements ObservableCollectionSwitchMaps<C> {
+  final ObservableCollection<T, C> source;
 
   ObservableCollectionFlatMapsImpl(this.source);
 
   @override
   ObservableList<E> list<E>({
     required final ObservableList<E>? Function(C change) mapper,
-    final FactoryList<E>? factory,
   }) {
-    return ListChangeSwitchMap<E, C, CS>(
+    return ListChangeSwitchMap<E, C, T>(
       source: source,
       mapChange: mapper,
-      factory: factory,
     );
   }
 
@@ -28,7 +26,7 @@ class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> impleme
     required final ObservableMap<K, V>? Function(C change) mapper,
     final FactoryMap<K, V>? factory,
   }) {
-    return MapChangeSwitchMap<K, V, C, CS>(
+    return MapChangeSwitchMap<K, V, C, T>(
       source: source,
       mapChange: mapper,
       factory: factory,
@@ -40,7 +38,7 @@ class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> impleme
     required final ObservableSet<E>? Function(C change) mapper,
     final FactorySet<E>? factory,
   }) {
-    return SetChangeSwitchMap<E, C, CS>(
+    return SetChangeSwitchMap<E, C, T>(
       source: source,
       mapChange: mapper,
       factory: factory,
@@ -50,12 +48,10 @@ class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> impleme
   @override
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final ObservableStatefulList<E, S>? Function(C change) mapper,
-    final FactoryList<E>? factory,
   }) {
-    return StatefulListChangeSwitchMap<E, S, C, CS>(
+    return StatefulListChangeSwitchMap<E, S, C, T>(
       source: source,
       mapChange: mapper,
-      factory: factory,
     );
   }
 
@@ -64,7 +60,7 @@ class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> impleme
     required final ObservableStatefulMap<K, V, S>? Function(C change) mapper,
     final FactoryMap<K, V>? factory,
   }) {
-    return StatefulMapChangeSwitchMap<K, V, S, C, CS>(
+    return StatefulMapChangeSwitchMap<K, V, S, C, T>(
       source: source,
       mapChange: mapper,
       factory: factory,
@@ -76,7 +72,7 @@ class ObservableCollectionFlatMapsImpl<CS extends CollectionState<C>, C> impleme
     required final ObservableStatefulSet<E, S>? Function(C change) mapper,
     final FactorySet<E>? factory,
   }) {
-    return StatefulSetChangeSwitchMap<E, S, C, CS>(
+    return StatefulSetChangeSwitchMap<E, S, C, T>(
       source: source,
       mapChange: mapper,
       factory: factory,

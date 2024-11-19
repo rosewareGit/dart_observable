@@ -7,21 +7,18 @@ import 'transforms/map_stateful.dart';
 import 'transforms/set.dart';
 import 'transforms/set_stateful.dart';
 
-class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
-    implements ObservableCollectionTransforms<C> {
-  final Observable<CS> source;
+class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTransforms<C> {
+  final ObservableCollection<T, C> source;
 
   ObservableCollectionTransformsImpl(this.source);
 
   @override
   ObservableList<E> list<E>({
     required final ListChangeUpdater<E, C> transform,
-    final FactoryList<E>? factory,
   }) {
-    return ListChangeTransform<E, C, CS>(
+    return ListChangeTransform<E, C, T>(
       source: source,
       transformFn: transform,
-      factory: factory,
     );
   }
 
@@ -30,7 +27,7 @@ class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
     required final MapChangeUpdater<K, V, C> transform,
     final FactoryMap<K, V>? factory,
   }) {
-    return MapChangeTransform<C, CS, K, V>(
+    return MapChangeTransform<C, T, K, V>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -42,7 +39,7 @@ class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
     required final SetChangeUpdater<E, C> transform,
     final Set<E> Function(Iterable<E>? items)? factory,
   }) {
-    return SetChangeTransform<E, C, CS>(
+    return SetChangeTransform<E, C, T>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -52,12 +49,10 @@ class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
   @override
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final StatefulListChangeUpdater<E, S, C> transform,
-    final FactoryList<E>? factory,
   }) {
-    return StatefulListChangeTransform<E, S, CS, C>(
+    return StatefulListChangeTransform<E, S, T, C>(
       source: source,
       transformFn: transform,
-      factory: factory,
     );
   }
 
@@ -66,7 +61,7 @@ class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
     required final StatefulMapChangeUpdater<K, V, S, C> transform,
     final FactoryMap<K, V>? factory,
   }) {
-    return OperatorCollectionTransformMapStateful<K, V, S, CS, C>(
+    return OperatorCollectionTransformMapStateful<K, V, S, T, C>(
       source: source,
       transformFn: transform,
       factory: factory,
@@ -78,7 +73,7 @@ class ObservableCollectionTransformsImpl<CS extends CollectionState<C>, C>
     required final StatefulSetChangeUpdater<E, S, C> transform,
     final FactorySet<E>? factory,
   }) {
-    return StatefulSetChangeTransform<E, S, CS, C>(
+    return StatefulSetChangeTransform<E, S, T, C>(
       source: source,
       transformFn: transform,
       factory: factory,

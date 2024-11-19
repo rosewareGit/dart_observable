@@ -14,12 +14,10 @@ class ObservableTransformsImpl<T> implements ObservableTransforms<T> {
   @override
   ObservableList<E> list<E>({
     required final ListUpdater<E, T> transform,
-    final FactoryList<E>? factory,
   }) {
     return ListTransform<T, E>(
       source: source,
       transformFn: transform,
-      factory: factory,
     );
   }
 
@@ -50,12 +48,10 @@ class ObservableTransformsImpl<T> implements ObservableTransforms<T> {
   @override
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final StatefulListUpdater<E, S, T> transform,
-    final FactoryList<E>? factory,
   }) {
     return StatefulListTransform<T, E, S>(
       source: source,
       transformFn: transform,
-      factory: factory,
     );
   }
 

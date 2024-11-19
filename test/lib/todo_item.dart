@@ -10,4 +10,14 @@ class TodoItem {
     this.description = '',
     this.completed = false,
   });
+
+  @override
+  int get hashCode {
+    return id.hashCode;
+  }
+
+  @override
+  bool operator ==(final Object other) {
+    return other is TodoItem && other.id == id;
+  }
 }

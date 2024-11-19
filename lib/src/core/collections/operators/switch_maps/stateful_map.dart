@@ -3,13 +3,13 @@ import '../../../rx/operators/_base_switch_map.dart';
 import '../../map/stateful/rx_stateful.dart';
 import '../_base_switch_map.dart';
 
-class StatefulMapChangeSwitchMap<K, V, S, C, CS extends CollectionState<C>> extends RxStatefulMapImpl<K, V, S>
+class StatefulMapChangeSwitchMap<K, V, S, C, T> extends RxStatefulMapImpl<K, V, S>
     with
-        BaseSwitchMapOperator<ObservableStatefulMap<K, V, S>, CS, ObservableStatefulMapState<K, V, S>>,
-        BaseSwitchMapChangeOperator<ObservableStatefulMap<K, V, S>, CS, C, ObservableStatefulMapState<K, V, S>,
+        BaseSwitchMapOperator<ObservableStatefulMap<K, V, S>, T, ObservableStatefulMapState<K, V, S>>,
+        BaseSwitchMapChangeOperator<ObservableStatefulMap<K, V, S>, T, C, ObservableStatefulMapState<K, V, S>,
             Either<ObservableMapChange<K, V>, S>> {
   @override
-  final ObservableCollection<C, CS> source;
+  final ObservableCollection<T, C> source;
   @override
   final ObservableStatefulMap<K, V, S>? Function(C value) mapChange;
 

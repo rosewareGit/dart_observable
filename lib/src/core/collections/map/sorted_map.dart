@@ -1,28 +1,31 @@
-import 'dart:collection';
-
 class SortedMap<K, V> implements Map<K, V> {
   final Comparator<V> _comparator;
 
+  // final Map<K, V> _map;
   final Map<K, V> _map;
-  final Map<V, K> _keyMap;
-  final SplayTreeSet<V> _sorted;
+  final List<K> _sortedByKeys;
 
   SortedMap(
     this._comparator, {
     final Map<K, V>? initial,
-  })  : _map = Map<K, V>.of(initial ?? <K, V>{}),
-        _keyMap = Map<V, K>.fromEntries(
-          initial == null
-              ? <MapEntry<V, K>>{}
-              : initial.entries.map((final MapEntry<K, V> entry) => MapEntry<V, K>(entry.value, entry.key)),
-        ),
-        _sorted = SplayTreeSet<V>.of(
-          (initial ?? <K, V>{}).values,
-          _comparator,
-        );
+  })  : _map = <K, V>{},
+        _sortedByKeys = <K>[] {
+    if (initial != null) {
+      _insertAll(initial);
+    }
+  }
 
   @override
-  Iterable<MapEntry<K, V>> get entries => _map.entries;
+  Iterable<MapEntry<K, V>> get entries {
+    return _sortedByKeys.map((final K key) {
+      final V? value = _map[key];
+      if (value == null) {
+        throw StateError('Value not found in map');
+      }
+
+      return MapEntry<K, V>(key, value);
+    });
+  }
 
   @override
   bool get isEmpty => _map.isEmpty;
@@ -76,7 +79,7 @@ class SortedMap<K, V> implements Map<K, V> {
   @override
   void clear() {
     _map.clear();
-    _sorted.clear();
+    _sortedByKeys.clear();
   }
 
   @override
@@ -111,9 +114,8 @@ class SortedMap<K, V> implements Map<K, V> {
   @override
   V? remove(final Object? key) {
     final V? value = _map.remove(key);
-    _keyMap.remove(value);
     if (value != null) {
-      _sorted.remove(value);
+      _sortedByKeys.remove(key);
     }
     return value;
   }
@@ -129,14 +131,14 @@ class SortedMap<K, V> implements Map<K, V> {
 
     for (final MapEntry<K, V> entry in toRemove.entries) {
       _map.remove(entry.key);
-      _sorted.remove(entry.value);
+      _sortedByKeys.remove(entry.key);
     }
   }
 
   List<V> toList({final bool growable = true}) {
     final List<V> list = <V>[];
-    for (final V value in _sorted) {
-      final K? key = _keyMap[value];
+    for (final K key in _sortedByKeys) {
+      // final K? key = _keyMap[value];
       final V? updatedItem = _map[key];
       if (updatedItem != null) {
         list.add(updatedItem);
@@ -185,18 +187,18 @@ class SortedMap<K, V> implements Map<K, V> {
   void _insert(final K key, final V value) {
     final V? current = _map[key];
     _map[key] = value;
-    _keyMap[value] = key;
+
     if (current == null) {
-      _sorted.add(value);
+      _insertKeyToSorted(key, value);
     } else {
       final int compare = _comparator(current, value);
       if (compare == 0) {
-        // Does not need to update the sorted set
+        // Does not need to update the sorted list
         return;
       }
 
-      _sorted.remove(current);
-      _sorted.add(value);
+      _sortedByKeys.remove(key);
+      _insertKeyToSorted(key, value);
     }
   }
 
@@ -204,5 +206,33 @@ class SortedMap<K, V> implements Map<K, V> {
     for (final MapEntry<K, V> entry in other.entries) {
       _insert(entry.key, entry.value);
     }
+  }
+
+  int _getPositionToInsert(final V item) {
+    int low = 0;
+    int high = _sortedByKeys.length;
+
+    while (low < high) {
+      final int mid = (low + high) ~/ 2;
+      final K keyAtMid = _sortedByKeys[mid];
+      final V valueAtMid = _map[keyAtMid] as V;
+      final int compareResult = _comparator(valueAtMid, item);
+
+      if (compareResult > 0) {
+        // If the item should be inserted before the current mid
+        high = mid;
+      } else {
+        // If the item is equal or greater, move low up
+        low = mid + 1;
+      }
+    }
+
+    // At this point, 'low' is the correct position to insert the item
+    return low;
+  }
+
+  void _insertKeyToSorted(final K key, final V value) {
+    final int index = _getPositionToInsert(value);
+    _sortedByKeys.insert(index, key);
   }
 }

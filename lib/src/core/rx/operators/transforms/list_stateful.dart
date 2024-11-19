@@ -10,7 +10,6 @@ class StatefulListTransform<T, E, S> extends RxStatefulListImpl<E, S>
 
   StatefulListTransform({
     required this.source,
-    required super.factory,
     this.transformFn,
   }) : super(<E>[]);
 

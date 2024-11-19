@@ -3,12 +3,12 @@ import '../../../rx/operators/_base_switch_map.dart';
 import '../../set/rx_impl.dart';
 import '../_base_switch_map.dart';
 
-class SetChangeSwitchMap<E, C, CS extends CollectionState<C>> extends RxSetImpl<E>
+class SetChangeSwitchMap<E, C, T> extends RxSetImpl<E>
     with
-        BaseSwitchMapOperator<ObservableSet<E>, CS, ObservableSetState<E>>,
-        BaseSwitchMapChangeOperator<ObservableSet<E>, CS, C, ObservableSetState<E>, ObservableSetChange<E>> {
+        BaseSwitchMapOperator<ObservableSet<E>, T, ObservableSetState<E>>,
+        BaseSwitchMapChangeOperator<ObservableSet<E>, T, C, ObservableSetState<E>, ObservableSetChange<E>> {
   @override
-  final ObservableCollection<C, CS> source;
+  final ObservableCollection<T, C> source;
   @override
   final ObservableSet<E>? Function(C value) mapChange;
 

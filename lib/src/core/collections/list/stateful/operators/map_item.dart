@@ -9,7 +9,6 @@ class OperatorStatefulListMapItem<E, E2, S> extends StatefulListChangeTransform<
   OperatorStatefulListMapItem({
     required super.source,
     required this.mapper,
-    super.factory,
   });
 
   @override

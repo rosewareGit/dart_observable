@@ -37,11 +37,14 @@ class OperatorMapMap<K, V, V2> extends OperatorMapTransform<K, V, K, V2> {
     if (addItems.isEmpty && removeItems.isEmpty) {
       return;
     }
-    updater(
-      ObservableMapUpdateAction<K, V2>(
-        removeItems: removeItems,
-        addItems: addItems,
-      ),
-    );
+
+    if (removeItems.isNotEmpty || addItems.isNotEmpty) {
+      updater(
+        ObservableMapUpdateAction<K, V2>(
+          removeKeys: removeItems,
+          addItems: addItems,
+        ),
+      );
+    }
   }
 }

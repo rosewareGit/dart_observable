@@ -2,8 +2,8 @@ import '../../../../../../dart_observable.dart';
 import '../rx_impl.dart';
 
 class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
-  final List<ObservableMap<K, V>> collections;
-  final V? Function(K key, V current, V conflict)? conflictResolver;
+  final Iterable<ObservableMap<K, V>> collections;
+  final MergeConflictResolver<K, V>? conflictResolver;
 
   late final List<Disposable> _subscriptions = <Disposable>[];
 
@@ -49,12 +49,11 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
     }
 
     for (final ObservableMap<K, V> collection in collections) {
-      _handleChange(collection: collection, change: collection.value.asChange());
+      _handleChange(collection: collection, change: collection.currentStateAsChange);
 
       _subscriptions.add(
-        collection.listen(
-          onChange: (final ObservableMapState<K, V> value) {
-            final ObservableMapChange<K, V> change = value.lastChange;
+        collection.onChange(
+          onChange: (final ObservableMapChange<K, V> change) {
             if (state == ObservableState.inactive) {
               _bufferedChanges.putIfAbsent(collection, () {
                 return <ObservableMapChange<K, V>>[];
@@ -71,7 +70,7 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
 
   static void handleChange<K, V>({
     required final ObservableMapChange<K, V> change,
-    required final V? Function(K, V, V)? conflictResolver,
+    required final V? Function(K, V, ObservableItemChange<V?>)? conflictResolver,
     required final V? Function(K key) currentValueProvider,
     required final V? Function(K key) getOtherValueOnRemove,
     required final void Function(ObservableMapUpdateAction<K, V> action) applyMapUpdateAction,
@@ -83,44 +82,83 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
     final Set<K> removedKeys = <K>{};
 
     if (conflictResolver != null) {
+      final Map<K, V> toAdd = <K, V>{};
       for (final MapEntry<K, V> entry in added.entries) {
         final K key = entry.key;
         final V value = entry.value;
         final V? currentValue = currentValueProvider(key);
         if (currentValue != null) {
-          final V? newValue = conflictResolver(key, currentValue, value);
+          final V? newValue = conflictResolver(
+            key,
+            currentValue,
+            ObservableItemChange<V?>(
+              oldValue: null,
+              newValue: value,
+            ),
+          );
           if (newValue != null) {
-            added[key] = newValue;
+            toAdd[key] = newValue;
           }
         }
       }
+
+      added.addAll(toAdd);
     }
 
     for (final MapEntry<K, ObservableItemChange<V>> entry in updated.entries) {
       final K key = entry.key;
       final V newValue = entry.value.newValue;
       final V? value = currentValueProvider(key);
-      if (newValue != value) {
+      if (value == null) {
+        added[key] = newValue;
+      } else if (conflictResolver != null) {
+        final V? resolvedValue = conflictResolver(
+          key,
+          value,
+          ObservableItemChange<V?>(oldValue: entry.value.oldValue, newValue: newValue),
+        );
+
+        if (resolvedValue != null) {
+          added[key] = resolvedValue;
+        }
+      } else if (newValue != value) {
         added[key] = newValue;
       }
     }
 
-    for (final K key in removed.keys) {
+    for (final MapEntry<K, V> entry in removed.entries) {
+      final K key = entry.key;
+      final V removedValue = entry.value;
+
       // If the key exists in an other collection, then it is not removed
       final V? valueInOtherCollection = getOtherValueOnRemove(key);
+      final V? currentValue = currentValueProvider(key);
       if (valueInOtherCollection == null) {
         removedKeys.add(key);
+      } else if (conflictResolver != null && currentValue != null) {
+        final V? resolvedValue = conflictResolver(
+          key,
+          currentValue,
+          ObservableItemChange<V?>(
+            oldValue: removedValue,
+            newValue: null,
+          ),
+        );
+        if (resolvedValue == null) {
+          removedKeys.add(key);
+        } else {
+          added[key] = resolvedValue;
+        }
       } else {
         added[key] = valueInOtherCollection;
       }
     }
 
-    applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        addItems: added,
-        removeItems: removedKeys,
-      ),
-    );
+    if (removedKeys.isNotEmpty || added.isNotEmpty) {
+      applyMapUpdateAction(
+        ObservableMapUpdateAction<K, V>(removeKeys: removedKeys, addItems: added),
+      );
+    }
   }
 
   void _handleChange({

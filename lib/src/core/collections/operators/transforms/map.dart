@@ -3,15 +3,15 @@ import '../../../../api/collections/collection_transforms.dart';
 import '../../map/rx_impl.dart';
 import '../_base_transform.dart';
 
-class MapChangeTransform<C, CS extends CollectionState<C>, K, V> extends RxMapImpl<K, V>
+class MapChangeTransform<C, T, K, V> extends RxMapImpl<K, V>
     with
         BaseCollectionTransformOperator<
-            CS, //
+            T, //
             ObservableMapState<K, V>,
             C,
             ObservableMapChange<K, V>> {
   @override
-  final Observable<CS> source;
+  final ObservableCollection<T, C> source;
   final MapChangeUpdater<K, V, C>? transformFn;
 
   MapChangeTransform({

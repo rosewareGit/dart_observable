@@ -47,41 +47,4 @@ class ObservableMapChange<K, V> {
   }
 
   bool get isEmpty => added.isEmpty && updated.isEmpty && removed.isEmpty;
-
-  static ObservableMapChange<K, V> fromAction<K, V>({
-    required final Map<K, V> state,
-    required final Map<K, V> addItems,
-    required final Iterable<K> removeItems,
-  }) {
-    final Map<K, V> added = <K, V>{};
-    final Map<K, V> removed = <K, V>{};
-    final Map<K, ObservableItemChange<V>> updated = <K, ObservableItemChange<V>>{};
-
-    for (final K key in removeItems) {
-      final V? current = state[key];
-      if (current != null) {
-        removed[key] = current;
-        state.remove(key);
-      }
-    }
-
-    for (final MapEntry<K, V> entry in addItems.entries) {
-      final V? current = state[entry.key];
-      if (current == null) {
-        added[entry.key] = entry.value;
-        state[entry.key] = entry.value;
-      } else if (current != entry.value) {
-        updated[entry.key] = ObservableItemChange<V>(
-          oldValue: current,
-          newValue: entry.value,
-        );
-        state[entry.key] = entry.value;
-      }
-    }
-    return ObservableMapChange<K, V>(
-      added: added,
-      updated: updated,
-      removed: removed,
-    );
-  }
 }

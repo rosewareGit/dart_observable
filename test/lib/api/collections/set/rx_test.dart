@@ -104,7 +104,7 @@ void main() {
         rxSet.value = RxSetState<int>.initial(<int>{2, 4, 6});
 
         expect(rxSet.value.setView, <int>{2, 4, 6});
-        final ObservableSetChange<int> change = rxSet.value.lastChange;
+        final ObservableSetChange<int> change = rxSet.change;
 
         expect(change.added, <int>{4, 6});
         expect(change.removed, <int>{1, 3});

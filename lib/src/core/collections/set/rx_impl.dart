@@ -21,22 +21,38 @@ Set<E> Function(Iterable<E>? items) _splayTreeSetFactory<E>(final Comparator<E> 
   };
 }
 
-class RxSetImpl<E> extends RxCollectionBase<ObservableSetChange<E>, ObservableSetState<E>>
+class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSetChange<E>>
     with RxSetActionsImpl<E>
     implements RxSet<E> {
+  late ObservableSetChange<E> _change;
+
   RxSetImpl({
     final Iterable<E>? initial,
     final Set<E> Function(Iterable<E>? items)? factory,
   }) : super(
           RxSetState<E>.initial((factory ?? defaultSetFactory<E>()).call(initial)),
-        );
+        ) {
+    _change = currentStateAsChange;
+  }
 
   RxSetImpl.splayTreeSet({
     required final Comparator<E> compare,
     final Iterable<E>? initial,
   }) : super(
           RxSetState<E>.initial(_splayTreeSetFactory<E>(compare)(initial)),
-        );
+        ) {
+    _change = currentStateAsChange;
+  }
+
+  @override
+  ObservableSetChange<E> get change {
+    return _change;
+  }
+
+  @override
+  ObservableSetChange<E> get currentStateAsChange {
+    return ObservableSetChange<E>(added: _value.data);
+  }
 
   @override
   Set<E> get data => _value.data;
@@ -59,10 +75,8 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetChange<E>, ObservableSe
       return null;
     }
 
-    super.value = RxSetState<E>(
-      updated,
-      change,
-    );
+    _change = change;
+    notify();
     return change;
   }
 
@@ -114,6 +128,11 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetChange<E>, ObservableSe
       source: this,
       predicate: predicate,
     );
+  }
+
+  @override
+  ObservableSet<E> sorted(final Comparator<E> compare) {
+    return changeFactory(_splayTreeSetFactory<E>(compare));
   }
 
   @override

@@ -1,11 +1,18 @@
 import '../../../../../dart_observable.dart';
-import '../../../../core/collections/set/set_state.dart';
+import '../../../../core/collections/set/stateful/state.dart';
 
-abstract class ObservableStatefulSetState<E, S>
-    extends ObservableCollectionState<ObservableSetState<E>, ObservableSetChange<E>, S> {
-  ObservableStatefulSetState.custom(final S custom) : super.custom(custom);
+abstract class ObservableStatefulSetState<E, S> extends ObservableCollectionState<ObservableSetState<E>, S> {
+  ObservableStatefulSetState(final Either<ObservableSetState<E>, S> state) : super(state);
 
-  ObservableStatefulSetState.fromSet(final Set<E> data) : super.data(RxSetState<E>.initial(data));
+  factory ObservableStatefulSetState.custom(final S custom) {
+    return RxStatefulSetState<E, S>.custom(custom);
+  }
 
-  ObservableStatefulSetState.fromState(final ObservableSetState<E> state) : super.data(state);
+  factory ObservableStatefulSetState.fromSet(final Set<E> data) {
+    return RxStatefulSetState<E, S>.fromSet(data);
+  }
+
+  factory ObservableStatefulSetState.fromState(final ObservableSetState<E> state) {
+    return RxStatefulSetState<E, S>.fromState(state);
+  }
 }

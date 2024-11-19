@@ -8,7 +8,6 @@ class ObservableListMapItemOperator<E, E2>
   ObservableListMapItemOperator({
     required this.mapper,
     required super.source,
-    super.factory,
   });
 
   @override
@@ -33,11 +32,15 @@ class ObservableListMapItemOperator<E, E2>
     );
     final List<E2> itemsToAdd = change.added.values.map(mapper).toList();
 
+    if (removedIndexes.isEmpty && updateItems.isEmpty && itemsToAdd.isEmpty) {
+      return;
+    }
+
     updater(
       ObservableListUpdateAction<E2>(
-        removeIndexes: removedIndexes,
-        updateItemAtPosition: updateItems,
-        insertItemAtPosition: <MapEntry<int?, Iterable<E2>>>[MapEntry<int?, Iterable<E2>>(null, itemsToAdd)],
+        removeItems: removedIndexes,
+        updateItems: updateItems,
+        addItems: itemsToAdd,
       ),
     );
   }

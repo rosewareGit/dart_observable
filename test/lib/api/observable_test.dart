@@ -101,12 +101,6 @@ void main() {
         expect(rxInt.previous, null);
       });
 
-      test('Should be null after dispose', () async {
-        final Observable<int> rxInt = Rx<int>(0);
-        await rxInt.dispose();
-        expect(rxInt.previous, null);
-      });
-
       test('Should be null after value change', () {
         final Rx<int> rxInt = Rx<int>(0);
         rxInt.value = 1;

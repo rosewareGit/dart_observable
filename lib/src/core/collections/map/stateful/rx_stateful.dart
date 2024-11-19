@@ -1,20 +1,26 @@
+import 'package:meta/meta.dart';
+
 import '../../../../../dart_observable.dart';
-import '../../_base.dart';
+import '../../_base_stateful.dart';
 import '../map_state.dart';
+import '../map_update_action_handler.dart';
 import '../rx_actions.dart';
 import '../rx_impl.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
+import 'operators/filter_item_state.dart';
 import 'operators/map_item.dart';
 import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
 import 'state.dart';
 
-class RxStatefulMapImpl<K, V, S>
-    extends RxCollectionBase<Either<ObservableMapChange<K, V>, S>, ObservableStatefulMapState<K, V, S>>
-    with RxMapActionsImpl<K, V>
-    implements RxStatefulMap<K, V, S> {
+class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
+    ObservableMapState<K, V>,
+    ObservableStatefulMapState<K, V, S>,
+    ObservableMapChange<K, V>,
+    S> with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V> implements RxStatefulMap<K, V, S> {
   final FactoryMap<K, V> _factory;
+  late Either<ObservableMapChange<K, V>, S> _change;
 
   RxStatefulMapImpl(
     final Map<K, V> data, {
@@ -42,7 +48,9 @@ class RxStatefulMapImpl<K, V, S>
     final ObservableStatefulMapState<K, V, S> state, {
     final FactoryMap<K, V>? factory,
   })  : _factory = factory ?? defaultMapFactory<K, V>(),
-        super(state);
+        super(state) {
+    _change = currentStateAsChange;
+  }
 
   @override
   Map<K, V> get data => value.fold(
@@ -66,7 +74,7 @@ class RxStatefulMapImpl<K, V, S>
     );
   }
 
-  @override
+  @protected
   Either<ObservableMapChange<K, V>, S>? applyAction(
     final Either<ObservableMapUpdateAction<K, V>, S> action,
   ) {
@@ -77,36 +85,45 @@ class RxStatefulMapImpl<K, V, S>
           onData: (final ObservableMapState<K, V> data) {
             final RxMapState<K, V> state = data as RxMapState<K, V>;
             final Map<K, V> updatedMap = state.data;
-            final ObservableMapChange<K, V> change = listUpdateAction.apply(updatedMap);
+            final ObservableMapChange<K, V> change = applyActionAndComputeChange(
+              data: updatedMap,
+              action: listUpdateAction,
+            );
 
             if (change.isEmpty) {
               return null;
             }
 
             final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
-              RxMapState<K, V>(updatedMap, change),
+              RxMapState<K, V>(updatedMap),
             );
 
+            _change = Either<ObservableMapChange<K, V>, S>.left(change);
             super.value = newState;
-            return newState.lastChange;
+            return _change;
           },
           onCustom: (final S state) {
             final Map<K, V> updatedMap = _factory(<K, V>{});
-            final ObservableMapChange<K, V> change = listUpdateAction.apply(updatedMap);
-
-            final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
-              RxMapState<K, V>(updatedMap, change),
+            final ObservableMapChange<K, V> change = applyActionAndComputeChange(
+              data: updatedMap,
+              action: listUpdateAction,
             );
 
+            final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
+              RxMapState<K, V>(updatedMap),
+            );
+
+            _change = Either<ObservableMapChange<K, V>, S>.left(change);
             super.value = newState;
-            return newState.lastChange;
+            return _change;
           },
         );
       },
       onRight: (final S action) {
         final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.custom(action);
+        _change = Either<ObservableMapChange<K, V>, S>.right(action);
         super.value = newState;
-        return newState.lastChange;
+        return _change;
       },
     );
   }
@@ -127,6 +144,15 @@ class RxStatefulMapImpl<K, V, S>
   }
 
   @override
+  ObservableStatefulMap<K, V, S> sorted(final Comparator<V> comparator) {
+    return changeFactory(
+      (final Map<K, V>? items){
+        return SortedMap<K,V>(comparator, initial: items);
+      },
+    );
+  }
+
+  @override
   bool containsKey(final K key) {
     return value.fold(
       onData: (final ObservableMapState<K, V> data) => data.mapView.containsKey(key),
@@ -140,6 +166,18 @@ class RxStatefulMapImpl<K, V, S>
     final FactoryMap<K, V>? factory,
   }) {
     return OperatorStatefulMapFilterItem<K, V, S>(
+      source: this,
+      predicate: predicate,
+      factory: factory,
+    );
+  }
+
+  @override
+  ObservableStatefulMap<K, V, S> filterItemWithState(
+    final bool Function(Either<MapEntry<K, V>, S>) predicate, {
+    final FactoryMap<K, V>? factory,
+  }) {
+    return OperatorStatefulMapFilterItemWithState<K, V, S>(
       source: this,
       predicate: predicate,
       factory: factory,
@@ -190,6 +228,32 @@ class RxStatefulMapImpl<K, V, S>
     return value.fold(
       onData: (final ObservableMapState<K, V> data) => data.mapView.values.toList(),
       onCustom: (final _) => null,
+    );
+  }
+
+  @override
+  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
+    _change = Either<ObservableMapChange<K, V>, S>.left(change);
+    super.value = RxStatefulMapState<K, V, S>.fromState(
+      RxMapState<K, V>(data),
+    );
+  }
+
+  @override
+  Either<ObservableMapChange<K, V>, S> get change => _change;
+
+  @override
+  Either<ObservableMapChange<K, V>, S> get currentStateAsChange {
+    return value.fold(
+      onData: (final ObservableMapState<K, V> data) {
+        final ObservableMapChange<K, V> change = ObservableMapChange<K, V>(
+          added: (data as RxMapState<K, V>).data,
+        );
+        return Either<ObservableMapChange<K, V>, S>.left(change);
+      },
+      onCustom: (final S state) {
+        return Either<ObservableMapChange<K, V>, S>.right(state);
+      },
     );
   }
 }

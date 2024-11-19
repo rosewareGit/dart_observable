@@ -6,15 +6,15 @@ import '../_base_transform.dart';
 class SetChangeTransform<
         E, //
         C,
-        CS extends CollectionState<C>> extends RxSetImpl<E>
+        T> extends RxSetImpl<E>
     with
         BaseCollectionTransformOperator<
-            CS, //
+            T, //
             ObservableSetState<E>,
             C,
             ObservableSetChange<E>> {
   @override
-  final Observable<CS> source;
+  final ObservableCollection<T, C> source;
   final SetChangeUpdater<E, C>? transformFn;
 
   SetChangeTransform({

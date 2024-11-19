@@ -5,12 +5,15 @@ import '../rx_impl.dart';
 
 class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
   final Stream<ObservableMapUpdateAction<K, V>> stream;
+  final Map<K, V>? Function(dynamic error)? onError;
+
   StreamSubscription<ObservableMapUpdateAction<K, V>>? _subscription;
 
   late final List<ObservableMapUpdateAction<K, V>> _bufferedActions = <ObservableMapUpdateAction<K, V>>[];
 
   ObservableMapFromStream({
     required this.stream,
+    required this.onError,
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
   }) : super(
@@ -26,6 +29,7 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
 
   @override
   void onInit() {
+    _startCollect();
     addDisposeWorker(() {
       return _subscription?.cancel().then((final _) {
         _subscription = null;
@@ -54,7 +58,15 @@ class ObservableMapFromStream<K, V> extends RxMapImpl<K, V> {
         applyAction(action);
       },
       onError: (final Object error, final StackTrace stack) {
-        dispatchError(error: error, stack: stack);
+        final Map<K, V>? Function(dynamic)? onError = this.onError;
+        if (onError != null) {
+          final Map<K, V>? data = onError(error);
+          if (data != null) {
+            setData(data);
+          }
+        } else {
+          dispatchError(error: error, stack: stack);
+        }
       },
       onDone: () {
         dispose();

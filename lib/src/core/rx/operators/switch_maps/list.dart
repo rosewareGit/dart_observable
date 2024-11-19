@@ -13,6 +13,5 @@ class ListSwitchMap<E2, T> extends RxListImpl<E2>
   ListSwitchMap({
     required this.source,
     required this.mapper,
-    super.factory,
   });
 }

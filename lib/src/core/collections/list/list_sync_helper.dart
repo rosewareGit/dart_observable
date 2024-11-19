@@ -1,130 +1,262 @@
-import 'dart:collection';
-
-import 'package:meta/meta.dart';
+import 'package:collection/collection.dart';
 
 import '../../../../dart_observable.dart';
+import 'change_elements.dart';
+import 'list_element.dart';
+import 'update_action_handler.dart';
 
-// Keeps the index connection between 2 observable list.
-// Receives the source state/change and updates the mapping based no the action result.
 class ObservableListSyncHelper<E> {
   final bool Function(E item)? predicate;
-  ObservableListChange<E>? Function(ObservableListUpdateAction<E> action) applyAction;
-
-  // key: index in source, value: index in target
-  @visibleForTesting
-  final Map<int, int> $indexMapper = <int, int>{};
+  final ObservableListUpdateActionHandler<E> actionHandler;
+  final Comparator<E>? comparator;
 
   ObservableListSyncHelper({
-    required this.applyAction,
+    required this.actionHandler,
     this.predicate,
+    this.comparator,
   });
 
-  void handleInitialState({
-    required final List<E> state,
-  }) {
-    for (int i = 0; i < state.length; i++) {
-      final ObservableListChange<E>? addedChange = applyAction(
-        ObservableListUpdateAction<E>(
-          insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
-            MapEntry<int?, Iterable<E>>(null, <E>[state[i]]),
-          ],
-        ),
-      );
-
-      if (addedChange != null) {
-        final MapEntry<int, E>? added = addedChange.added.entries.firstOrNull;
-        if (added != null) {
-          $indexMapper[i] = added.key;
-        }
-      }
-    }
-  }
-
-  void handleListChange({
+  void handleListSync({
     required final ObservableListChange<E> sourceChange,
   }) {
-    final Map<int, E> sourceAdded = sourceChange.added;
-    final Map<int, E> sourceRemoved = sourceChange.removed;
-    final Map<int, ObservableItemChange<E>> sourceUpdated = sourceChange.updated;
+    final ObservableListChangeElements<E> elementChange = sourceChange as ObservableListChangeElements<E>;
+    final Map<int, ObservableListElement<E>> sourceAdded = elementChange.addedElements;
+    final Map<int, ObservableListElementChange<E>> sourceUpdated = elementChange.updatedElements;
 
-    final Map<int, E> updateActionData = <int, E>{};
-    final Set<int> indexToRemove = <int>{};
+    final _SyncChange<E> syncChange = _SyncChange<E>();
 
-    for (final MapEntry<int, ObservableItemChange<E>> entry in sourceUpdated.entries) {
-      final int key = entry.key;
-      final int? indexInSource = $indexMapper[key];
-      if (indexInSource == null) {
-        continue;
-      }
-      if (predicate?.call(entry.value.newValue) == false) {
-        indexToRemove.add(indexInSource);
+    final List<ObservableListElement<E>> data = actionHandler.data;
+
+    final bool Function(E item)? predicate = this.predicate;
+    final Comparator<E>? comparator = this.comparator;
+
+    final List<ObservableListElementChange<E>> elementsToRemove = <ObservableListElementChange<E>>[];
+    for (final MapEntry<int, ObservableListElementChange<E>> change in elementChange.removedElements.entries) {
+      elementsToRemove.add(change.value);
+    }
+
+    final List<ObservableListElementChange<E>> itemChanges = <ObservableListElementChange<E>>[];
+
+    for (final MapEntry<int, ObservableListElementChange<E>> entry in sourceUpdated.entries) {
+      final ObservableListElementChange<E> change = entry.value;
+      if (predicate?.call(change.newValue) == false) {
+        elementsToRemove.add(change);
       } else {
-        updateActionData[indexInSource] = entry.value.newValue;
+        itemChanges.add(entry.value);
       }
     }
 
-    applyAction(
-      ObservableListUpdateAction<E>(updateItemAtPosition: updateActionData),
-    );
-
-    final Map<int, int> updatedIndexMapper = Map<int, int>.fromEntries($indexMapper.entries);
-
-    for (final int removedIndex in sourceRemoved.keys) {
-      final int? valueInTarget = $indexMapper.remove(removedIndex);
-      updatedIndexMapper.remove(removedIndex);
-      if (valueInTarget != null) {
-        indexToRemove.add(valueInTarget);
+    if (itemChanges.isNotEmpty) {
+      for (int i = 0; i < itemChanges.length; i++) {
+        final ObservableListElementChange<E> change = itemChanges[i];
+        _handleUpdate(
+          change: change,
+          comparator: comparator,
+          data: data,
+          syncChange: syncChange,
+        );
       }
-      for (final MapEntry<int, int> entry in updatedIndexMapper.entries) {
-        if (entry.key > removedIndex) {
-          $indexMapper.remove(entry.key);
-          // Shift the index
-          $indexMapper[entry.key - 1] = valueInTarget == null ? entry.value : entry.value - 1;
+    }
+
+    if (elementsToRemove.isNotEmpty) {
+      _handleRemove(
+        data: data,
+        elementsToRemove: elementsToRemove,
+        syncChange: syncChange,
+      );
+    }
+
+    if (sourceAdded.isNotEmpty) {
+      _handleAddItems(
+        data: data,
+        syncChange: syncChange,
+        sourceAdded: sourceAdded,
+        predicate: predicate,
+        comparator: comparator,
+      );
+    }
+
+    actionHandler.onSyncComplete(
+      ObservableListChangeElements<E>(
+        added: syncChange.addedElements,
+        updated: syncChange.updatedElements,
+        removed: syncChange.removedElements,
+      ),
+    );
+  }
+
+  void _handleAddItems({
+    required final Map<int, ObservableListElement<E>> sourceAdded,
+    required final List<ObservableListElement<E>> data,
+    required final _SyncChange<E> syncChange,
+    final bool Function(E item)? predicate,
+    final Comparator<E>? comparator,
+  }) {
+    final Map<int, ObservableListElement<E>> addItems;
+    if (predicate == null) {
+      addItems = sourceAdded;
+    } else {
+      addItems = Map<int, ObservableListElement<E>>.fromEntries(
+        sourceAdded.entries.where((final MapEntry<int, ObservableListElement<E>> entry) {
+          return predicate(entry.value.value);
+        }),
+      );
+    }
+
+    if (addItems.isEmpty) {
+      return;
+    }
+
+    if (comparator != null) {
+      _handleAddItemsWithComparator(
+        addItems: addItems.values,
+        comparator: comparator,
+        data: data,
+        syncChange: syncChange,
+      );
+      return;
+    }
+
+    for (final MapEntry<int, ObservableListElement<E>> entry in addItems.entries) {
+      final ObservableListElement<E> element = entry.value;
+
+      //find the first element that exists in this list and insert after it
+      int index = -1;
+      ObservableListElement<E> currentElement = element;
+      while (true) {
+        final ObservableListElement<E>? prev = currentElement.previousElement;
+        if (prev == null) {
+          break;
         }
-      }
-    }
 
-    applyAction(
-      ObservableListUpdateAction<E>(removeIndexes: indexToRemove),
+        final int indexInTarget = data.indexOf(prev);
+        if (indexInTarget != -1) {
+          index = indexInTarget + 1;
+          break;
+        }
+        currentElement = prev;
+      }
+      if (index == -1) {
+        data.add(element);
+      } else {
+        data.insert(index, element);
+      }
+      syncChange.addedElements[index == -1 ? data.length - 1 : index] = element;
+    }
+  }
+
+  void _handleAddItemsWithComparator({
+    required final Iterable<ObservableListElement<E>> addItems,
+    required final Comparator<E> comparator,
+    required final List<ObservableListElement<E>> data,
+    required final _SyncChange<E> syncChange,
+  }) {
+    final Map<int, List<ObservableListElement<E>>> itemsToInsert = <int, List<ObservableListElement<E>>>{};
+    final List<ObservableListElement<E>> sortedItems = addItems.sorted(
+      (final ObservableListElement<E> left, final ObservableListElement<E> right) {
+        return comparator(left.value, right.value);
+      },
     );
 
-    for (final MapEntry<int, E> entry in sourceAdded.entries) {
-      final int removedIndexesBefore = sourceRemoved.keys.where((final int element) => element <= entry.key).length;
-      final int indexInSource = entry.key - removedIndexesBefore;
-      final E value = entry.value;
-      if (predicate?.call(value) == false) {
-        continue;
-      }
-
-      final ObservableListChange<E>? resultChange = applyAction(
-        ObservableListUpdateAction<E>(
-          insertItemAtPosition: <MapEntry<int?, Iterable<E>>>[
-            MapEntry<int?, Iterable<E>>(null, <E>[entry.value]),
-          ],
-        ),
+    final int length = sortedItems.length;
+    for (int i = 0; i < length; ++i) {
+      final ObservableListElement<E> item = sortedItems[i];
+      final int position = _getPositionToInsert(
+        currentData: data,
+        item: item.value,
+        comparator: comparator,
       );
 
-      if (resultChange != null) {
-        final MapEntry<int, E>? added = resultChange.added.entries.firstOrNull;
-        if (added != null) {
-          $indexMapper[indexInSource] = added.key;
-        }
+      itemsToInsert.putIfAbsent(position, () => <ObservableListElement<E>>[]).add(item);
+    }
+
+    final List<MapEntry<int, List<ObservableListElement<E>>>> entries = itemsToInsert.entries.toList();
+    final int entriesLength = entries.length;
+
+    for (int i = 0; i < entriesLength; ++i) {
+      final MapEntry<int, List<ObservableListElement<E>>> entry = entries[i];
+      final int position = entry.key;
+      final List<ObservableListElement<E>> items = entry.value;
+      data.insertAll(position, items);
+
+      for (int j = 0; j < items.length; j++) {
+        syncChange.addedElements[position + j] = items[j];
       }
     }
   }
 
-  Iterable<int> handleRemovedState(final List<E> itemsToRemove) {
-    final List<int> removeIndexes = <int>[];
-    for (int i = 0; i < itemsToRemove.length; i++) {
-      final int index = $indexMapper.remove(i) ?? -1;
+  int _getPositionToInsert({
+    required final List<ObservableListElement<E>> currentData,
+    required final E item,
+    required final Comparator<E> comparator,
+  }) {
+    int low = 0;
+    int high = currentData.length;
+
+    while (low < high) {
+      final int mid = (low + high) ~/ 2;
+      final int compareResult = comparator(currentData[mid].value, item);
+
+      if (compareResult > 0) {
+        // If the item should be inserted before the current mid
+        high = mid;
+      } else {
+        // If the item is equal or greater, move low up
+        low = mid + 1;
+      }
+    }
+
+    // At this point, 'low' is the correct position to insert the item
+    return low;
+  }
+
+  void _handleUpdate({
+    required final ObservableListElementChange<E> change,
+    required final List<ObservableListElement<E>> data,
+    required final _SyncChange<E> syncChange,
+    required final Comparator<E>? comparator,
+  }) {
+    final ObservableListElement<E> element = change.element;
+    final int index = data.indexOf(element);
+    if (index == -1) {
+      return;
+    }
+
+    syncChange.updatedElements[index] = change;
+
+    if (comparator != null) {
+      // remove old element and insert it in the correct position
+      data.removeAt(index);
+      final int position = _getPositionToInsert(
+        currentData: data,
+        item: change.newValue,
+        comparator: comparator,
+      );
+
+      data.insert(position, element);
+    }
+  }
+
+  void _handleRemove({
+    required final List<ObservableListElement<E>> data,
+    required final List<ObservableListElementChange<E>> elementsToRemove,
+    required final _SyncChange<E> syncChange,
+  }) {
+    final List<ObservableListElement<E>> currentData = data;
+
+    for (final ObservableListElementChange<E> change in elementsToRemove) {
+      final ObservableListElement<E> element = change.element;
+      final int index = currentData.indexOf(element);
       if (index != -1) {
-        removeIndexes.add(index);
+        syncChange.removedElements[index] = change;
+        currentData.removeAt(index);
       }
     }
-    return removeIndexes;
   }
+}
 
-  void reset() {
-    $indexMapper.clear();
-  }
+class _SyncChange<E> {
+  final Map<int, ObservableListElement<E>> addedElements = <int, ObservableListElement<E>>{};
+  final Map<int, ObservableListElementChange<E>> removedElements = <int, ObservableListElementChange<E>>{};
+  final Map<int, ObservableListElementChange<E>> updatedElements = <int, ObservableListElementChange<E>>{};
 }

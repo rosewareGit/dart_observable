@@ -12,6 +12,5 @@ class StatefulListSwitchMap<E, S, T> extends RxStatefulListImpl<E, S>
   StatefulListSwitchMap({
     required this.source,
     required this.mapper,
-    required super.factory,
   }) : super(<E>[]);
 }

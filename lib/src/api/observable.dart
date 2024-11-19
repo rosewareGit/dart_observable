@@ -3,22 +3,11 @@ import 'dart:async';
 import '../../dart_observable.dart';
 
 typedef Emitter<T> = void Function(T value);
-typedef FactoryList<T> = List<T> Function(Iterable<T>? items);
 typedef FactoryMap<K, V> = Map<K, V> Function(Map<K, V>? items);
 typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FutureWorker = FutureOr<void> Function();
 
 abstract interface class Observable<T> {
-  factory Observable.just(
-    final T value, {
-    final bool distinct = true,
-  }) {
-    return Rx<T>(
-      value,
-      distinct: distinct,
-    );
-  }
-
   factory Observable.combineLatest({
     required final Iterable<Observable<dynamic>> observables,
     required final T Function() combiner,
@@ -53,6 +42,16 @@ abstract interface class Observable<T> {
     return Rx<T>.fromStream(
       stream: stream,
       initial: initial,
+      distinct: distinct,
+    );
+  }
+
+  factory Observable.just(
+    final T value, {
+    final bool distinct = true,
+  }) {
+    return Rx<T>(
+      value,
       distinct: distinct,
     );
   }
@@ -103,10 +102,9 @@ abstract interface class Observable<T> {
 
   Future<void> dispose();
 
-  Observable<T?> filter(
-    final bool Function(T value) predicate,
-  );
+  Observable<T?> filter(final bool Function(T value) predicate);
 
+  // rethink + recover?
   Observable<T> handleError(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
     final bool Function(dynamic error)? predicate,

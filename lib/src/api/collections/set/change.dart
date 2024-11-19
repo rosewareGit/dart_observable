@@ -38,9 +38,6 @@ class ObservableSetChange<E> {
     }
 
     for (final E entry in addItems) {
-      if (sourceToUpdate.contains(entry)) {
-        continue;
-      }
       added.add(entry);
     }
 

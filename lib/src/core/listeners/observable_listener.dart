@@ -29,8 +29,8 @@ class ObservableListener<T> implements Disposable {
         _onError = _registerErrorHandler(_zone, onError);
 
   @override
-  Future<void> dispose() async {
-    await _disposer(this);
+  FutureOr<void> dispose() {
+    return _disposer(this);
   }
 
   void notify(final T value) {

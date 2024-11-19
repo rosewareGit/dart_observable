@@ -12,9 +12,24 @@ class OperatorStatefulMapChangeFactory<K, V, S> extends OperatorCollectionTransf
   void handleChange(final Either<ObservableMapChange<K, V>, S> change) {
     change.fold(
       onLeft: (final ObservableMapChange<K, V> change) {
-        applyAction(
-          Either<ObservableMapUpdateAction<K, V>, S>.left(ObservableMapUpdateAction<K, V>.fromChange(change)),
-        );
+        final Set<K> removeKeys = change.removed.keys.toSet();
+        final Map<K, V> addItems = <K, V>{
+          ...change.added,
+          ...change.updated.map(
+            (final K key, final ObservableItemChange<V> change) => MapEntry<K, V>(key, change.newValue),
+          ),
+        };
+
+        if (removeKeys.isNotEmpty || addItems.isNotEmpty) {
+          applyAction(
+            Either<ObservableMapUpdateAction<K, V>, S>.left(
+              ObservableMapUpdateAction<K, V>(
+                removeKeys: removeKeys,
+                addItems: addItems,
+              ),
+            ),
+          );
+        }
       },
       onRight: (final S state) {
         applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(state));

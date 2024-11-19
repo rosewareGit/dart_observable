@@ -1,5 +1,6 @@
+import 'package:collection/collection.dart';
+
 import '../../../../../dart_observable.dart';
-import '../../../../utils/extensions/iterable.dart';
 import '../../../rx/_impl.dart';
 
 class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
@@ -49,18 +50,16 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
     final E? initial = source.value.setView.firstWhereOrNull(predicate);
     value = initial;
 
-    _listener = source.listen(
-      onChange: (final ObservableSetState<E> value) {
-        final ObservableSetChange<E> change = value.lastChange;
-
+    _listener = source.onChange(
+      onChange: (final ObservableSetChange<E> change) {
         final E? added = change.added.firstWhereOrNull(predicate);
         if (added != null) {
-          this.value = added;
+          value = added;
           return;
         }
         final E? removed = change.removed.firstWhereOrNull(predicate);
         if (removed != null) {
-          this.value = null;
+          value = null;
         }
       },
     );

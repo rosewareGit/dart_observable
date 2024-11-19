@@ -1,28 +1,41 @@
 import '../../../../dart_observable.dart';
 import '../_base.dart';
+import 'change_elements.dart';
+import 'list_element.dart';
 import 'list_state.dart';
-import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
 import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
+import 'operators/sorted.dart';
 import 'rx_actions.dart';
+import 'update_action_handler.dart';
 
-FactoryList<E> defaultListFactory<E>() {
-  return (final Iterable<E>? items) {
-    return List<E>.of(items ?? <E>{});
-  };
-}
+class RxListImpl<E> extends RxCollectionBase<ObservableListState<E>, ObservableListChange<E>>
+    with RxListActionsImpl<E>, ObservableListUpdateActionHandlerImpl<E>
+    implements RxList<E>, ObservableListUpdateActionHandler<E> {
+  late ObservableListChange<E> _change;
 
-class RxListImpl<E> extends RxCollectionBase<ObservableListChange<E>, ObservableListState<E>>
-    with RxListActionsImpl<E>
-    implements RxList<E> {
   RxListImpl({
     final Iterable<E>? initial,
-    final List<E> Function(Iterable<E>? items)? factory,
-  }) : super(RxListState<E>.initial((factory ?? defaultListFactory<E>()).call(initial)));
+  }) : super(RxListState<E>.fromData(initial ?? <E>[])) {
+    _change = currentStateAsChange;
+    _value.onUpdated();
+  }
 
   @override
-  List<E> get data => _value.data;
+  ObservableListChange<E> get change => _change;
+
+  @override
+  ObservableListChangeElements<E> get currentStateAsChange {
+    return ObservableListChangeElements<E>(
+      added: <int, ObservableListElement<E>>{
+        for (int i = 0; i < length; i++) i: data[i],
+      },
+    );
+  }
+
+  @override
+  List<ObservableListElement<E>> get data => _value.data;
 
   @override
   int get length => data.length;
@@ -31,26 +44,28 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListChange<E>, Observable
 
   @override
   E? operator [](final int position) {
-    final List<E> data = _value.data;
+    final List<ObservableListElement<E>> data = _value.data;
     if (position < 0 || position >= data.length) return null;
-    return data[position];
+    return data[position].value;
   }
 
   @override
-  ObservableListChange<E>? applyAction(final ObservableListUpdateAction<E> action) {
+  ObservableListChangeElements<E>? applyAction(final ObservableListUpdateAction<E> action) {
     if (action.isEmpty) {
       return null;
     }
 
-    final List<E> updated = _value.data;
-    final ObservableListChange<E> change = action.apply(updated);
+    final (List<ObservableListElement<E>> data, ObservableListChangeElements<E> change) result =
+        handleListUpdateAction(data, action);
+
+    final ObservableListChangeElements<E> change = result.$2;
     if (change.isEmpty) {
       return null;
     }
-    value = RxListState<E>(
-      updated,
-      change,
-    );
+
+    _change = change;
+    _value.onUpdated();
+    notify();
     return change;
   }
 
@@ -60,28 +75,29 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListChange<E>, Observable
   }
 
   @override
-  ObservableList<E> changeFactory(final FactoryList<E> factory) {
-    return ObservableListFactoryOperator<E>(factory: factory, source: this);
+  ObservableList<E> filterItem(final bool Function(E item) predicate) {
+    return ObservableListFilterOperator<E>(
+      predicate: predicate,
+      source: this,
+    );
   }
 
   @override
-  ObservableList<E> filterItem(
-    final bool Function(E item) predicate, {
-    final FactoryList<E>? factory,
-  }) {
-    return ObservableListFilterOperator<E>(predicate: predicate, source: this);
-  }
-
-  @override
-  ObservableList<E2> mapItem<E2>(
-    final E2 Function(E item) mapper, {
-    final FactoryList<E2>? factory,
-  }) {
+  ObservableList<E2> mapItem<E2>(final E2 Function(E item) mapper) {
     return ObservableListMapItemOperator<E, E2>(
       mapper: mapper,
       source: this,
-      factory: factory,
     );
+  }
+
+  @override
+  void onSyncComplete(final ObservableListChange<E> change) {
+    if (change.isEmpty) {
+      return;
+    }
+    _change = change;
+    _value.onUpdated();
+    notify();
   }
 
   @override
@@ -89,6 +105,20 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListChange<E>, Observable
     return OperatorObservableListRxItem<E>(
       source: this,
       index: position,
+    );
+  }
+
+  @override
+  void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change) {
+    _change = change;
+    super.value = RxListState<E>(data);
+  }
+
+  @override
+  ObservableList<E> sorted(final Comparator<E> comparator) {
+    return ObservableListSortedOperator<E>(
+      comparator: comparator,
+      source: this,
     );
   }
 }

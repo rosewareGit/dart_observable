@@ -7,10 +7,7 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
   @override
   void operator []=(final K key, final V value) {
     applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{},
-        addItems: <K, V>{key: value},
-      ),
+      ObservableMapUpdateAction<K, V>(addItems: <K, V>{key: value}),
     );
   }
 
@@ -22,10 +19,7 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
   @override
   ObservableMapChange<K, V>? addAll(final Map<K, V> other) {
     return applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{},
-        addItems: other,
-      ),
+      ObservableMapUpdateAction<K, V>(addItems: other),
     );
   }
 
@@ -39,20 +33,14 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
     }
 
     return applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: data.keys.toSet(),
-        addItems: <K, V>{},
-      ),
+      ObservableMapUpdateAction<K, V>(removeKeys: data.keys),
     );
   }
 
   @override
   ObservableMapChange<K, V>? remove(final K key) {
     return applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: <K>{key},
-        addItems: <K, V>{},
-      ),
+      ObservableMapUpdateAction<K, V>(removeKeys: <K>{key}),
     );
   }
 
@@ -68,11 +56,9 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
     if (removed.isEmpty) {
       return null;
     }
+
     return applyMapUpdateAction(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: removed,
-        addItems: <K, V>{},
-      ),
+      ObservableMapUpdateAction<K, V>(removeKeys: removed),
     );
   }
 
@@ -84,7 +70,10 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
       return null;
     }
 
-    final ObservableMapUpdateAction<K, V> action = ObservableMapUpdateAction<K, V>.fromChange(change);
-    return applyMapUpdateAction(action);
+    setDataWithChange(data, change);
+
+    return change;
   }
+
+  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change);
 }

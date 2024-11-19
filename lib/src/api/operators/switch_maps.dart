@@ -3,7 +3,6 @@ import '../../../dart_observable.dart';
 abstract interface class ObservableSwitchMaps<T> {
   ObservableList<E> list<E>({
     required final ObservableList<E> Function(T value) mapper,
-    final FactoryList<E>? factory,
   });
 
   ObservableMap<K, V> map<K, V>({
@@ -18,7 +17,6 @@ abstract interface class ObservableSwitchMaps<T> {
 
   ObservableStatefulList<E, S> statefulList<E, S>({
     required final ObservableStatefulList<E, S> Function(T value) mapper,
-    final FactoryList<E>? factory,
   });
 
   ObservableStatefulMap<K, V, S> statefulMap<K, V, S>({

@@ -3,18 +3,17 @@ import '../../../rx/operators/_base_switch_map.dart';
 import '../../list/rx_impl.dart';
 import '../_base_switch_map.dart';
 
-class ListChangeSwitchMap<E, C, CS extends CollectionState<C>> extends RxListImpl<E>
+class ListChangeSwitchMap<E, C, T> extends RxListImpl<E>
     with
-        BaseSwitchMapOperator<ObservableList<E>, CS, ObservableListState<E>>,
-        BaseSwitchMapChangeOperator<ObservableList<E>, CS, C, ObservableListState<E>, ObservableListChange<E>> {
+        BaseSwitchMapOperator<ObservableList<E>, T, ObservableListState<E>>,
+        BaseSwitchMapChangeOperator<ObservableList<E>, T, C, ObservableListState<E>, ObservableListChange<E>> {
   @override
-  final ObservableCollection<C, CS> source;
+  final ObservableCollection<T, C> source;
   @override
   final ObservableList<E>? Function(C value) mapChange;
 
   ListChangeSwitchMap({
     required this.source,
     required this.mapChange,
-    super.factory,
   });
 }

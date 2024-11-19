@@ -1,15 +1,15 @@
 import '../../../../dart_observable.dart';
 
 mixin BaseCollectionTransformOperator<
-    CS extends CollectionState<C>, // Collection state for this
-    CS2 extends CollectionState<C2>, // Collection state for the transformed
+    T, // Collection state for this
+    T2, // Collection state for the transformed
     C,
-    C2> on RxBase<CS2> {
+    C2> on RxBase<T2> {
   Disposable? _listener;
 
   late final List<C> _buffer = <C>[];
 
-  Observable<CS> get source;
+  ObservableCollection<T, C> get source;
 
   void handleChange(final C change);
 
@@ -19,15 +19,14 @@ mixin BaseCollectionTransformOperator<
     super.onInit();
   }
 
-  void _init() {
-    final Disposable activeListener = onActivityChanged(
-      onActive: (final _) {
-        _initListener();
-      },
-    );
+  @override
+  void onActive() {
+    _initListener();
+    super.onActive();
+  }
 
+  void _init() {
     source.addDisposeWorker(() async {
-      await activeListener.dispose();
       final Disposable? changeListener = _listener;
       if (changeListener != null) {
         await changeListener.dispose();
@@ -47,11 +46,10 @@ mixin BaseCollectionTransformOperator<
       return;
     }
 
-    handleChange(source.value.asChange());
+    handleChange(source.currentStateAsChange);
 
-    _listener = source.listen(
-      onChange: (final CS value) {
-        final C change = value.lastChange;
+    _listener = source.onChange(
+      onChange: (final C change) {
         if (state == ObservableState.inactive) {
           // store changes to apply when active
           _buffer.add(change);

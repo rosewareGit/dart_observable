@@ -1,6 +1,9 @@
+import 'package:meta/meta.dart';
+
 import '../../../../dart_observable.dart';
 import '../_base.dart';
 import 'map_state.dart';
+import 'map_update_action_handler.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
 import 'operators/map_item.dart';
@@ -13,13 +16,19 @@ Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   };
 }
 
-class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapChange<K, V>, ObservableMapState<K, V>>
-    with RxMapActionsImpl<K, V>
+class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, ObservableMapChange<K, V>>
+    with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V>
     implements RxMap<K, V> {
+  late ObservableMapChange<K, V> _change;
+
   RxMapImpl({
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
-  }) : super(RxMapState<K, V>.initial((factory ?? defaultMapFactory<K, V>()).call(initial)));
+  }) : super(
+          RxMapState<K, V>.initial((factory ?? defaultMapFactory<K, V>()).call(initial)),
+        ) {
+    _change = currentStateAsChange;
+  }
 
   factory RxMapImpl.sorted({
     required final Comparator<V> comparator,
@@ -30,6 +39,16 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapChange<K, V>, Observ
       factory: (final Map<K, V>? items) {
         return SortedMap<K, V>(comparator, initial: items);
       },
+    );
+  }
+
+  @override
+  ObservableMapChange<K, V> get change => _change;
+
+  @override
+  ObservableMapChange<K, V> get currentStateAsChange {
+    return ObservableMapChange<K, V>(
+      added: _value.data,
     );
   }
 
@@ -47,19 +66,19 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapChange<K, V>, Observ
   }
 
   @override
+  @protected
   ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action) {
-    final Map<K, V> updatedMap = _value.data;
-    final ObservableMapChange<K, V> change = action.apply(updatedMap);
+    final ObservableMapChange<K, V> change = applyActionAndComputeChange(
+      data: _value.data,
+      action: action,
+    );
+
     if (change.isEmpty) {
       return null;
     }
 
-    final RxMapState<K, V> newState = RxMapState<K, V>(
-      updatedMap,
-      change,
-    );
-
-    super.value = newState;
+    _change = change;
+    notify();
     return change;
   }
 
@@ -106,11 +125,24 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapChange<K, V>, Observ
   }
 
   @override
+  ObservableMap<K, V> sorted(final Comparator<V> comparator) {
+    return changeFactory((final Map<K, V>? items) {
+      return SortedMap<K, V>(comparator, initial: items);
+    });
+  }
+
+  @override
   Observable<V?> rxItem(final K key) {
     return OperatorObservableMapRxItem<K, V>(
       source: this,
       key: key,
     );
+  }
+
+  @override
+  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
+    _change = change;
+    super.value = RxMapState<K, V>(data);
   }
 
   @override

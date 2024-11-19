@@ -47,21 +47,18 @@ class OperatorObservableMapRxItem<K, V> extends RxnImpl<V?> {
     // Update initial value
     value = source[key];
 
-    _listener = source.listen(
-      onChange: (final ObservableMapState<K, V> value) {
+    _listener = source.onChange(
+      onChange: (final  ObservableMapChange<K, V> change) {
         if (state == ObservableState.inactive) {
           return;
         }
 
-        final ObservableMapState<K, V> value = source.value;
-        final ObservableMapChange<K, V> change = value.lastChange;
-
         if (change.removed.containsKey(key)) {
-          this.value = null;
+          value = null;
         } else if (change.added.containsKey(key)) {
-          this.value = change.added[key];
+          value = change.added[key];
         } else if (change.updated.containsKey(key)) {
-          this.value = change.updated[key]?.newValue;
+          value = change.updated[key]?.newValue;
         }
       },
     );

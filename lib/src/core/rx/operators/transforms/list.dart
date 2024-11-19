@@ -9,7 +9,6 @@ class ListTransform<T, E> extends RxListImpl<E> with BaseTransformOperator<T, Ob
 
   ListTransform({
     required this.source,
-    required super.factory,
     this.transformFn,
   });
 

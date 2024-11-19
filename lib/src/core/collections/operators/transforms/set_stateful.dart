@@ -3,10 +3,10 @@ import '../../../../api/collections/collection_transforms.dart';
 import '../../set/stateful/rx_stateful.dart';
 import '../_base_transform.dart';
 
-class StatefulSetChangeTransform<E, S, CR extends CollectionState<C>, C> extends RxStatefulSetImpl<E, S>
-    with BaseCollectionTransformOperator<CR, ObservableStatefulSetState<E, S>, C, Either<ObservableSetChange<E>, S>> {
+class StatefulSetChangeTransform<E, S, T, C> extends RxStatefulSetImpl<E, S>
+    with BaseCollectionTransformOperator<T, ObservableStatefulSetState<E, S>, C, Either<ObservableSetChange<E>, S>> {
   @override
-  final Observable<CR> source;
+  final ObservableCollection<T, C> source;
   final StatefulSetChangeUpdater<E, S, C>? transformFn;
 
   StatefulSetChangeTransform({

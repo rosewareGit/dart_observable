@@ -2,21 +2,14 @@ import '../../../../../../dart_observable.dart';
 import '../../../../rx/_impl.dart';
 
 Either<E?, S>? _getStateForIndex<E, S>({
-  required final ObservableStatefulListState<E, S> state,
+  required final ObservableStatefulList<E, S> source,
   required final int position,
   required final bool isInitial,
 }) {
-  return state.fold(
+  final ObservableStatefulListState<E, S> value = source.value;
+  return value.fold(
     onData: (final ObservableListState<E> list) {
-      final ObservableListChange<E> change = isInitial ? list.asChange() : list.lastChange;
-      if (change.removed.containsKey(position)) {
-        return Either<E?, S>.left(state.leftOrNull?.listView.elementAtOrNull(position));
-      } else if (change.added.containsKey(position)) {
-        return Either<E?, S>.left(change.added[position]);
-      } else if (change.updated.containsKey(position)) {
-        return Either<E?, S>.left(change.updated[position]?.newValue);
-      }
-      return null;
+      return Either<E?, S>.left(source[position]);
     },
     onCustom: (final S state) {
       return Either<E?, S>.right(state);
@@ -34,7 +27,7 @@ class OperatorObservableListStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
     required this.source,
     required this.position,
   }) : super(
-          _getStateForIndex(state: source.value, position: position, isInitial: true) ?? Either<E?, S>.left(null),
+          _getStateForIndex(source: source, position: position, isInitial: true) ?? Either<E?, S>.left(null),
         );
 
   @override
@@ -67,14 +60,14 @@ class OperatorObservableListStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
       return;
     }
 
-    final Either<E?, S>? newState = _getStateForIndex(state: source.value, position: position, isInitial: true);
+    final Either<E?, S>? newState = _getStateForIndex(source: source, position: position, isInitial: true);
     if (newState != null) {
       value = newState;
     }
 
     _listener = source.listen(
       onChange: (final ObservableStatefulListState<E, S> value) {
-        final Either<E?, S>? newState = _getStateForIndex(state: value, position: position, isInitial: false);
+        final Either<E?, S>? newState = _getStateForIndex(source: source, position: position, isInitial: false);
         if (newState != null) {
           this.value = newState;
         }

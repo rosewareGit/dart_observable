@@ -48,6 +48,16 @@ mixin RxSetActionsImpl<E> implements RxSetActions<E> {
   }
 
   @override
+  ObservableSetChange<E>? removeAll(final Iterable<E> items) {
+    return applySetUpdateAction(
+      ObservableSetUpdateAction<E>(
+        addItems: <E>{},
+        removeItems: items.toSet(),
+      ),
+    );
+  }
+
+  @override
   ObservableSetChange<E>? removeWhere(final bool Function(E item) predicate) {
     final Set<E> data = this.data;
     final Set<E> removed = data.where(predicate).toSet();

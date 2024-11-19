@@ -3,13 +3,12 @@ import '../../../../api/collections/collection_transforms.dart';
 import '../../map/stateful/rx_stateful.dart';
 import '../_base_transform.dart';
 
-class OperatorCollectionTransformMapStateful<K, V, S, CR extends CollectionState<C>, C>
-    extends RxStatefulMapImpl<K, V, S>
+class OperatorCollectionTransformMapStateful<K, V, S, T, C> extends RxStatefulMapImpl<K, V, S>
     with
-        BaseCollectionTransformOperator<CR, ObservableStatefulMapState<K, V, S>, C,
+        BaseCollectionTransformOperator<T, ObservableStatefulMapState<K, V, S>, C,
             Either<ObservableMapChange<K, V>, S>> {
   @override
-  final Observable<CR> source;
+  final ObservableCollection<T, C> source;
   final StatefulMapChangeUpdater<K, V, S, C>? transformFn;
 
   OperatorCollectionTransformMapStateful({

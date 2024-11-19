@@ -1,13 +1,14 @@
 import '../../../../../../dart_observable.dart';
 import '../../factories/merged.dart';
+import '../../map_state.dart';
 import '../rx_stateful.dart';
 
 class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
-  final List<ObservableStatefulMap<K, V, S>> collections;
-  final V? Function(K key, V current, V conflict)? conflictResolver;
-  final Either<ObservableMapUpdateAction<K, V>, S>? Function(
+  final Iterable<ObservableStatefulMap<K, V, S>> collections;
+  final MergeConflictResolver<K, V>? conflictResolver;
+  final Either<Map<K, V>, S>? Function(
     S state,
-    List<ObservableStatefulMap<K, V, S>> collections,
+    Iterable<ObservableStatefulMap<K, V, S>> collections,
   )? stateResolver;
 
   late final List<Disposable> _subscriptions = <Disposable>[];
@@ -21,60 +22,6 @@ class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
     required this.stateResolver,
     required super.factory,
   }) : super(<K, V>{});
-
-  @override
-  void onActive() {
-    super.onActive();
-    _startCollect();
-  }
-
-  @override
-  void onInit() {
-    addDisposeWorker(() async {
-      for (final Disposable e in _subscriptions) {
-        await e.dispose();
-      }
-      await dispose();
-    });
-    super.onInit();
-  }
-
-  void _startCollect() {
-    if (_subscriptions.isNotEmpty) {
-      // apply buffered actions
-      for (final MapEntry<ObservableStatefulMap<K, V, S>, List<Either<ObservableMapChange<K, V>, S>>> entry
-          in _bufferedChanges.entries) {
-        final ObservableStatefulMap<K, V, S> collection = entry.key;
-        final List<Either<ObservableMapChange<K, V>, S>> changes = entry.value;
-
-        for (final Either<ObservableMapChange<K, V>, S> change in changes) {
-          handleChange(collection: collection, change: change);
-        }
-      }
-      _bufferedChanges.clear();
-      return;
-    }
-
-    for (final ObservableStatefulMap<K, V, S> collection in collections) {
-      handleChange(collection: collection, change: collection.value.asChange());
-
-      _subscriptions.add(
-        collection.listen(
-          onChange: (final ObservableStatefulMapState<K, V, S> value) {
-            final Either<ObservableMapChange<K, V>, S> change = value.lastChange;
-            if (state == ObservableState.inactive) {
-              _bufferedChanges.putIfAbsent(collection, () {
-                return <Either<ObservableMapChange<K, V>, S>>[];
-              }).add(change);
-              return;
-            }
-
-            handleChange(collection: collection, change: change);
-          },
-        ),
-      );
-    }
-  }
 
   void handleChange({
     required final ObservableStatefulMap<K, V, S> collection,
@@ -98,27 +45,101 @@ class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
         );
       },
       onRight: (final S state) {
-        _handleCustomState(state);
+        _handleCustomState(state, collection);
       },
     );
   }
 
-  void _handleCustomState(final S state) {
-    final Either<ObservableMapUpdateAction<K, V>, S>? Function(
+  @override
+  void onActive() {
+    super.onActive();
+    _startCollect();
+  }
+
+  @override
+  void onInit() {
+    addDisposeWorker(() async {
+      for (final Disposable e in _subscriptions) {
+        await e.dispose();
+      }
+      await dispose();
+    });
+    super.onInit();
+  }
+
+  void _handleCustomState(
+    final S state,
+    final ObservableStatefulMap<K, V, S> collection,
+  ) {
+    final Either<Map<K, V>, S>? Function(
       S state,
-      List<ObservableStatefulMap<K, V, S>> collections,
+      Iterable<ObservableStatefulMap<K, V, S>> collections,
     )? stateResolver = this.stateResolver;
 
     if (stateResolver != null) {
-      final Either<ObservableMapUpdateAction<K, V>, S>? action = stateResolver(state, collections);
-      if (action != null) {
-        applyAction(action);
+      final Either<Map<K, V>, S>? newState = stateResolver(state, collections);
+      if (newState != null) {
+        newState.fold(
+          onLeft: (final Map<K, V> newState) {
+            setData(newState);
+          },
+          onRight: (final S newState) {
+            setState(newState);
+          },
+        );
       }
     } else {
-      // If all collections are custom, then the merged collection is custom
-      if (collections.every((final ObservableStatefulMap<K, V, S> e) => e.value.isCustom)) {
-        applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(state));
+      final ObservableStatefulMapState<K, V, S>? previous = collection.previous;
+      if (previous != null) {
+        previous.when(
+          onData: (final ObservableMapState<K, V> data) {
+            final RxMapState<K, V> parsed = data as RxMapState<K, V>;
+            final Map<K, V> items = parsed.data;
+            handleChange(
+              collection: collection,
+              change: Either<ObservableMapChange<K, V>, S>.left(
+                ObservableMapChange<K, V>(removed: items),
+              ),
+            );
+          },
+        );
       }
+    }
+  }
+
+  void _startCollect() {
+    if (_subscriptions.isNotEmpty) {
+      // apply buffered actions
+      for (final MapEntry<ObservableStatefulMap<K, V, S>, List<Either<ObservableMapChange<K, V>, S>>> entry
+          in _bufferedChanges.entries) {
+        final ObservableStatefulMap<K, V, S> collection = entry.key;
+        final List<Either<ObservableMapChange<K, V>, S>> changes = entry.value;
+
+        for (final Either<ObservableMapChange<K, V>, S> change in changes) {
+          handleChange(collection: collection, change: change);
+        }
+      }
+      _bufferedChanges.clear();
+      return;
+    }
+
+    for (final ObservableStatefulMap<K, V, S> collection in collections) {
+      handleChange(collection: collection, change: collection.currentStateAsChange);
+
+      _subscriptions.add(
+        collection.onChange(
+          onChange: (final Either<ObservableMapChange<K, V>, S> change) {
+            if (state == ObservableState.inactive) {
+              _bufferedChanges.putIfAbsent(collection, () {
+                return <Either<ObservableMapChange<K, V>, S>>[];
+              }).add(change);
+              return;
+            }
+
+            handleChange(collection: collection, change: change);
+          },
+        ),
+      );
     }
   }
 }

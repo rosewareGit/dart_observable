@@ -45,11 +45,13 @@ class OperatorMapFilter<K, V> extends OperatorMapTransform<K, V, K, V> {
       return;
     }
 
-    updater(
-      ObservableMapUpdateAction<K, V>(
-        removeItems: removeItems,
-        addItems: addItems,
-      ),
-    );
+    if (removeItems.isNotEmpty || addItems.isNotEmpty) {
+      updater(
+        ObservableMapUpdateAction<K, V>(
+          removeKeys: removeItems,
+          addItems: addItems,
+        ),
+      );
+    }
   }
 }
