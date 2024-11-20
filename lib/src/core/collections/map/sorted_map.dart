@@ -184,6 +184,29 @@ class SortedMap<K, V> implements Map<K, V> {
     }
   }
 
+  int _getPositionToInsert(final V item) {
+    int low = 0;
+    int high = _sortedByKeys.length;
+
+    while (low < high) {
+      final int mid = (low + high) ~/ 2;
+      final K keyAtMid = _sortedByKeys[mid];
+      final V valueAtMid = _map[keyAtMid] as V;
+      final int compareResult = _comparator(valueAtMid, item);
+
+      if (compareResult > 0) {
+        // If the item should be inserted before the current mid
+        high = mid;
+      } else {
+        // If the item is equal or greater, move low up
+        low = mid + 1;
+      }
+    }
+
+    // At this point, 'low' is the correct position to insert the item
+    return low;
+  }
+
   void _insert(final K key, final V value) {
     final V? current = _map[key];
     _map[key] = value;
@@ -206,29 +229,6 @@ class SortedMap<K, V> implements Map<K, V> {
     for (final MapEntry<K, V> entry in other.entries) {
       _insert(entry.key, entry.value);
     }
-  }
-
-  int _getPositionToInsert(final V item) {
-    int low = 0;
-    int high = _sortedByKeys.length;
-
-    while (low < high) {
-      final int mid = (low + high) ~/ 2;
-      final K keyAtMid = _sortedByKeys[mid];
-      final V valueAtMid = _map[keyAtMid] as V;
-      final int compareResult = _comparator(valueAtMid, item);
-
-      if (compareResult > 0) {
-        // If the item should be inserted before the current mid
-        high = mid;
-      } else {
-        // If the item is equal or greater, move low up
-        low = mid + 1;
-      }
-    }
-
-    // At this point, 'low' is the correct position to insert the item
-    return low;
   }
 
   void _insertKeyToSorted(final K key, final V value) {

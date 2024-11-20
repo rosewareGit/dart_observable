@@ -97,13 +97,9 @@ class RxStatefulSetImpl<E, S>
               return null;
             }
 
-            final RxStatefulSetState<E, S> newState = RxStatefulSetState<E, S>.fromState(
-              RxSetState<E>(updatedSet),
-            );
-
             final Either<ObservableSetChange<E>, S> change = Either<ObservableSetChange<E>, S>.left(setChange);
             _change = change;
-            super.value = newState;
+            notify();
             return change;
           },
           onCustom: (final S state) {

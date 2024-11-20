@@ -104,7 +104,6 @@ abstract interface class Observable<T> {
 
   Observable<T?> filter(final bool Function(T value) predicate);
 
-  // rethink + recover?
   Observable<T> handleError(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
     final bool Function(dynamic error)? predicate,

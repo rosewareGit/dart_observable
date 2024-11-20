@@ -49,48 +49,6 @@ class ObservableStatefulListMerged<E, S> extends RxStatefulListImpl<E, S> {
     super.onInit();
   }
 
-  void _startCollect() {
-    if (_subscriptions.isNotEmpty) {
-      // apply buffered actions
-      for (final MapEntry<ObservableStatefulList<E, S>, List<Either<ObservableListChange<E>, S>>> entry
-          in _bufferedChanges.entries) {
-        final ObservableStatefulList<E, S> collection = entry.key;
-        final List<Either<ObservableListChange<E>, S>> changes = entry.value;
-
-        for (final Either<ObservableListChange<E>, S> change in changes) {
-          _handleChange(collection, change);
-        }
-      }
-      _bufferedChanges.clear();
-      return;
-    }
-
-    for (final ObservableStatefulList<E, S> collection in collections) {
-      final Either<ObservableListChange<E>, S> currentStateAsChange = collection.currentStateAsChange;
-      currentStateAsChange.fold(
-        onLeft: (final ObservableListChange<E> data) {
-          _syncHelpers[collection]!.handleListSync(sourceChange: data);
-        },
-        onRight: (final S custom) {},
-      );
-
-      _subscriptions.add(
-        collection.onChange(
-          onChange: (final Either<ObservableListChange<E>, S> change) {
-            if (state == ObservableState.inactive) {
-              _bufferedChanges.putIfAbsent(collection, () {
-                return <Either<ObservableListChange<E>, S>>[];
-              }).add(change);
-              return;
-            }
-
-            _handleChange(collection, change);
-          },
-        ),
-      );
-    }
-  }
-
   void _handleChange(
     final ObservableStatefulList<E, S> collection,
     final Either<ObservableListChange<E>, S> change,
@@ -138,5 +96,47 @@ class ObservableStatefulListMerged<E, S> extends RxStatefulListImpl<E, S> {
         }
       },
     );
+  }
+
+  void _startCollect() {
+    if (_subscriptions.isNotEmpty) {
+      // apply buffered actions
+      for (final MapEntry<ObservableStatefulList<E, S>, List<Either<ObservableListChange<E>, S>>> entry
+          in _bufferedChanges.entries) {
+        final ObservableStatefulList<E, S> collection = entry.key;
+        final List<Either<ObservableListChange<E>, S>> changes = entry.value;
+
+        for (final Either<ObservableListChange<E>, S> change in changes) {
+          _handleChange(collection, change);
+        }
+      }
+      _bufferedChanges.clear();
+      return;
+    }
+
+    for (final ObservableStatefulList<E, S> collection in collections) {
+      final Either<ObservableListChange<E>, S> currentStateAsChange = collection.currentStateAsChange;
+      currentStateAsChange.fold(
+        onLeft: (final ObservableListChange<E> data) {
+          _syncHelpers[collection]!.handleListSync(sourceChange: data);
+        },
+        onRight: (final S custom) {},
+      );
+
+      _subscriptions.add(
+        collection.onChange(
+          onChange: (final Either<ObservableListChange<E>, S> change) {
+            if (state == ObservableState.inactive) {
+              _bufferedChanges.putIfAbsent(collection, () {
+                return <Either<ObservableListChange<E>, S>>[];
+              }).add(change);
+              return;
+            }
+
+            _handleChange(collection, change);
+          },
+        ),
+      );
+    }
   }
 }

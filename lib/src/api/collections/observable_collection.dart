@@ -8,13 +8,13 @@ export 'map/rx_map.dart';
 export 'map/state.dart';
 
 abstract interface class ObservableCollection<T, C> implements Observable<T> {
-  ObservableCollectionSwitchMaps<C> get switchMapChangeAs;
-
-  ObservableCollectionTransforms<C> get transformChangeAs;
-
   C get change;
 
   C get currentStateAsChange;
+
+  ObservableCollectionSwitchMaps<C> get switchMapChangeAs;
+
+  ObservableCollectionTransforms<C> get transformChangeAs;
 
   Disposable onChange({
     required final void Function(C change) onChange,

@@ -9,7 +9,7 @@ class StatefulSetChangeSwitchMap<E, S, C, T> extends RxStatefulSetImpl<E, S>
         BaseSwitchMapChangeOperator<ObservableStatefulSet<E, S>, T, C, ObservableStatefulSetState<E, S>,
             Either<ObservableSetChange<E>, S>> {
   @override
-  final ObservableCollection<T,C> source;
+  final ObservableCollection<T, C> source;
   @override
   final ObservableStatefulSet<E, S>? Function(C value) mapChange;
 

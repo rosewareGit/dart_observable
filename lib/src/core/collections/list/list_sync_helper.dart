@@ -85,6 +85,31 @@ class ObservableListSyncHelper<E> {
     );
   }
 
+  int _getPositionToInsert({
+    required final List<ObservableListElement<E>> currentData,
+    required final E item,
+    required final Comparator<E> comparator,
+  }) {
+    int low = 0;
+    int high = currentData.length;
+
+    while (low < high) {
+      final int mid = (low + high) ~/ 2;
+      final int compareResult = comparator(currentData[mid].value, item);
+
+      if (compareResult > 0) {
+        // If the item should be inserted before the current mid
+        high = mid;
+      } else {
+        // If the item is equal or greater, move low up
+        low = mid + 1;
+      }
+    }
+
+    // At this point, 'low' is the correct position to insert the item
+    return low;
+  }
+
   void _handleAddItems({
     required final Map<int, ObservableListElement<E>> sourceAdded,
     required final List<ObservableListElement<E>> data,
@@ -185,29 +210,21 @@ class ObservableListSyncHelper<E> {
     }
   }
 
-  int _getPositionToInsert({
-    required final List<ObservableListElement<E>> currentData,
-    required final E item,
-    required final Comparator<E> comparator,
+  void _handleRemove({
+    required final List<ObservableListElement<E>> data,
+    required final List<ObservableListElementChange<E>> elementsToRemove,
+    required final _SyncChange<E> syncChange,
   }) {
-    int low = 0;
-    int high = currentData.length;
+    final List<ObservableListElement<E>> currentData = data;
 
-    while (low < high) {
-      final int mid = (low + high) ~/ 2;
-      final int compareResult = comparator(currentData[mid].value, item);
-
-      if (compareResult > 0) {
-        // If the item should be inserted before the current mid
-        high = mid;
-      } else {
-        // If the item is equal or greater, move low up
-        low = mid + 1;
+    for (final ObservableListElementChange<E> change in elementsToRemove) {
+      final ObservableListElement<E> element = change.element;
+      final int index = currentData.indexOf(element);
+      if (index != -1) {
+        syncChange.removedElements[index] = change;
+        currentData.removeAt(index);
       }
     }
-
-    // At this point, 'low' is the correct position to insert the item
-    return low;
   }
 
   void _handleUpdate({
@@ -234,23 +251,6 @@ class ObservableListSyncHelper<E> {
       );
 
       data.insert(position, element);
-    }
-  }
-
-  void _handleRemove({
-    required final List<ObservableListElement<E>> data,
-    required final List<ObservableListElementChange<E>> elementsToRemove,
-    required final _SyncChange<E> syncChange,
-  }) {
-    final List<ObservableListElement<E>> currentData = data;
-
-    for (final ObservableListElementChange<E> change in elementsToRemove) {
-      final ObservableListElement<E> element = change.element;
-      final int index = currentData.indexOf(element);
-      if (index != -1) {
-        syncChange.removedElements[index] = change;
-        currentData.removeAt(index);
-      }
     }
   }
 }

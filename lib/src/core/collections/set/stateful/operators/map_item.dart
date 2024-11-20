@@ -2,8 +2,8 @@ import '../../../../../../dart_observable.dart';
 import '../../../operators/transforms/set_stateful.dart';
 import '../../operators/map_item.dart';
 
-class OperatorStatefulSetMapItem<E, E2, S> extends StatefulSetChangeTransform<E2, S,
-    ObservableStatefulSetState<E, S>, Either<ObservableSetChange<E>, S>> {
+class OperatorStatefulSetMapItem<E, E2, S>
+    extends StatefulSetChangeTransform<E2, S, ObservableStatefulSetState<E, S>, Either<ObservableSetChange<E>, S>> {
   final E2 Function(E item) mapper;
 
   OperatorStatefulSetMapItem({

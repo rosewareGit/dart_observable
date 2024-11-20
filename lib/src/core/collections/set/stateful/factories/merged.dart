@@ -44,43 +44,6 @@ class ObservableStatefulSetMerged<E, S> extends RxStatefulSetImpl<E, S> {
     super.onInit();
   }
 
-  void _startCollect() {
-    if (_subscriptions.isNotEmpty) {
-      // apply buffered actions
-      for (final MapEntry<ObservableStatefulSet<E, S>, List<Either<ObservableSetChange<E>, S>>> entry
-          in _bufferedChanges.entries) {
-        final ObservableStatefulSet<E, S> collection = entry.key;
-        final List<Either<ObservableSetChange<E>, S>> changes = entry.value;
-
-        for (final Either<ObservableSetChange<E>, S> change in changes) {
-          _handleChange(collection, change);
-        }
-      }
-      _bufferedChanges.clear();
-      return;
-    }
-
-    for (final ObservableStatefulSet<E, S> collection in collections) {
-      final Either<ObservableSetChange<E>, S> currentStateAsChange = collection.currentStateAsChange;
-      _handleChange(collection, currentStateAsChange);
-
-      _subscriptions.add(
-        collection.onChange(
-          onChange: (final Either<ObservableSetChange<E>, S> change) {
-            if (state == ObservableState.inactive) {
-              _bufferedChanges.putIfAbsent(collection, () {
-                return <Either<ObservableSetChange<E>, S>>[];
-              }).add(change);
-              return;
-            }
-
-            _handleChange(collection, change);
-          },
-        ),
-      );
-    }
-  }
-
   void _handleChange(
     final ObservableStatefulSet<E, S> collection,
     final Either<ObservableSetChange<E>, S> change,
@@ -130,5 +93,42 @@ class ObservableStatefulSetMerged<E, S> extends RxStatefulSetImpl<E, S> {
         }
       },
     );
+  }
+
+  void _startCollect() {
+    if (_subscriptions.isNotEmpty) {
+      // apply buffered actions
+      for (final MapEntry<ObservableStatefulSet<E, S>, List<Either<ObservableSetChange<E>, S>>> entry
+          in _bufferedChanges.entries) {
+        final ObservableStatefulSet<E, S> collection = entry.key;
+        final List<Either<ObservableSetChange<E>, S>> changes = entry.value;
+
+        for (final Either<ObservableSetChange<E>, S> change in changes) {
+          _handleChange(collection, change);
+        }
+      }
+      _bufferedChanges.clear();
+      return;
+    }
+
+    for (final ObservableStatefulSet<E, S> collection in collections) {
+      final Either<ObservableSetChange<E>, S> currentStateAsChange = collection.currentStateAsChange;
+      _handleChange(collection, currentStateAsChange);
+
+      _subscriptions.add(
+        collection.onChange(
+          onChange: (final Either<ObservableSetChange<E>, S> change) {
+            if (state == ObservableState.inactive) {
+              _bufferedChanges.putIfAbsent(collection, () {
+                return <Either<ObservableSetChange<E>, S>>[];
+              }).add(change);
+              return;
+            }
+
+            _handleChange(collection, change);
+          },
+        ),
+      );
+    }
   }
 }

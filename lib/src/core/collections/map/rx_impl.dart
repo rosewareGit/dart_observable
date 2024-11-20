@@ -125,13 +125,6 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
   }
 
   @override
-  ObservableMap<K, V> sorted(final Comparator<V> comparator) {
-    return changeFactory((final Map<K, V>? items) {
-      return SortedMap<K, V>(comparator, initial: items);
-    });
-  }
-
-  @override
   Observable<V?> rxItem(final K key) {
     return OperatorObservableMapRxItem<K, V>(
       source: this,
@@ -143,6 +136,13 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
   void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
     _change = change;
     super.value = RxMapState<K, V>(data);
+  }
+
+  @override
+  ObservableMap<K, V> sorted(final Comparator<V> comparator) {
+    return changeFactory((final Map<K, V>? items) {
+      return SortedMap<K, V>(comparator, initial: items);
+    });
   }
 
   @override

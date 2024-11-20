@@ -26,6 +26,14 @@ class RxListState<E> extends ObservableListState<E> {
     return UnmodifiableListView<E>(_cached);
   }
 
+  void onUpdated() {
+    _cached.clear();
+    final int length = _data.length;
+    for (int i = 0; i < length; i++) {
+      _cached.add(_data[i].value);
+    }
+  }
+
   static Iterable<ObservableListElement<E>> _convertToObservableListElement<E>(final Iterable<E>? data) {
     if (data == null) {
       return <ObservableListElement<E>>[];
@@ -52,13 +60,5 @@ class RxListState<E> extends ObservableListState<E> {
     required final Iterable<ObservableListElement<E>> initial,
   }) {
     return List<ObservableListElement<E>>.of(initial);
-  }
-
-  void onUpdated() {
-    _cached.clear();
-    final int length = _data.length;
-    for (int i = 0; i < length; i++) {
-      _cached.add(_data[i].value);
-    }
   }
 }

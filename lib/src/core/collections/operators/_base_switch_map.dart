@@ -11,6 +11,11 @@ mixin BaseSwitchMapChangeOperator<
   bool _firstMap = true;
 
   @override
+  late final Result? Function(T value) mapper = _mapper;
+
+  Result? Function(C value) get mapChange;
+
+  @override
   ObservableCollection<T, C> get source;
 
   Result? _mapper(final T value) {
@@ -24,9 +29,4 @@ mixin BaseSwitchMapChangeOperator<
 
     return mapChange(change);
   }
-
-  @override
-  late final Result? Function(T value) mapper = _mapper;
-
-  Result? Function(C value) get mapChange;
 }

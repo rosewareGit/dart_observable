@@ -33,6 +33,26 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
     super.onInit();
   }
 
+  void _handleChange({
+    required final ObservableMap<K, V> collection,
+    required final ObservableMapChange<K, V> change,
+  }) {
+    handleChange(
+      change: change,
+      conflictResolver: conflictResolver,
+      currentValueProvider: (final K key) => this[key],
+      applyMapUpdateAction: applyMapUpdateAction,
+      getOtherValueOnRemove: (final K key) {
+        for (final ObservableMap<K, V> otherCollection in collections) {
+          if (otherCollection != collection && otherCollection.containsKey(key)) {
+            return otherCollection[key];
+          }
+        }
+        return null;
+      },
+    );
+  }
+
   void _startCollect() {
     if (_subscriptions.isNotEmpty) {
       // apply buffered actions
@@ -159,25 +179,5 @@ class ObservableMapMerged<K, V> extends RxMapImpl<K, V> {
         ObservableMapUpdateAction<K, V>(removeKeys: removedKeys, addItems: added),
       );
     }
-  }
-
-  void _handleChange({
-    required final ObservableMap<K, V> collection,
-    required final ObservableMapChange<K, V> change,
-  }) {
-    handleChange(
-      change: change,
-      conflictResolver: conflictResolver,
-      currentValueProvider: (final K key) => this[key],
-      applyMapUpdateAction: applyMapUpdateAction,
-      getOtherValueOnRemove: (final K key) {
-        for (final ObservableMap<K, V> otherCollection in collections) {
-          if (otherCollection != collection && otherCollection.containsKey(key)) {
-            return otherCollection[key];
-          }
-        }
-        return null;
-      },
-    );
   }
 }

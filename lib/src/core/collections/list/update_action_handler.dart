@@ -56,42 +56,6 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
     return (data, change);
   }
 
-  void _handleUpdated({
-    required final List<ObservableListElement<E>> data,
-    required final ObservableListChangeElements<E> change,
-    required final Map<int, E> updatedItems,
-  }) {
-    for (final MapEntry<int, E> entry in updatedItems.entries) {
-      final int position = entry.key;
-      final ObservableListElement<E>? current;
-      if (position < data.length) {
-        current = data[position];
-      } else {
-        current = null;
-      }
-
-      if (current == null) {
-        final ObservableListElement<E> element = ObservableListElement<E>(
-          value: entry.value,
-          previousElement: data.lastOrNull,
-          nextElement: null,
-        );
-        data.add(element);
-        change.addedElements[data.length - 1] = element;
-        continue;
-      }
-
-      if (current != entry.value) {
-        change.updatedElements[position] = ObservableListElementChange<E>(
-          element: current,
-          oldValue: current.value,
-          newValue: entry.value,
-        );
-        current.value = entry.value;
-      }
-    }
-  }
-
   void _handleAdded({
     required final List<ObservableListElement<E>> data,
     required final ObservableListChangeElements<E> change,
@@ -143,7 +107,7 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
   }) {
     final List<int> sortedDescend = removedIndexes.toList()..sort((final int a, final int b) => b.compareTo(a));
 
-    for(final int index in sortedDescend) {
+    for (final int index in sortedDescend) {
       if (index >= data.length) {
         continue;
       }
@@ -154,6 +118,42 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
         oldValue: item.value,
         newValue: item.value,
       );
+    }
+  }
+
+  void _handleUpdated({
+    required final List<ObservableListElement<E>> data,
+    required final ObservableListChangeElements<E> change,
+    required final Map<int, E> updatedItems,
+  }) {
+    for (final MapEntry<int, E> entry in updatedItems.entries) {
+      final int position = entry.key;
+      final ObservableListElement<E>? current;
+      if (position < data.length) {
+        current = data[position];
+      } else {
+        current = null;
+      }
+
+      if (current == null) {
+        final ObservableListElement<E> element = ObservableListElement<E>(
+          value: entry.value,
+          previousElement: data.lastOrNull,
+          nextElement: null,
+        );
+        data.add(element);
+        change.addedElements[data.length - 1] = element;
+        continue;
+      }
+
+      if (current != entry.value) {
+        change.updatedElements[position] = ObservableListElementChange<E>(
+          element: current,
+          oldValue: current.value,
+          newValue: entry.value,
+        );
+        current.value = entry.value;
+      }
     }
   }
 }

@@ -38,6 +38,21 @@ class ObservableSetMerged<E> extends RxSetImpl<E> {
     super.onInit();
   }
 
+  void _handleChange({
+    required final ObservableSet<E> collection,
+    required final ObservableSetChange<E> change,
+  }) {
+    handleChange(
+      change: change,
+      hasItemInOtherCollections: (final E item) {
+        return collections
+            .where((final ObservableSet<E> element) => element != collection)
+            .any((final ObservableSet<E> element) => element.contains(item));
+      },
+      applyAction: applyAction,
+    );
+  }
+
   void _startCollect() {
     if (_subscriptions.isNotEmpty) {
       // apply buffered actions
@@ -96,21 +111,6 @@ class ObservableSetMerged<E> extends RxSetImpl<E> {
         removeItems: removeItems,
         addItems: added,
       ),
-    );
-  }
-
-  void _handleChange({
-    required final ObservableSet<E> collection,
-    required final ObservableSetChange<E> change,
-  }) {
-    handleChange(
-      change: change,
-      hasItemInOtherCollections: (final E item) {
-        return collections
-            .where((final ObservableSet<E> element) => element != collection)
-            .any((final ObservableSet<E> element) => element.contains(item));
-      },
-      applyAction: applyAction,
     );
   }
 }

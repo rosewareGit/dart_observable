@@ -14,15 +14,15 @@ mixin BaseCollectionTransformOperator<
   void handleChange(final C change);
 
   @override
-  void onInit() {
-    _init();
-    super.onInit();
-  }
-
-  @override
   void onActive() {
     _initListener();
     super.onActive();
+  }
+
+  @override
+  void onInit() {
+    _init();
+    super.onInit();
   }
 
   void _init() {

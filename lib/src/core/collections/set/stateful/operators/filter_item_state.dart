@@ -25,7 +25,7 @@ class OperatorStatefulSetFilterItemState<E, S>
         );
       },
       onRight: (final S state) {
-        if(predicate(Either<E, S>.right(state))) {
+        if (predicate(Either<E, S>.right(state))) {
           applyAction(Either<ObservableSetUpdateAction<E>, S>.right(state));
         }
       },

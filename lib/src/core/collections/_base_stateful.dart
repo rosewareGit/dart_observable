@@ -3,9 +3,9 @@ import '_base.dart';
 
 abstract class RxCollectionStatefulBase<T, CS extends ObservableCollectionState<T, S>, C, S>
     extends RxCollectionBase<CS, Either<C, S>> implements ObservableCollectionStateful<C, S, CS> {
-  RxCollectionStatefulBase(super.value, {super.distinct});
-
   CS? _previous;
+
+  RxCollectionStatefulBase(super.value, {super.distinct});
 
   @override
   CS? get previous {

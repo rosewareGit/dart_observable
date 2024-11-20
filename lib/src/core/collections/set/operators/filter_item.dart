@@ -1,8 +1,7 @@
 import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
-class ObservableSetFilterOperator<E>
-    extends SetChangeTransform<E, ObservableSetChange<E>, ObservableSetState<E>> {
+class ObservableSetFilterOperator<E> extends SetChangeTransform<E, ObservableSetChange<E>, ObservableSetState<E>> {
   final bool Function(E item) predicate;
 
   ObservableSetFilterOperator({
