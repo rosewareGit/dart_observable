@@ -1,34 +1,24 @@
 import 'package:dart_observable/dart_observable.dart';
 import 'package:test/test.dart';
 
-import 'observable_map_test.dart';
-
 void main() {
   group('RxMap', () {
-    group('sorted', () {
-      test('Should return sorted values', () {
-        final RxMap<String, TestModel> rxSortedMap = RxMap<String, TestModel>.sorted(
-          comparator: (final TestModel a, final TestModel b) => a.value.compareTo(b.value),
-        );
-
-        expect(rxSortedMap.toList(), <TestModel>[]);
-
-        rxSortedMap.addAll(<String, TestModel>{
-          'a': TestModel(5),
-          'b': TestModel(3),
-          'c': TestModel(1),
+    group('value', () {
+      test('Should return an unmodifiable map', () {
+        final RxMap<String, int> map = RxMap<String, int>(<String, int>{
+          'a': 1,
+          'b': 2,
         });
 
-        final List<TestModel> list = rxSortedMap.toList();
-        expect(list[0].value, 1);
-        expect(list[1].value, 3);
-        expect(list[2].value, 5);
+        final Map<String, int> value = map.value;
 
-        rxSortedMap.remove('c');
+        expect(value.length, 2);
+        expect(value['a'], 1);
+        expect(value['b'], 2);
 
-        final List<TestModel> list2 = rxSortedMap.toList();
-        expect(list2[0].value, 3);
-        expect(list2[1].value, 5);
+        expect(() => value['a'] = 3, throwsUnsupportedError);
+        expect(() => value['c'] = 3, throwsUnsupportedError);
+        expect(() => value.remove('a'), throwsUnsupportedError);
       });
     });
 

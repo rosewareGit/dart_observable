@@ -1,11 +1,12 @@
+import 'dart:collection';
+
 import '../../../../dart_observable.dart';
 import '../../../core/collections/map/factories/merged.dart';
 import '../../../core/collections/map/factories/stream.dart';
 
 typedef MergeConflictResolver<K, V> = V? Function(K key, V current, ObservableItemChange<V?> conflict);
 
-abstract interface class ObservableMap<K, V>
-    implements ObservableCollection<ObservableMapState<K, V>, ObservableMapChange<K, V>> {
+abstract interface class ObservableMap<K, V> implements ObservableCollection<Map<K, V>, ObservableMapChange<K, V>> {
   factory ObservableMap.fromStream({
     required final Stream<ObservableMapUpdateAction<K, V>> stream,
     final Map<K, V>? Function(dynamic error)? onError,
@@ -43,6 +44,9 @@ abstract interface class ObservableMap<K, V>
   }
 
   int get length;
+
+  @override
+  UnmodifiableMapView<K, V> get value;
 
   V? operator [](final K key);
 

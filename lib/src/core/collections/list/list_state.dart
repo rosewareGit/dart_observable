@@ -1,9 +1,8 @@
 import 'package:collection/collection.dart';
 
-import '../../../../dart_observable.dart';
 import 'list_element.dart';
 
-class RxListState<E> extends ObservableListState<E> {
+class RxListState<E> {
   final List<ObservableListElement<E>> _data;
   final List<E> _cached = <E>[];
 
@@ -21,7 +20,6 @@ class RxListState<E> extends ObservableListState<E> {
 
   List<ObservableListElement<E>> get data => _data;
 
-  @override
   UnmodifiableListView<E> get listView {
     return UnmodifiableListView<E>(_cached);
   }
@@ -60,5 +58,11 @@ class RxListState<E> extends ObservableListState<E> {
     required final Iterable<ObservableListElement<E>> initial,
   }) {
     return List<ObservableListElement<E>>.of(initial);
+  }
+
+  void setData(final List<ObservableListElement<E>> data) {
+    _data.clear();
+    _data.addAll(data);
+    onUpdated();
   }
 }

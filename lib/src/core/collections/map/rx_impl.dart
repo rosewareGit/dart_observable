@@ -1,8 +1,9 @@
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import '../../../../dart_observable.dart';
 import '../_base.dart';
-import 'map_state.dart';
 import 'map_update_action_handler.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
@@ -16,7 +17,7 @@ Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
   };
 }
 
-class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, ObservableMapChange<K, V>>
+class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K, V>>
     with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V>
     implements RxMap<K, V> {
   late ObservableMapChange<K, V> _change;
@@ -25,7 +26,7 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
   }) : super(
-          RxMapState<K, V>.initial((factory ?? defaultMapFactory<K, V>()).call(initial)),
+          (factory ?? defaultMapFactory<K, V>()).call(initial),
         ) {
     _change = currentStateAsChange;
   }
@@ -48,28 +49,31 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
   @override
   ObservableMapChange<K, V> get currentStateAsChange {
     return ObservableMapChange<K, V>(
-      added: _value.data,
+      added: _value,
     );
   }
 
   @override
-  Map<K, V> get data => _value.mapView;
+  Map<K, V> get data => _value;
 
   @override
-  int get length => _value.data.length;
+  int get length => _value.length;
 
-  RxMapState<K, V> get _value => value as RxMapState<K, V>;
+  @override
+  UnmodifiableMapView<K, V> get value => UnmodifiableMapView<K, V>(_value);
+
+  Map<K, V> get _value => super.value;
 
   @override
   V? operator [](final K key) {
-    return _value.data[key];
+    return _value[key];
   }
 
   @override
   @protected
   ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action) {
     final ObservableMapChange<K, V> change = applyActionAndComputeChange(
-      data: _value.data,
+      data: _value,
       action: action,
     );
 
@@ -97,7 +101,7 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
 
   @override
   bool containsKey(final K key) {
-    return _value.data.containsKey(key);
+    return _value.containsKey(key);
   }
 
   @override
@@ -135,7 +139,7 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
   @override
   void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
     _change = change;
-    super.value = RxMapState<K, V>(data);
+    super.value = data;
   }
 
   @override
@@ -147,6 +151,6 @@ class RxMapImpl<K, V> extends RxCollectionBase<ObservableMapState<K, V>, Observa
 
   @override
   List<V> toList() {
-    return _value.data.values.toList();
+    return _value.values.toList();
   }
 }

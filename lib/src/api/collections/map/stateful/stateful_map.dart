@@ -1,9 +1,11 @@
+import 'dart:collection';
+
 import '../../../../../dart_observable.dart';
 import '../../../../core/collections/map/stateful/factories/merged.dart';
 import '../../../../core/collections/map/stateful/factories/stream.dart';
 
 abstract class ObservableStatefulMap<K, V, S>
-    implements ObservableCollectionStateful<ObservableMapChange<K, V>, S, ObservableStatefulMapState<K, V, S>> {
+    implements ObservableCollectionStateful<ObservableMapChange<K, V>, S, Either<Map<K, V>, S>> {
   factory ObservableStatefulMap.custom(final S custom) {
     return RxStatefulMap<K, V, S>.custom(custom);
   }
@@ -50,6 +52,9 @@ abstract class ObservableStatefulMap<K, V, S>
   }
 
   int? get length;
+
+  @override
+  Either<UnmodifiableMapView<K, V>, S> get value;
 
   V? operator [](final K key);
 

@@ -1,6 +1,5 @@
 import '../../../../../../dart_observable.dart';
 import '../../factories/merged.dart';
-import '../../map_state.dart';
 import '../rx_stateful.dart';
 
 class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
@@ -89,16 +88,14 @@ class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
         );
       }
     } else {
-      final ObservableStatefulMapState<K, V, S>? previous = collection.previous;
+      final Either<Map<K, V>, S>? previous = collection.previous;
       if (previous != null) {
         previous.when(
-          onData: (final ObservableMapState<K, V> data) {
-            final RxMapState<K, V> parsed = data as RxMapState<K, V>;
-            final Map<K, V> items = parsed.data;
+          onLeft: (final  Map<K, V> data) {
             handleChange(
               collection: collection,
               change: Either<ObservableMapChange<K, V>, S>.left(
-                ObservableMapChange<K, V>(removed: items),
+                ObservableMapChange<K, V>(removed: data),
               ),
             );
           },

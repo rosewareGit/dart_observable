@@ -6,12 +6,12 @@ Either<E?, S>? _getStateForIndex<E, S>({
   required final int position,
   required final bool isInitial,
 }) {
-  final ObservableStatefulListState<E, S> value = source.value;
+  final Either<List<E>,S> value = source.value;
   return value.fold(
-    onData: (final ObservableListState<E> list) {
+    onLeft: (final List<E> list) {
       return Either<E?, S>.left(source[position]);
     },
-    onCustom: (final S state) {
+    onRight: (final S state) {
       return Either<E?, S>.right(state);
     },
   );
@@ -66,7 +66,7 @@ class OperatorObservableListStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
     }
 
     _listener = source.listen(
-      onChange: (final ObservableStatefulListState<E, S> value) {
+      onChange: (final Either<List<E>,S> value) {
         final Either<E?, S>? newState = _getStateForIndex(source: source, position: position, isInitial: false);
         if (newState != null) {
           this.value = newState;

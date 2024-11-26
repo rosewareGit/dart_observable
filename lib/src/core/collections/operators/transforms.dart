@@ -7,16 +7,16 @@ import 'transforms/map_stateful.dart';
 import 'transforms/set.dart';
 import 'transforms/set_stateful.dart';
 
-class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTransforms<C> {
+class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTransforms<C, T> {
   final ObservableCollection<T, C> source;
 
   ObservableCollectionTransformsImpl(this.source);
 
   @override
   ObservableList<E> list<E>({
-    required final ListChangeUpdater<E, C> transform,
+    required final ListChangeUpdater<E, C, T> transform,
   }) {
-    return ListChangeTransform<E, C, T>(
+    return ListChangeTransform<E, T, C>(
       source: source,
       transformFn: transform,
     );
@@ -24,7 +24,7 @@ class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTr
 
   @override
   ObservableMap<K, V> map<K, V>({
-    required final MapChangeUpdater<K, V, C> transform,
+    required final MapChangeUpdater<K, V, C, T> transform,
     final FactoryMap<K, V>? factory,
   }) {
     return MapChangeTransform<C, T, K, V>(
@@ -36,7 +36,7 @@ class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTr
 
   @override
   ObservableSet<E> set<E>({
-    required final SetChangeUpdater<E, C> transform,
+    required final SetChangeUpdater<E, C, T> transform,
     final Set<E> Function(Iterable<E>? items)? factory,
   }) {
     return SetChangeTransform<E, C, T>(
@@ -48,7 +48,7 @@ class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTr
 
   @override
   ObservableStatefulList<E, S> statefulList<E, S>({
-    required final StatefulListChangeUpdater<E, S, C> transform,
+    required final StatefulListChangeUpdater<E, S, C, T> transform,
   }) {
     return StatefulListChangeTransform<E, S, T, C>(
       source: source,
@@ -58,7 +58,7 @@ class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTr
 
   @override
   ObservableStatefulMap<K, V, S> statefulMap<K, V, S>({
-    required final StatefulMapChangeUpdater<K, V, S, C> transform,
+    required final StatefulMapChangeUpdater<K, V, S, C, T> transform,
     final FactoryMap<K, V>? factory,
   }) {
     return OperatorCollectionTransformMapStateful<K, V, S, T, C>(
@@ -70,7 +70,7 @@ class ObservableCollectionTransformsImpl<T, C> implements ObservableCollectionTr
 
   @override
   ObservableStatefulSet<E, S> statefulSet<E, S>({
-    required final StatefulSetChangeUpdater<E, S, C> transform,
+    required final StatefulSetChangeUpdater<E, S, C, T> transform,
     final FactorySet<E>? factory,
   }) {
     return StatefulSetChangeTransform<E, S, T, C>(

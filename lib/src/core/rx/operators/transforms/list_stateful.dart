@@ -3,7 +3,7 @@ import '../../../collections/list/stateful/rx_stateful.dart';
 import '../_base_transform.dart';
 
 class StatefulListTransform<T, E, S> extends RxStatefulListImpl<E, S>
-    with BaseTransformOperator<T, ObservableStatefulListState<E, S>, Either<List<E>, S>> {
+    with BaseTransformOperator<T, Either<List<E>, S>, Either<List<E>, S>> {
   @override
   final Observable<T> source;
   final StatefulListUpdater<E, S, T>? transformFn;

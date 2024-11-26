@@ -5,8 +5,8 @@ import '../_base_switch_map.dart';
 
 class StatefulListChangeSwitchMap<E, S, C, T> extends RxStatefulListImpl<E, S>
     with
-        BaseSwitchMapOperator<ObservableStatefulList<E, S>, T, ObservableStatefulListState<E, S>>,
-        BaseSwitchMapChangeOperator<ObservableStatefulList<E, S>, T, C, ObservableStatefulListState<E, S>,
+        BaseSwitchMapOperator<ObservableStatefulList<E, S>, T, Either<List<E>, S>>,
+        BaseSwitchMapChangeOperator<ObservableStatefulList<E, S>, T, C, Either<List<E>, S>,
             Either<ObservableListChange<E>, S>> {
   @override
   final ObservableCollection<T, C> source;

@@ -7,10 +7,10 @@ abstract class RxCollectionBase<T, C> extends RxBase<T> implements ObservableCol
   RxCollectionBase(super.value, {super.distinct});
 
   @override
-  ObservableCollectionSwitchMaps<C> get switchMapChangeAs => ObservableCollectionFlatMapsImpl<T, C>(this);
+  ObservableCollectionSwitchMaps<C> get switchMapChangeAs => ObservableCollectionSwitchMapsImpl<T, C>(this);
 
   @override
-  ObservableCollectionTransforms<C> get transformChangeAs => ObservableCollectionTransformsImpl<T, C>(this);
+  ObservableCollectionTransforms<C, T> get transformChangeAs => ObservableCollectionTransformsImpl<T, C>(this);
 
   @override
   Disposable onChange({required final void Function(C change) onChange}) {

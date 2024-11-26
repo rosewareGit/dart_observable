@@ -1,9 +1,16 @@
 import 'package:dart_observable/dart_observable.dart';
-import 'package:dart_observable/src/core/collections/set/set_state.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('RxSet', () {
+    group('value', () {
+      test('Should return an unmodifiable view of the set', () {
+        final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+        expect(rx.value, <int>{1, 2, 3});
+        expect(() => rx.value.add(4), throwsUnsupportedError);
+      });
+    });
+
     group('add', () {
       test('should add item', () {
         final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
@@ -13,7 +20,7 @@ void main() {
         expect(change!.added, <int>{4});
         expect(change.removed, <int>{});
 
-        expect(set.value.setView, <int>{1, 2, 3, 4});
+        expect(set.value, <int>{1, 2, 3, 4});
       });
     });
 
@@ -26,7 +33,7 @@ void main() {
         expect(change!.added, <int>{4, 5, 6});
         expect(change.removed, <int>{});
 
-        expect(set.value.setView, <int>{1, 2, 3, 4, 5, 6});
+        expect(set.value, <int>{1, 2, 3, 4, 5, 6});
       });
     });
 
@@ -39,7 +46,7 @@ void main() {
         expect(change!.added, <int>{});
         expect(change.removed, <int>{1, 2, 3});
 
-        expect(set.value.setView, <int>{});
+        expect(set.value, <int>{});
       });
     });
 
@@ -52,7 +59,7 @@ void main() {
         expect(change!.added, <int>{});
         expect(change.removed, <int>{2});
 
-        expect(set.value.setView, <int>{1, 3});
+        expect(set.value, <int>{1, 3});
       });
     });
 
@@ -65,7 +72,7 @@ void main() {
         expect(change!.added, <int>{});
         expect(change.removed, <int>{1, 3});
 
-        expect(set.value.setView, <int>{2});
+        expect(set.value, <int>{2});
       });
     });
 
@@ -78,7 +85,7 @@ void main() {
         expect(change!.added, <int>{4, 6});
         expect(change.removed, <int>{1, 3});
 
-        expect(set.value.setView, <int>{2, 4, 6});
+        expect(set.value, <int>{2, 4, 6});
       });
 
       test('Should use the existing factory', () {
@@ -101,9 +108,9 @@ void main() {
     group('set value', () {
       test('should set value', () {
         final RxSet<int> rxSet = RxSet<int>(initial: <int>[1, 2, 3]);
-        rxSet.value = RxSetState<int>.initial(<int>{2, 4, 6});
+        rxSet.value = <int>{2, 4, 6};
 
-        expect(rxSet.value.setView, <int>{2, 4, 6});
+        expect(rxSet.value, <int>{2, 4, 6});
         final ObservableSetChange<int> change = rxSet.change;
 
         expect(change.added, <int>{4, 6});

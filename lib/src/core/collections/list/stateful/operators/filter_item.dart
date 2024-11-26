@@ -3,7 +3,7 @@ import '../../../operators/transforms/list_stateful.dart';
 import '../../list_sync_helper.dart';
 
 class StatefulListFilterOperator<E, S>
-    extends StatefulListChangeTransform<E, S, ObservableStatefulListState<E, S>, Either<ObservableListChange<E>, S>> {
+    extends StatefulListChangeTransform<E, S, Either<List<E>,S>, Either<ObservableListChange<E>, S>> {
   final bool Function(E item) predicate;
 
   late final ObservableListSyncHelper<E> _helper = ObservableListSyncHelper<E>(

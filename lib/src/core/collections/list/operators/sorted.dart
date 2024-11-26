@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/list.dart';
 import '../list_sync_helper.dart';
 
-class ObservableListSortedOperator<E> extends ListChangeTransform<E, ObservableListChange<E>, ObservableListState<E>> {
+class ObservableListSortedOperator<E> extends ListChangeTransform<E, List<E>, ObservableListChange<E>> {
   final Comparator<E> comparator;
 
   late final ObservableListSyncHelper<E> _helper = ObservableListSyncHelper<E>(

@@ -3,7 +3,7 @@ import '../../../collections/set/stateful/rx_stateful.dart';
 import '../_base_switch_map.dart';
 
 class StatefulSetSwitchMap<E, S, T> extends RxStatefulSetImpl<E, S>
-    with BaseSwitchMapOperator<ObservableStatefulSet<E, S>, T, ObservableStatefulSetState<E, S>> {
+    with BaseSwitchMapOperator<ObservableStatefulSet<E, S>, T, Either<Set<E>, S>> {
   @override
   final Observable<T> source;
   @override

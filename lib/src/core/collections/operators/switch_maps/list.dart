@@ -5,8 +5,8 @@ import '../_base_switch_map.dart';
 
 class ListChangeSwitchMap<E, C, T> extends RxListImpl<E>
     with
-        BaseSwitchMapOperator<ObservableList<E>, T, ObservableListState<E>>,
-        BaseSwitchMapChangeOperator<ObservableList<E>, T, C, ObservableListState<E>, ObservableListChange<E>> {
+        BaseSwitchMapOperator<ObservableList<E>, T, List<E>>,
+        BaseSwitchMapChangeOperator<ObservableList<E>, T, C, List<E>, ObservableListChange<E>> {
   @override
   final ObservableCollection<T, C> source;
   @override

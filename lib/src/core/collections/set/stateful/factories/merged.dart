@@ -1,6 +1,5 @@
 import '../../../../../../dart_observable.dart';
 import '../../factories/merged.dart';
-import '../../set_state.dart';
 import '../rx_stateful.dart';
 
 class ObservableStatefulSetMerged<E, S> extends RxStatefulSetImpl<E, S> {
@@ -74,17 +73,15 @@ class ObservableStatefulSetMerged<E, S> extends RxStatefulSetImpl<E, S> {
             );
           }
         } else {
-          final ObservableStatefulSetState<E, S>? previous = collection.previous;
+          final Either<Set<E>, S>? previous = collection.previous;
           // remove items from collection
           if (previous != null) {
             previous.when(
-              onData: (final ObservableSetState<E> data) {
-                final RxSetState<E> parsed = data as RxSetState<E>;
-                final Set<E> items = parsed.data;
+              onLeft: (final Set<E> data) {
                 _handleChange(
                   collection,
                   Either<ObservableSetChange<E>, S>.left(
-                    ObservableSetChange<E>(removed: items),
+                    ObservableSetChange<E>(removed: data),
                   ),
                 );
               },

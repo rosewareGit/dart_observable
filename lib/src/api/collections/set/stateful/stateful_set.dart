@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../../../../../dart_observable.dart';
 import '../../../../core/collections/set/stateful/factories/merged.dart';
 import '../../../../core/collections/set/stateful/factories/stream.dart';
@@ -7,7 +9,7 @@ abstract class ObservableStatefulSet<E, S>
         ObservableCollectionStateful<
             ObservableSetChange<E>, // the collection type
             S, // The custom state
-            ObservableStatefulSetState<E, S>> {
+            Either<Set<E>, S>> {
   factory ObservableStatefulSet.custom(final S custom) {
     return RxStatefulSet<E, S>.custom(custom);
   }
@@ -25,6 +27,9 @@ abstract class ObservableStatefulSet<E, S>
       factory: factory,
     );
   }
+
+  @override
+  Either<UnmodifiableSetView<E>, S> get value;
 
   factory ObservableStatefulSet.just(
     final Set<E> data, {

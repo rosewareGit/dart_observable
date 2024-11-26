@@ -3,7 +3,7 @@ import '../../../operators/transforms/set_stateful.dart';
 import '../../operators/filter_item.dart';
 
 class OperatorStatefulSetFilterItem<E, S>
-    extends StatefulSetChangeTransform<E, S, ObservableStatefulSetState<E, S>, Either<ObservableSetChange<E>, S>> {
+    extends StatefulSetChangeTransform<E, S, Either<Set<E>, S>, Either<ObservableSetChange<E>, S>> {
   final bool Function(E item) predicate;
 
   OperatorStatefulSetFilterItem({

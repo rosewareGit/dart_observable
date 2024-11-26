@@ -3,7 +3,7 @@ import '../../../operators/transforms/map_stateful.dart';
 import '../../operators/map_item.dart';
 
 class OperatorStatefulMapMapItem<K, V, V2, S> extends OperatorCollectionTransformMapStateful<K, V2, S,
-    ObservableStatefulMapState<K, V, S>, Either<ObservableMapChange<K, V>, S>> {
+    Either<Map<K, V>, S>, Either<ObservableMapChange<K, V>, S>> {
   final V2 Function(K key, V value) mapper;
 
   OperatorStatefulMapMapItem({

@@ -9,17 +9,16 @@ Either<E?, S>? _getStateByPredicate<E, S>({
   required final bool isInitial,
 }) {
   if (isInitial) {
-    final ObservableStatefulSetState<E, S> state = source.value;
+    final Either<Set<E>, S> state = source.value;
     return state.fold(
-      onData: (final ObservableSetState<E> set) {
-        final Set<E> data = set.setView;
+      onLeft: (final Set<E> data) {
         final E? matched = data.firstWhereOrNull((final E element) => predicate(element));
         if (matched != null) {
           return Either<E?, S>.left(matched);
         }
         return null;
       },
-      onCustom: (final S state) {
+      onRight: (final S state) {
         return Either<E?, S>.right(state);
       },
     );
@@ -106,7 +105,7 @@ class OperatorObservableSetStatefulRxItem<E, S> extends RxImpl<Either<E?, S>> {
     }
 
     _listener = source.listen(
-      onChange: (final ObservableStatefulSetState<E, S> value) {
+      onChange: (final Either<Set<E>, S> value) {
         final Either<E?, S>? newState = _getStateByPredicate(source: source, predicate: predicate, isInitial: false);
         if (newState != null) {
           this.value = newState;

@@ -1,9 +1,10 @@
+import 'dart:collection';
+
 import '../../../../dart_observable.dart';
 import '../../../core/collections/set/factories/merged.dart';
 import '../../../core/collections/set/factories/stream.dart';
 
-abstract interface class ObservableSet<E>
-    implements ObservableCollection<ObservableSetState<E>, ObservableSetChange<E>> {
+abstract interface class ObservableSet<E> implements ObservableCollection<Set<E>, ObservableSetChange<E>> {
   factory ObservableSet.fromStream({
     required final Stream<ObservableSetUpdateAction<E>> stream,
     final Set<E>? Function(dynamic error)? onError,
@@ -39,6 +40,9 @@ abstract interface class ObservableSet<E>
   }
 
   int get length;
+
+  @override
+  UnmodifiableSetView<E> get value;
 
   ObservableSet<E> changeFactory(final FactorySet<E> factory);
 

@@ -171,7 +171,7 @@ void main() {
               final Emitter<List<String>> emitter,
             ) {
               emitter(
-                <String>[...state.value.listView, value.toString()],
+                <String>[...state.value, value.toString()],
               );
             },
           );
@@ -185,7 +185,7 @@ void main() {
           source.value = 3;
 
           expect(rxList.length, 2);
-          expect(rxList.value.listView, <String>['0', '3']);
+          expect(rxList.value, <String>['0', '3']);
           expect(rxList[1], '3');
 
           listener.dispose();
@@ -198,7 +198,7 @@ void main() {
           rxList.listen();
 
           expect(rxList.length, 4);
-          expect(rxList.value.listView, <String>['0', '3', '6', '7']);
+          expect(rxList.value, <String>['0', '3', '6', '7']);
           expect(rxList[2], '6');
           expect(rxList[3], '7');
 
@@ -218,7 +218,7 @@ void main() {
               final Emitter<Set<String>> emitter,
             ) {
               emitter(
-                <String>{...state.value.setView, value.toString()},
+                <String>{...state.value, value.toString()},
               );
             },
           );
@@ -263,7 +263,7 @@ void main() {
               final Emitter<Map<int, String>> emitter,
             ) {
               emitter(
-                <int, String>{...state.value.mapView, value: value.toString()},
+                <int, String>{...state.value, value: value.toString()},
               );
             },
           );
@@ -299,31 +299,31 @@ void main() {
             ) {
               emitter(
                 Either<List<String>, String>.left(
-                  <String>[...?state.value.leftOrNull?.listView, value.toString()],
+                  <String>[...?state.value.leftOrNull, value.toString()],
                 ),
               );
             },
           );
 
-          expect(rxList.value.leftOrThrow.listView, <String>[]);
+          expect(rxList.value.leftOrThrow, <String>[]);
           final Disposable listener = rxList.listen();
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0']);
+          expect(rxList.value.leftOrThrow, <String>['0']);
 
           source.value = 3;
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '3']);
+          expect(rxList.value.leftOrThrow, <String>['0', '3']);
 
           listener.dispose();
 
           source.value = 6;
           source.value = 7;
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '3']);
+          expect(rxList.value.leftOrThrow, <String>['0', '3']);
 
           rxList.listen();
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '3', '6', '7']);
+          expect(rxList.value.leftOrThrow, <String>['0', '3', '6', '7']);
 
           await source.dispose();
 
@@ -342,22 +342,22 @@ void main() {
             ) {
               emitter(
                 Either<Map<int, String>, String>.left(
-                  <int, String>{...?state.value.leftOrNull?.mapView, value: value.toString()},
+                  <int, String>{...?state.value.leftOrNull, value: value.toString()},
                 ),
               );
             },
           );
 
-          expect(rxMap.value.leftOrThrow.mapView, <int, String>{});
+          expect(rxMap.value.leftOrThrow, <int, String>{});
           rxMap.listen();
 
-          expect(rxMap.value.leftOrThrow.mapView, <int, String>{0: '0'});
+          expect(rxMap.value.leftOrThrow, <int, String>{0: '0'});
 
           source.value = 3;
-          expect(rxMap.value.leftOrThrow.mapView, <int, String>{0: '0', 3: '3'});
+          expect(rxMap.value.leftOrThrow, <int, String>{0: '0', 3: '3'});
 
           source.value = 6;
-          expect(rxMap.value.leftOrThrow.mapView, <int, String>{0: '0', 3: '3', 6: '6'});
+          expect(rxMap.value.leftOrThrow, <int, String>{0: '0', 3: '3', 6: '6'});
 
           await source.dispose();
 
@@ -376,22 +376,22 @@ void main() {
             ) {
               emitter(
                 Either<Set<String>, String>.left(
-                  <String>{...?state.value.leftOrNull?.setView, value.toString()},
+                  <String>{...?state.value.leftOrNull, value.toString()},
                 ),
               );
             },
           );
 
-          expect(rxSet.value.leftOrThrow.setView, <String>{});
+          expect(rxSet.value.leftOrThrow, <String>{});
           rxSet.listen();
 
-          expect(rxSet.value.leftOrThrow.setView, <String>{'0'});
+          expect(rxSet.value.leftOrThrow, <String>{'0'});
 
           source.value = 3;
-          expect(rxSet.value.leftOrThrow.setView, <String>{'0', '3'});
+          expect(rxSet.value.leftOrThrow, <String>{'0', '3'});
 
           source.value = 6;
-          expect(rxSet.value.leftOrThrow.setView, <String>{'0', '3', '6'});
+          expect(rxSet.value.leftOrThrow, <String>{'0', '3', '6'});
 
           await source.dispose();
 
@@ -636,27 +636,27 @@ void main() {
 
           rxList.listen();
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '2', '4']);
+          expect(rxList.value.leftOrThrow, <String>['0', '2', '4']);
           rxSource.value = 1;
-          expect(rxList.value.leftOrThrow.listView, <String>[]);
+          expect(rxList.value.leftOrThrow, <String>[]);
 
           rxSource.value = 2;
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '2', '4']);
+          expect(rxList.value.leftOrThrow, <String>['0', '2', '4']);
 
           rxEven.addAll(<String>['6', '8']);
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '2', '4', '6', '8']);
+          expect(rxList.value.leftOrThrow, <String>['0', '2', '4', '6', '8']);
           rxEven.remove('2');
           rxEven.remove('4');
           rxEven.remove('6');
           rxOdd.add('3');
           rxOdd.add('5');
 
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '8']);
+          expect(rxList.value.leftOrThrow, <String>['0', '8']);
 
           rxSource.value = 3;
-          expect(rxList.value.leftOrThrow.listView, <String>['3', '5']);
+          expect(rxList.value.leftOrThrow, <String>['3', '5']);
           rxSource.value = 4;
-          expect(rxList.value.leftOrThrow.listView, <String>['0', '8']);
+          expect(rxList.value.leftOrThrow, <String>['0', '8']);
         });
       });
 
@@ -679,22 +679,22 @@ void main() {
 
           rxMap.listen();
 
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{'a': 1, 'b': 2, 'c': 3});
+          expect(rxMap.value.leftOrThrow, <String, int>{'a': 1, 'b': 2, 'c': 3});
           rxSource.value = 1;
 
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{});
+          expect(rxMap.value.leftOrThrow, <String, int>{});
 
           rxSource.value = 2;
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{'a': 1, 'b': 2, 'c': 3});
+          expect(rxMap.value.leftOrThrow, <String, int>{'a': 1, 'b': 2, 'c': 3});
 
           rxSource.value = 1;
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{});
+          expect(rxMap.value.leftOrThrow, <String, int>{});
 
           rxOdd.addAll(<String, int>{'d': 4, 'e': 5});
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{'d': 4, 'e': 5});
+          expect(rxMap.value.leftOrThrow, <String, int>{'d': 4, 'e': 5});
 
           rxSource.value = 4;
-          expect(rxMap.value.leftOrThrow.mapView, <String, int>{'a': 1, 'b': 2, 'c': 3});
+          expect(rxMap.value.leftOrThrow, <String, int>{'a': 1, 'b': 2, 'c': 3});
 
           await rxSource.dispose();
           expect(rxMap.disposed, true);

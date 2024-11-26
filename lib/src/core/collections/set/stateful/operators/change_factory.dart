@@ -2,7 +2,7 @@ import '../../../../../../dart_observable.dart';
 import '../../../operators/transforms/set_stateful.dart';
 
 class OperatorStatefulSetChangeFactory<E, S>
-    extends StatefulSetChangeTransform<E, S, ObservableStatefulSetState<E, S>, Either<ObservableSetChange<E>, S>> {
+    extends StatefulSetChangeTransform<E, S, Either<Set<E>, S>, Either<ObservableSetChange<E>, S>> {
   OperatorStatefulSetChangeFactory({
     required super.source,
     required super.factory,

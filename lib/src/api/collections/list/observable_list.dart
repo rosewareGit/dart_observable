@@ -1,9 +1,10 @@
+import 'dart:collection';
+
 import '../../../../dart_observable.dart';
 import '../../../core/collections/list/factories/merged.dart';
 import '../../../core/collections/list/factories/stream.dart';
 
-abstract interface class ObservableList<E>
-    implements ObservableCollection<ObservableListState<E>, ObservableListChange<E>> {
+abstract interface class ObservableList<E> implements ObservableCollection<List<E>, ObservableListChange<E>> {
   factory ObservableList.fromStream({
     required final Stream<ObservableListUpdateAction<E>> stream,
     final List<E>? initial,
@@ -27,6 +28,9 @@ abstract interface class ObservableList<E>
       collections: collections,
     );
   }
+
+  @override
+  UnmodifiableListView<E> get value;
 
   int get length;
 

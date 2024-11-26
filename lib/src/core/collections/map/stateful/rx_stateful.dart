@@ -1,8 +1,9 @@
+import 'dart:collection';
+
 import 'package:meta/meta.dart';
 
 import '../../../../../dart_observable.dart';
 import '../../_base_stateful.dart';
-import '../map_state.dart';
 import '../map_update_action_handler.dart';
 import '../rx_actions.dart';
 import '../rx_impl.dart';
@@ -12,13 +13,10 @@ import 'operators/filter_item_state.dart';
 import 'operators/map_item.dart';
 import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
-import 'state.dart';
 
-class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
-    ObservableMapState<K, V>,
-    ObservableStatefulMapState<K, V, S>,
-    ObservableMapChange<K, V>,
-    S> with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V> implements RxStatefulMap<K, V, S> {
+class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, ObservableMapChange<K, V>, S>
+    with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V>
+    implements RxStatefulMap<K, V, S> {
   final FactoryMap<K, V> _factory;
   late Either<ObservableMapChange<K, V>, S> _change;
 
@@ -29,7 +27,7 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
           () {
             final FactoryMap<K, V> $factory = factory ?? defaultMapFactory<K, V>();
             final Map<K, V> updatedMap = $factory(data);
-            return RxStatefulMapState<K, V, S>.fromState(RxMapState<K, V>.initial(updatedMap));
+            return Either<Map<K, V>, S>.left(updatedMap);
           }(),
           factory: factory,
         );
@@ -39,13 +37,13 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
     final FactoryMap<K, V>? factory,
   }) {
     return RxStatefulMapImpl<K, V, S>._(
-      RxStatefulMapState<K, V, S>.custom(state),
+      Either<Map<K, V>, S>.right(state),
       factory: factory,
     );
   }
 
   RxStatefulMapImpl._(
-    final ObservableStatefulMapState<K, V, S> state, {
+    final Either<Map<K, V>, S> state, {
     final FactoryMap<K, V>? factory,
   })  : _factory = factory ?? defaultMapFactory<K, V>(),
         super(state) {
@@ -57,14 +55,12 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
 
   @override
   Either<ObservableMapChange<K, V>, S> get currentStateAsChange {
-    return value.fold(
-      onData: (final ObservableMapState<K, V> data) {
-        final ObservableMapChange<K, V> change = ObservableMapChange<K, V>(
-          added: (data as RxMapState<K, V>).data,
-        );
+    return super.value.fold(
+      onLeft: (final Map<K, V> data) {
+        final ObservableMapChange<K, V> change = ObservableMapChange<K, V>(added: data);
         return Either<ObservableMapChange<K, V>, S>.left(change);
       },
-      onCustom: (final S state) {
+      onRight: (final S state) {
         return Either<ObservableMapChange<K, V>, S>.right(state);
       },
     );
@@ -72,23 +68,31 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
 
   @override
   Map<K, V> get data => value.fold(
-        onData: (final ObservableMapState<K, V> data) => data.mapView,
-        onCustom: (final _) => <K, V>{},
+        onLeft: (final Map<K, V> data) => data,
+        onRight: (final _) => <K, V>{},
       );
 
   @override
   int? get length => value.fold(
-        onData: (final ObservableMapState<K, V> data) => data.mapView.length,
-        onCustom: (final S state) => null,
+        onLeft: (final Map<K, V> data) => data.length,
+        onRight: (final S state) => null,
       );
+
+  @override
+  Either<UnmodifiableMapView<K, V>, S> get value {
+    return super.value.fold(
+          onLeft: (final Map<K, V> data) => Either<UnmodifiableMapView<K, V>, S>.left(UnmodifiableMapView<K, V>(data)),
+          onRight: (final S state) => Either<UnmodifiableMapView<K, V>, S>.right(state),
+        );
+  }
 
   @override
   V? operator [](final K key) {
     return value.fold(
-      onData: (final ObservableMapState<K, V> data) {
-        return data.mapView[key];
+      onLeft: (final Map<K, V> data) {
+        return data[key];
       },
-      onCustom: (final _) => null,
+      onRight: (final _) => null,
     );
   }
 
@@ -96,13 +100,12 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
   Either<ObservableMapChange<K, V>, S>? applyAction(
     final Either<ObservableMapUpdateAction<K, V>, S> action,
   ) {
-    final ObservableStatefulMapState<K, V, S> currentValue = value;
+    final Either<Map<K, V>, S> currentValue = super.value;
     return action.fold<Either<ObservableMapChange<K, V>, S>?>(
       onLeft: (final ObservableMapUpdateAction<K, V> listUpdateAction) {
         return currentValue.fold(
-          onData: (final ObservableMapState<K, V> data) {
-            final RxMapState<K, V> state = data as RxMapState<K, V>;
-            final Map<K, V> updatedMap = state.data;
+          onLeft: (final Map<K, V> data) {
+            final Map<K, V> updatedMap = data;
             final ObservableMapChange<K, V> change = applyActionAndComputeChange(
               data: updatedMap,
               action: listUpdateAction,
@@ -116,27 +119,22 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
             notify();
             return _change;
           },
-          onCustom: (final S state) {
+          onRight: (final S state) {
             final Map<K, V> updatedMap = _factory(<K, V>{});
             final ObservableMapChange<K, V> change = applyActionAndComputeChange(
               data: updatedMap,
               action: listUpdateAction,
             );
 
-            final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.fromState(
-              RxMapState<K, V>(updatedMap),
-            );
-
             _change = Either<ObservableMapChange<K, V>, S>.left(change);
-            super.value = newState;
+            super.value = Either<Map<K, V>, S>.left(updatedMap);
             return _change;
           },
         );
       },
       onRight: (final S action) {
-        final RxStatefulMapState<K, V, S> newState = RxStatefulMapState<K, V, S>.custom(action);
         _change = Either<ObservableMapChange<K, V>, S>.right(action);
-        super.value = newState;
+        super.value = Either<Map<K, V>, S>.right(action);
         return _change;
       },
     );
@@ -160,8 +158,8 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
   @override
   bool containsKey(final K key) {
     return value.fold(
-      onData: (final ObservableMapState<K, V> data) => data.mapView.containsKey(key),
-      onCustom: (final _) => false,
+      onLeft: (final Map<K, V> data) => data.containsKey(key),
+      onRight: (final _) => false,
     );
   }
 
@@ -226,9 +224,7 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
   @override
   void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
     _change = Either<ObservableMapChange<K, V>, S>.left(change);
-    super.value = RxStatefulMapState<K, V, S>.fromState(
-      RxMapState<K, V>(data),
-    );
+    super.value = Either<Map<K, V>, S>.left(data);
   }
 
   @override
@@ -248,8 +244,8 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<
   @override
   List<V>? toList() {
     return value.fold(
-      onData: (final ObservableMapState<K, V> data) => data.mapView.values.toList(),
-      onCustom: (final _) => null,
+      onLeft: (final Map<K, V> data) => data.values.toList(),
+      onRight: (final _) => null,
     );
   }
 }

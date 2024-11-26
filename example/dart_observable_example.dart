@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:dart_observable/dart_observable.dart';
 
 Future<void> main() async {
@@ -16,8 +14,7 @@ Future<void> main() async {
   assert(rxCounter == 1);
 
   final Disposable listListener = controller.rxItems.listen(
-    onChange: (final ObservableListState<String> state) {
-      final UnmodifiableListView<String> immutableList = state.listView;
+    onChange: (final List<String> immutableList) {
       final ObservableListChange<String> change = controller.rxItems.change;
 
       print('list size: ${immutableList.length}');
@@ -99,8 +96,8 @@ class Controller {
   /// These changes are utilized in collection operators to compute only the differences.
   /// The base [Observable.map] operator does not handle the changes but can map to any type.
   late final Observable<List<String>> rxItemsUppercasedMap = _rxItems.map(
-    (final ObservableListState<String> immutableState) {
-      return immutableState.listView.map((final String item) => item.toUpperCase()).toList();
+    (final List<String> immutableView) {
+      return immutableView.map((final String item) => item.toUpperCase()).toList();
     },
   );
 

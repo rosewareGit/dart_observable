@@ -1,12 +1,23 @@
+import 'dart:collection';
+
 import 'package:dart_observable/dart_observable.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('RxStatefulSet', () {
+    group('value', () {
+      test('Should return an unmodifiable view of the set', () {
+        final RxStatefulSet<int, String> set = RxStatefulSet<int, String>(initial: <int>{1, 2, 3});
+        final UnmodifiableSetView<int> value = set.value.leftOrThrow;
+
+        expect(() => value.add(4), throwsUnsupportedError);
+      });
+    });
+
     group('factory', () {
       test('Should create instance with initial data', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
-        expect(rxSet.value.leftOrThrow.setView, <int>[1, 2, 3]);
+        expect(rxSet.value.leftOrThrow, <int>[1, 2, 3]);
       });
 
       test('Should create instance with failure', () {
@@ -80,12 +91,12 @@ void main() {
       test('Should add value', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         rxSet.add(100);
-        expect(rxSet.value.leftOrThrow.setView, <int>[1, 2, 3, 100]);
+        expect(rxSet.value.leftOrThrow, <int>[1, 2, 3, 100]);
 
         rxSet.setState('custom');
         rxSet.add(1000);
 
-        expect(rxSet.value.leftOrThrow.setView, <int>[1000]);
+        expect(rxSet.value.leftOrThrow, <int>[1000]);
       });
     });
 
@@ -93,12 +104,12 @@ void main() {
       test('Should add all values', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         rxSet.addAll(<int>[100, 101]);
-        expect(rxSet.value.leftOrThrow.setView, <int>[1, 2, 3, 100, 101]);
+        expect(rxSet.value.leftOrThrow, <int>[1, 2, 3, 100, 101]);
 
         rxSet.setState('custom');
         rxSet.addAll(<int>[1000, 1001]);
 
-        expect(rxSet.value.leftOrThrow.setView, <int>[1000, 1001]);
+        expect(rxSet.value.leftOrThrow, <int>[1000, 1001]);
       });
     });
 
@@ -106,12 +117,12 @@ void main() {
       test('Should clear values', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         rxSet.clear();
-        expect(rxSet.value.leftOrThrow.setView, <int>[]);
+        expect(rxSet.value.leftOrThrow, <int>[]);
 
         rxSet.setState('custom');
         rxSet.clear();
 
-        expect(rxSet.value.leftOrThrow.setView, <int>[]);
+        expect(rxSet.value.leftOrThrow, <int>[]);
       });
     });
 
@@ -119,12 +130,12 @@ void main() {
       test('Should remove value', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         rxSet.remove(2);
-        expect(rxSet.value.leftOrThrow.setView, <int>[1, 3]);
+        expect(rxSet.value.leftOrThrow, <int>[1, 3]);
 
         rxSet.setState('custom');
         rxSet.remove(3);
 
-        expect(rxSet.value.leftOrThrow.setView, <int>[]);
+        expect(rxSet.value.leftOrThrow, <int>[]);
       });
     });
 
@@ -132,12 +143,12 @@ void main() {
       test('Should remove values where predicate is true', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         rxSet.removeWhere((final int item) => item == 2);
-        expect(rxSet.value.leftOrThrow.setView, <int>[1, 3]);
+        expect(rxSet.value.leftOrThrow, <int>[1, 3]);
 
         rxSet.setState('custom');
         rxSet.removeWhere((final int item) => item == 3);
 
-        expect(rxSet.value.leftOrThrow.setView, <int>[]);
+        expect(rxSet.value.leftOrThrow, <int>[]);
       });
     });
 
@@ -145,7 +156,7 @@ void main() {
       test('Should set data', () {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
         final ObservableSetChange<int>? change = rxSet.setData(<int>{100, 101});
-        expect(rxSet.value.leftOrThrow.setView, <int>{100, 101});
+        expect(rxSet.value.leftOrThrow, <int>{100, 101});
         expect(change!.added, <int>{100, 101});
         expect(change.removed, <int>{1, 2, 3});
 
@@ -153,10 +164,10 @@ void main() {
         expect(rxSet.value.leftOrNull, null);
 
         rxSet.setData(<int>{1000, 1001});
-        expect(rxSet.value.leftOrThrow.setView, <int>{1000, 1001});
+        expect(rxSet.value.leftOrThrow, <int>{1000, 1001});
 
         final ObservableSetChange<int>? change2 = rxSet.setData(<int>{1001, 1002, 1003});
-        expect(rxSet.value.leftOrThrow.setView, <int>{1001, 1002, 1003});
+        expect(rxSet.value.leftOrThrow, <int>{1001, 1002, 1003});
         expect(change2!.added, <int>{1002, 1003});
         expect(change2.removed, <int>{1000});
       });

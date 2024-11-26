@@ -9,13 +9,13 @@ void main() {
       test('Should create an empty ObservableList', () {
         final ObservableList<int> rxList = ObservableList<int>.just(<int>[]);
         expect(rxList.length, 0);
-        expect(rxList.value.listView, <int>[]);
+        expect(rxList.value, <int>[]);
       });
 
       test('Should create an ObservableList with the specified value', () {
         final ObservableList<int> rxList = ObservableList<int>.just(<int>[1, 2, 3]);
         expect(rxList.length, 3);
-        expect(rxList.value.listView, <int>[1, 2, 3]);
+        expect(rxList.value, <int>[1, 2, 3]);
       });
     });
 
@@ -32,7 +32,7 @@ void main() {
 
         controller.add(ObservableListUpdateAction<int>(addItems: <int>[1, 2]));
         expect(rxList.length, 3);
-        expect(rxList.value.listView, <int>[0, 1, 2]);
+        expect(rxList.value, <int>[0, 1, 2]);
 
         controller.add(
           ObservableListUpdateAction<int>(
@@ -42,11 +42,11 @@ void main() {
           ),
         );
         expect(rxList.length, 5);
-        expect(rxList.value.listView, <int>[3, 4, 0, 1, 2]);
+        expect(rxList.value, <int>[3, 4, 0, 1, 2]);
 
         controller.add(ObservableListUpdateAction<int>(removeItems: <int>{0}));
         expect(rxList.length, 4);
-        expect(rxList.value.listView, <int>[4, 0, 1, 2]);
+        expect(rxList.value, <int>[4, 0, 1, 2]);
 
         await controller.close();
         await rxList.dispose();
@@ -70,7 +70,7 @@ void main() {
         controller.addError(Exception('Stream error'));
 
         expect(rxList.length, 1);
-        expect(rxList.value.listView, <int>[-1]);
+        expect(rxList.value, <int>[-1]);
 
         await controller.close();
         await rxList.dispose();
@@ -94,7 +94,7 @@ void main() {
         controller.addError(Exception('Stream error'));
 
         expect(rxList.length, 1);
-        expect(rxList.value.listView, <int>[0]);
+        expect(rxList.value, <int>[0]);
       });
 
       test('Should propagate error to downstream handler', () {
@@ -140,7 +140,7 @@ void main() {
         expect(catchError, true);
 
         expect(rxList.length, 1);
-        expect(rxList.value.listView, <int>[0]);
+        expect(rxList.value, <int>[0]);
 
         await controller.close();
         await rxList.dispose();
@@ -160,7 +160,7 @@ void main() {
         controller.add(ObservableListUpdateAction<int>(addItems: <int>[3]));
 
         expect(rxList.length, 4);
-        expect(rxList.value.listView, <int>[0, 1, 2, 3]);
+        expect(rxList.value, <int>[0, 1, 2, 3]);
       });
 
       test('Should update the list with all the pending changes after listening', () async {
@@ -176,7 +176,7 @@ void main() {
         Disposable listener = rxList.listen();
 
         expect(rxList.length, 4);
-        expect(rxList.value.listView, <int>[0, 1, 2, 3]);
+        expect(rxList.value, <int>[0, 1, 2, 3]);
 
         await listener.dispose();
 
@@ -186,7 +186,7 @@ void main() {
         listener = rxList.listen();
 
         expect(rxList.length, 6);
-        expect(rxList.value.listView, <int>[0, 1, 2, 3, 4, 5]);
+        expect(rxList.value, <int>[0, 1, 2, 3, 4, 5]);
       });
     });
 
@@ -203,37 +203,37 @@ void main() {
         rxList.listen();
 
         expect(rxList.length, 11);
-        expect(rxList.value.listView, <int>[1, 2, 3, 4, 5, 4, 5, 6, 6, 6, 6]);
+        expect(rxList.value, <int>[1, 2, 3, 4, 5, 4, 5, 6, 6, 6, 6]);
 
         source1.add(7);
-        expect(source1.value.listView, <int>[1, 2, 3, 4, 5, 7]);
+        expect(source1.value, <int>[1, 2, 3, 4, 5, 7]);
         expect(rxList.length, 12);
-        expect(rxList.value.listView, <int>[1, 2, 3, 4, 5, 7, 4, 5, 6, 6, 6, 6]);
+        expect(rxList.value, <int>[1, 2, 3, 4, 5, 7, 4, 5, 6, 6, 6, 6]);
 
         source2.add(7);
-        expect(source2.value.listView, <int>[4, 5, 6, 7]);
+        expect(source2.value, <int>[4, 5, 6, 7]);
         expect(rxList.length, 13);
-        expect(rxList.value.listView, <int>[1, 2, 3, 4, 5, 7, 4, 5, 6, 7, 6, 6, 6]);
+        expect(rxList.value, <int>[1, 2, 3, 4, 5, 7, 4, 5, 6, 7, 6, 6, 6]);
 
         source1.removeAt(0);
-        expect(source1.value.listView, <int>[2, 3, 4, 5, 7]);
+        expect(source1.value, <int>[2, 3, 4, 5, 7]);
         expect(rxList.length, 12);
-        expect(rxList.value.listView, <int>[2, 3, 4, 5, 7, 4, 5, 6, 7, 6, 6, 6]);
+        expect(rxList.value, <int>[2, 3, 4, 5, 7, 4, 5, 6, 7, 6, 6, 6]);
 
         source2.removeAt(0);
-        expect(source2.value.listView, <int>[5, 6, 7]);
+        expect(source2.value, <int>[5, 6, 7]);
         expect(rxList.length, 11);
-        expect(rxList.value.listView, <int>[2, 3, 4, 5, 7, 5, 6, 7, 6, 6, 6]);
+        expect(rxList.value, <int>[2, 3, 4, 5, 7, 5, 6, 7, 6, 6, 6]);
 
         source1[0] = 10;
-        expect(source1.value.listView, <int>[10, 3, 4, 5, 7]);
+        expect(source1.value, <int>[10, 3, 4, 5, 7]);
         expect(rxList.length, 11);
-        expect(rxList.value.listView, <int>[10, 3, 4, 5, 7, 5, 6, 7, 6, 6, 6]);
+        expect(rxList.value, <int>[10, 3, 4, 5, 7, 5, 6, 7, 6, 6, 6]);
 
         source2[0] = 12;
-        expect(source2.value.listView, <int>[12, 6, 7]);
+        expect(source2.value, <int>[12, 6, 7]);
         expect(rxList.length, 11);
-        expect(rxList.value.listView, <int>[10, 3, 4, 5, 7, 12, 6, 7, 6, 6, 6]);
+        expect(rxList.value, <int>[10, 3, 4, 5, 7, 12, 6, 7, 6, 6, 6]);
       });
 
       test('Should handle merging with an empty source list', () {
@@ -248,15 +248,15 @@ void main() {
         rxList.listen();
 
         expect(rxList.length, 5);
-        expect(rxList.value.listView, <int>[1, 2, 3, 4, 5]);
+        expect(rxList.value, <int>[1, 2, 3, 4, 5]);
 
         source1.add(6);
         expect(rxList.length, 6);
-        expect(rxList.value.listView, <int>[1, 2, 3, 6, 4, 5]);
+        expect(rxList.value, <int>[1, 2, 3, 6, 4, 5]);
 
         source3.add(7);
         expect(rxList.length, 7);
-        expect(rxList.value.listView, <int>[1, 2, 3, 6, 4, 5, 7]);
+        expect(rxList.value, <int>[1, 2, 3, 6, 4, 5, 7]);
       });
 
       test('Should handle merging with overlapping elements', () {
@@ -271,19 +271,19 @@ void main() {
         rxList.listen();
 
         expect(rxList.length, 9);
-        expect(rxList.value.listView, <int>[1, 2, 3, 3, 4, 5, 5, 6, 7]);
+        expect(rxList.value, <int>[1, 2, 3, 3, 4, 5, 5, 6, 7]);
 
         source1.add(8);
         expect(rxList.length, 10);
-        expect(rxList.value.listView, <int>[1, 2, 3, 8, 3, 4, 5, 5, 6, 7]);
+        expect(rxList.value, <int>[1, 2, 3, 8, 3, 4, 5, 5, 6, 7]);
 
         source2.remove(3);
         expect(rxList.length, 9);
-        expect(rxList.value.listView, <int>[1, 2, 3, 8, 4, 5, 5, 6, 7]);
+        expect(rxList.value, <int>[1, 2, 3, 8, 4, 5, 5, 6, 7]);
 
         source3[0] = 9;
         expect(rxList.length, 9);
-        expect(rxList.value.listView, <int>[1, 2, 3, 8, 4, 5, 9, 6, 7]);
+        expect(rxList.value, <int>[1, 2, 3, 8, 4, 5, 9, 6, 7]);
       });
     });
 
@@ -297,12 +297,20 @@ void main() {
       });
     });
 
+    group('value', () {
+      test('Should return an unmodifiable list', () {
+        final ObservableList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final List<int> value = rxList.value;
+        expect(() => value.add(4), throwsUnsupportedError);
+      });
+    });
+
     group('listen', () {
       test('Should emit updated state', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         final List<ObservableListChange<int>> changes = <ObservableListChange<int>>[];
         rxList.listen(
-          onChange: (final ObservableListState<int> state) {
+          onChange: (final List<int> state) {
             changes.add(rxList.change);
           },
         );
@@ -456,7 +464,7 @@ void main() {
         rxSorted.listen();
 
         expect(rxSorted.length, 10);
-        expect(rxSorted.value.listView, <int>[10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+        expect(rxSorted.value, <int>[10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
       });
 
       test('Should update list on source change', () async {
@@ -473,41 +481,41 @@ void main() {
         );
 
         expect(rxSorted.length, 1);
-        expect(rxSorted.value.listView, <int>[1]);
+        expect(rxSorted.value, <int>[1]);
         expect(lastChange!.added[0], 1);
 
         rxSource.add(5);
         expect(rxSorted.length, 2);
-        expect(rxSorted.value.listView, <int>[5, 1]);
+        expect(rxSorted.value, <int>[5, 1]);
         expect(lastChange!.added[0], 5);
 
         rxSource.add(3);
         expect(rxSorted.length, 3);
-        expect(rxSorted.value.listView, <int>[5, 3, 1]);
+        expect(rxSorted.value, <int>[5, 3, 1]);
         expect(lastChange!.added[1], 3);
 
         rxSource.add(7);
-        expect(rxSource.value.listView, <int>[1, 5, 3, 7]);
+        expect(rxSource.value, <int>[1, 5, 3, 7]);
         expect(rxSorted.length, 4);
-        expect(rxSorted.value.listView, <int>[7, 5, 3, 1]);
+        expect(rxSorted.value, <int>[7, 5, 3, 1]);
         expect(lastChange!.added[0], 7);
 
         rxSource.insert(0, 2);
-        expect(rxSource.value.listView, <int>[2, 1, 5, 3, 7]);
+        expect(rxSource.value, <int>[2, 1, 5, 3, 7]);
         expect(rxSorted.length, 5);
-        expect(rxSorted.value.listView, <int>[7, 5, 3, 2, 1]);
+        expect(rxSorted.value, <int>[7, 5, 3, 2, 1]);
         expect(lastChange!.added[3], 2);
 
         rxSource.removeAt(0);
-        expect(rxSource.value.listView, <int>[1, 5, 3, 7]);
+        expect(rxSource.value, <int>[1, 5, 3, 7]);
         expect(rxSorted.length, 4);
-        expect(rxSorted.value.listView, <int>[7, 5, 3, 1]);
+        expect(rxSorted.value, <int>[7, 5, 3, 1]);
         expect(lastChange!.removed[3], 2);
 
         rxSource[2] = 10;
-        expect(rxSource.value.listView, <int>[1, 5, 10, 7]);
+        expect(rxSource.value, <int>[1, 5, 10, 7]);
         expect(rxSorted.length, 4);
-        expect(rxSorted.value.listView, <int>[10, 7, 5, 1]);
+        expect(rxSorted.value, <int>[10, 7, 5, 1]);
         expect(lastChange!.updated[2]!.oldValue, 3);
         expect(lastChange!.updated[2]!.newValue, 10);
 
@@ -526,7 +534,7 @@ void main() {
         filteredList.listen();
 
         expect(filteredList.length, 5);
-        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+        expect(filteredList.value, <int>[2, 4, 6, 8, 10]);
       });
 
       test('Should filter source list on change', () {
@@ -541,55 +549,55 @@ void main() {
         );
 
         expect(filteredList.length, 5);
-        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+        expect(filteredList.value, <int>[2, 4, 6, 8, 10]);
         expect(changes[0].added.length, 5);
 
         rxSource.add(11);
-        expect(rxSource.value.listView, <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        expect(rxSource.value, <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
         expect(filteredList.length, 5);
-        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10]);
+        expect(filteredList.value, <int>[2, 4, 6, 8, 10]);
 
         rxSource.add(12);
-        expect(rxSource.value.listView, <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 6);
-        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10, 12]);
+        expect(filteredList.value, <int>[2, 4, 6, 8, 10, 12]);
         expect(changes[1].added[5], 12);
 
         rxSource.removeAt(0);
-        expect(rxSource.value.listView, <int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 6);
-        expect(filteredList.value.listView, <int>[2, 4, 6, 8, 10, 12]);
+        expect(filteredList.value, <int>[2, 4, 6, 8, 10, 12]);
         expect(changes.length, 2);
 
         rxSource.removeAt(0);
-        expect(rxSource.value.listView, <int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 5);
-        expect(filteredList.value.listView, <int>[4, 6, 8, 10, 12]);
+        expect(filteredList.value, <int>[4, 6, 8, 10, 12]);
         expect(changes[2].removed[0], 2);
 
         rxSource[1] = 20;
-        expect(rxSource.value.listView, <int>[3, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[3, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 5);
-        expect(filteredList.value.listView, <int>[20, 6, 8, 10, 12]);
+        expect(filteredList.value, <int>[20, 6, 8, 10, 12]);
         expect(changes[3].updated[0]!.oldValue, 4);
         expect(changes[3].updated[0]!.newValue, 20);
 
         rxSource[1] = 3;
-        expect(rxSource.value.listView, <int>[3, 3, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[3, 3, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 4);
-        expect(filteredList.value.listView, <int>[6, 8, 10, 12]);
+        expect(filteredList.value, <int>[6, 8, 10, 12]);
         expect(changes[4].removed[0], 20);
 
         rxSource.removeAt(0);
-        expect(rxSource.value.listView, <int>[3, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[3, 5, 6, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 4);
-        expect(filteredList.value.listView, <int>[6, 8, 10, 12]);
+        expect(filteredList.value, <int>[6, 8, 10, 12]);
         expect(changes.length, 5);
 
         rxSource.removeAt(2);
-        expect(rxSource.value.listView, <int>[3, 5, 7, 8, 9, 10, 11, 12]);
+        expect(rxSource.value, <int>[3, 5, 7, 8, 9, 10, 11, 12]);
         expect(filteredList.length, 3);
-        expect(filteredList.value.listView, <int>[8, 10, 12]);
+        expect(filteredList.value, <int>[8, 10, 12]);
         expect(changes[5].removed[0], 6);
       });
     });
@@ -604,7 +612,7 @@ void main() {
         rxMapped.listen();
 
         expect(rxMapped.length, 5);
-        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+        expect(rxMapped.value, <String>['1', '2', '3', '4', '5']);
       });
 
       test('Should map changes', () {
@@ -616,22 +624,22 @@ void main() {
         rxMapped.listen();
 
         expect(rxMapped.length, 5);
-        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+        expect(rxMapped.value, <String>['1', '2', '3', '4', '5']);
 
         rxSource.add(6);
 
         expect(rxMapped.length, 6);
-        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5', '6']);
+        expect(rxMapped.value, <String>['1', '2', '3', '4', '5', '6']);
 
         rxSource.removeAt(0);
 
         expect(rxMapped.length, 5);
-        expect(rxMapped.value.listView, <String>['2', '3', '4', '5', '6']);
+        expect(rxMapped.value, <String>['2', '3', '4', '5', '6']);
 
         rxSource[0] = 7;
 
         expect(rxMapped.length, 5);
-        expect(rxMapped.value.listView, <String>['7', '3', '4', '5', '6']);
+        expect(rxMapped.value, <String>['7', '3', '4', '5', '6']);
       });
 
       test('Should dispose when source disposed', () async {
@@ -643,7 +651,7 @@ void main() {
         rxMapped.listen();
 
         expect(rxMapped.length, 5);
-        expect(rxMapped.value.listView, <String>['1', '2', '3', '4', '5']);
+        expect(rxMapped.value, <String>['1', '2', '3', '4', '5']);
 
         await rxSource.dispose();
 
@@ -660,8 +668,8 @@ void main() {
         final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3]);
 
         final Observable<int> rxSwitched = rxSource.switchMap<int>(
-          (final ObservableListState<int> state) {
-            final int mod = state.listView.length % 3;
+          (final List<int> state) {
+            final int mod = state.length % 3;
             if (mod == 0) {
               return rxType1;
             } else if (mod == 1) {
@@ -701,8 +709,8 @@ void main() {
         expect(rxSwitched.value, 6, reason: 'Should switch to rxType3 because 6 % 3 == 0');
 
         final Observable<int> rxSwitched2 = rxSource.switchMap<int>(
-          (final ObservableListState<int> state) {
-            final int mod = state.listView.length % 3;
+          (final List<int> state) {
+            final int mod = state.length % 3;
             if (mod == 0) {
               return rxType1;
             } else if (mod == 1) {
@@ -732,8 +740,8 @@ void main() {
           final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3]);
 
           final ObservableMap<int, String> rxSwitched = rxSource.switchMapAs.map<int, String>(
-            mapper: (final ObservableListState<int> state) {
-              final int mod = state.listView.length % 3;
+            mapper: (final List<int> state) {
+              final int mod = state.length % 3;
               if (mod == 0) {
                 return rxType1;
               } else if (mod == 1) {
@@ -747,23 +755,775 @@ void main() {
           rxSwitched.listen();
 
           expect(rxSwitched.length, 1);
-          expect(rxSwitched.value.mapView, <int, String>{1: '1'});
+          expect(rxSwitched.value, <int, String>{1: '1'});
 
           rxType1[1] = '4';
-          expect(rxSwitched.value.mapView, <int, String>{1: '4'});
+          expect(rxSwitched.value, <int, String>{1: '4'});
           rxType1[2] = '5';
-          expect(rxSwitched.value.mapView, <int, String>{1: '4', 2: '5'});
+          expect(rxSwitched.value, <int, String>{1: '4', 2: '5'});
 
           rxSource.add(4);
           expect(rxSwitched.length, 1);
-          expect(rxSwitched.value.mapView, <int, String>{2: '2'});
+          expect(rxSwitched.value, <int, String>{2: '2'});
 
           rxSource.remove(4);
           expect(rxSwitched.length, 2);
-          expect(rxSwitched.value.mapView, <int, String>{1: '4', 2: '5'});
+          expect(rxSwitched.value, <int, String>{1: '4', 2: '5'});
 
           await rxSource.dispose();
           expect(rxSwitched.disposed, true);
+        });
+      });
+    });
+
+    group('transformAs', () {
+      group('list', () {
+        test('Should transform to a new list', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableList<String> rxTransformed = rxSource.transformAs.list<String>(
+            transform: (
+              final ObservableList<String> state,
+              final List<int> value,
+              final Emitter<List<String>> emitter,
+            ) {
+              emitter(<String>[for (final int item in value) item.toString()]);
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>['1', '2', '3', '4', '5']);
+
+          rxSource.add(6);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>['1', '2', '3', '4', '5', '6']);
+
+          rxSource.removeAt(0);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>['2', '3', '4', '5', '6']);
+
+          rxSource[0] = 7;
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>['7', '3', '4', '5', '6']);
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should transform to a new list', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableStatefulList<String, String> rxTransformed =
+              rxSource.transformAs.statefulList<String, String>(
+            transform: (
+              final ObservableStatefulList<String, String> state,
+              final List<int> value,
+              final Emitter<Either<List<String>, String>> emitter,
+            ) {
+              if (value.contains(0)) {
+                emitter(Either<List<String>, String>.right('0'));
+              } else {
+                emitter(Either<List<String>, String>.left(<String>[for (final int item in value) item.toString()]));
+              }
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>['1', '2', '3', '4', '5']);
+
+          rxSource.add(6);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>['1', '2', '3', '4', '5', '6']);
+
+          rxSource.removeAt(0);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>['2', '3', '4', '5', '6']);
+
+          rxSource[0] = 7;
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>['7', '3', '4', '5', '6']);
+
+          rxSource.add(0);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, '0');
+
+          rxSource.remove(0);
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>['7', '3', '4', '5', '6']);
+          expect(rxTransformed.value.rightOrNull, null);
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform to a new map', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableMap<int, String> rxTransformed = rxSource.transformAs.map<int, String>(
+            transform: (
+              final ObservableMap<int, String> state,
+              final List<int> value,
+              final Emitter<Map<int, String>> emitter,
+            ) {
+              emitter(<int, String>{for (final int item in value) item: item.toString()});
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <int, String>{1: '1', 2: '2', 3: '3', 4: '4', 5: '5'});
+
+          rxSource.add(6);
+          expect(rxSource.value, <int>[1, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <int, String>{1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6'});
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <int, String>{2: '2', 3: '3', 4: '4', 5: '5', 6: '6'});
+
+          rxSource[0] = 7;
+          expect(rxSource.value, <int>[7, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <int, String>{3: '3', 4: '4', 5: '5', 6: '6', 7: '7'});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform to a new map', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableStatefulMap<int, String, String> rxTransformed =
+              rxSource.transformAs.statefulMap<int, String, String>(
+            transform: (
+              final ObservableStatefulMap<int, String, String> state,
+              final List<int> value,
+              final Emitter<Either<Map<int, String>, String>> emitter,
+            ) {
+              if (value.contains(0)) {
+                emitter(Either<Map<int, String>, String>.right('0'));
+              } else {
+                emitter(
+                  Either<Map<int, String>, String>.left(
+                    <int, String>{for (final int item in value) item: item.toString()},
+                  ),
+                );
+              }
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{1: '1', 2: '2', 3: '3', 4: '4', 5: '5'});
+
+          rxSource.add(6);
+          expect(rxSource.value, <int>[1, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{1: '1', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6'});
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{2: '2', 3: '3', 4: '4', 5: '5', 6: '6'});
+
+          rxSource[0] = 7;
+          expect(rxSource.value, <int>[7, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{3: '3', 4: '4', 5: '5', 6: '6', 7: '7'});
+
+          rxSource.add(0);
+          expect(rxSource.value, <int>[7, 3, 4, 5, 6, 0]);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, '0');
+
+          rxSource.remove(0);
+          expect(rxSource.value, <int>[7, 3, 4, 5, 6]);
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{3: '3', 4: '4', 5: '5', 6: '6', 7: '7'});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform to a new set', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableSet<String> rxTransformed = rxSource.transformAs.set<String>(
+            transform: (
+              final ObservableSet<String> state,
+              final List<int> value,
+              final Emitter<Set<String>> emitter,
+            ) {
+              emitter(<String>{for (final int item in value) item.toString()});
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>{'1', '2', '3', '4', '5'});
+
+          rxSource.add(6);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>{'1', '2', '3', '4', '5', '6'});
+
+          rxSource.removeAt(0);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>{'2', '3', '4', '5', '6'});
+
+          rxSource[0] = 7;
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>{'7', '3', '4', '5', '6'});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform to a new set', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          final ObservableStatefulSet<String, String> rxTransformed = rxSource.transformAs.statefulSet<String, String>(
+            transform: (
+              final ObservableStatefulSet<String, String> state,
+              final List<int> value,
+              final Emitter<Either<Set<String>, String>> emitter,
+            ) {
+              if (value.contains(0)) {
+                emitter(Either<Set<String>, String>.right('0'));
+              } else {
+                emitter(Either<Set<String>, String>.left(<String>{for (final int item in value) item.toString()}));
+              }
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>{'1', '2', '3', '4', '5'});
+
+          rxSource.add(6);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>{'1', '2', '3', '4', '5', '6'});
+
+          rxSource.removeAt(0);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>{'2', '3', '4', '5', '6'});
+
+          rxSource[0] = 7;
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>{'7', '3', '4', '5', '6'});
+
+          rxSource.add(0);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, '0');
+
+          rxSource.remove(0);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>{'7', '3', '4', '5', '6'});
+          expect(rxTransformed.value.rightOrNull, null);
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+    });
+
+    group('transformChangeAs', () {
+      group('list', () {
+        test('Should transform the change as a new list', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableList<String> rxTransformed = rxSource.transformChangeAs.list<String>(
+            transform: (
+              final ObservableList<String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<ObservableListUpdateAction<String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              emitter(
+                ObservableListUpdateAction<String>(
+                  insertAt: <int, List<String>>{
+                    for (final MapEntry<int, int> entry in added.entries) entry.key: <String>[mapper(entry.value)],
+                  },
+                  removeItems: removed.keys.toSet(),
+                  updateItems: <int, String>{
+                    for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                      entry.key: mapper(entry.value.newValue),
+                  },
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>['E2', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>['E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>['E14', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>['E16', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.clear();
+          expect(rxSource.value, <int>[]);
+          expect(rxTransformed.length, 0);
+          expect(rxTransformed.value, <String>[]);
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should transform the change as a new list', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableStatefulList<String, String> rxTransformed =
+              rxSource.transformChangeAs.statefulList<String, String>(
+            transform: (
+              final ObservableStatefulList<String, String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<Either<ObservableListUpdateAction<String>, String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              if (added.containsValue(-1)) {
+                emitter(Either<ObservableListUpdateAction<String>, String>.right('empty'));
+                return;
+              }
+
+              if (removed.containsValue(-1)) {
+                // re-add items
+                emitter(
+                  Either<ObservableListUpdateAction<String>, String>.left(
+                    ObservableListUpdateAction<String>(
+                      addItems: <String>[for (final int item in state) mapper(item)],
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              emitter(
+                Either<ObservableListUpdateAction<String>, String>.left(
+                  ObservableListUpdateAction<String>(
+                    insertAt: <int, List<String>>{
+                      for (final MapEntry<int, int> entry in added.entries) entry.key: <String>[mapper(entry.value)],
+                    },
+                    removeItems: removed.keys.toSet(),
+                    updateItems: <int, String>{
+                      for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                        entry.key: mapper(entry.value.newValue),
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>['E2', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>['E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>['E14', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>['E16', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.add(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6, -1]);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, 'empty');
+
+          rxSource.remove(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>['E16', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSource.clear();
+          expect(rxSource.value, <int>[]);
+          expect(rxTransformed.length, 0);
+          expect(rxTransformed.value.leftOrThrow, <String>[]);
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform the change as a new map', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableMap<int, String> rxTransformed = rxSource.transformChangeAs.map<int, String>(
+            transform: (
+              final ObservableMap<int, String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<ObservableMapUpdateAction<int, String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              emitter(
+                ObservableMapUpdateAction<int, String>(
+                  addItems: <int, String>{
+                    for (final MapEntry<int, int> entry in added.entries) entry.value: mapper(entry.value),
+                    for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                      entry.value.newValue: mapper(entry.value.newValue),
+                  },
+                  removeKeys: <int>{
+                    ...removed.values.toSet(),
+                    ...updated.values.map((final ObservableItemChange<int> change) => change.oldValue).toSet(),
+                  },
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <int, String>{1: 'E2', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <int, String>{2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <int, String>{7: 'E14', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <int, String>{8: 'E16', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform the change as a new map', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableStatefulMap<int, String, String> rxTransformed =
+              rxSource.transformChangeAs.statefulMap<int, String, String>(
+            transform: (
+              final ObservableStatefulMap<int, String, String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<Either<ObservableMapUpdateAction<int, String>, String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              if (added.containsValue(-1)) {
+                emitter(Either<ObservableMapUpdateAction<int, String>, String>.right('empty'));
+                return;
+              }
+
+              if (removed.containsValue(-1)) {
+                // re-add items
+                emitter(
+                  Either<ObservableMapUpdateAction<int, String>, String>.left(
+                    ObservableMapUpdateAction<int, String>(
+                      addItems: <int, String>{
+                        for (final int item in state) item: mapper(item),
+                      },
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              emitter(
+                Either<ObservableMapUpdateAction<int, String>, String>.left(
+                  ObservableMapUpdateAction<int, String>(
+                    addItems: <int, String>{
+                      for (final MapEntry<int, int> entry in added.entries) entry.value: mapper(entry.value),
+                      for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                        entry.value.newValue: mapper(entry.value.newValue),
+                    },
+                    removeKeys: <int>{
+                      ...removed.values.toSet(),
+                      ...updated.values.map((final ObservableItemChange<int> change) => change.oldValue).toSet(),
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(
+            rxTransformed.value.leftOrThrow,
+            <int, String>{1: 'E2', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'},
+          );
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(
+            rxTransformed.value.leftOrThrow,
+            <int, String>{7: 'E14', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'},
+          );
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(
+            rxTransformed.value.leftOrThrow,
+            <int, String>{8: 'E16', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'},
+          );
+
+          rxSource.add(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6, -1]);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, 'empty');
+
+          rxSource.remove(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(
+            rxTransformed.value.leftOrThrow,
+            <int, String>{8: 'E16', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'},
+          );
+
+          rxSource.clear();
+          expect(rxSource.value, <int>[]);
+          expect(rxTransformed.length, 0);
+          expect(rxTransformed.value.leftOrThrow, <int, String>{});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform the change as a new set', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableSet<String> rxTransformed = rxSource.transformChangeAs.set<String>(
+            transform: (
+              final ObservableSet<String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<ObservableSetUpdateAction<String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              emitter(
+                ObservableSetUpdateAction<String>(
+                  addItems: <String>{
+                    for (final MapEntry<int, int> entry in added.entries) mapper(entry.value),
+                    for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                      mapper(entry.value.newValue),
+                  },
+                  removeItems: <String>{
+                    for (final int value in removed.values) mapper(value),
+                    for (final ObservableItemChange<int> change in updated.values) mapper(change.oldValue),
+                  },
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value, <String>{'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>{'E14', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>{'E16', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform the change as a new set', () async {
+          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
+          rxSource.add(6);
+
+          final ObservableStatefulSet<String, String> rxTransformed =
+              rxSource.transformChangeAs.statefulSet<String, String>(
+            transform: (
+              final ObservableStatefulSet<String, String> current,
+              final List<int> state,
+              final ObservableListChange<int> change,
+              final Emitter<Either<ObservableSetUpdateAction<String>, String>> emitter,
+            ) {
+              final Map<int, int> added = change.added;
+              final Map<int, int> removed = change.removed;
+              final Map<int, ObservableItemChange<int>> updated = change.updated;
+
+              String mapper(final int value) => 'E${value * 2}';
+
+              if (added.containsValue(-1)) {
+                emitter(Either<ObservableSetUpdateAction<String>, String>.right('empty'));
+                return;
+              }
+
+              if (removed.containsValue(-1)) {
+                // re-add items
+                emitter(
+                  Either<ObservableSetUpdateAction<String>, String>.left(
+                    ObservableSetUpdateAction<String>(
+                      addItems: <String>{for (final int item in state) mapper(item)},
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              emitter(
+                Either<ObservableSetUpdateAction<String>, String>.left(
+                  ObservableSetUpdateAction<String>(
+                    addItems: <String>{
+                      for (final MapEntry<int, int> entry in added.entries) mapper(entry.value),
+                      for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
+                        mapper(entry.value.newValue),
+                    },
+                    removeItems: <String>{
+                      ...removed.values.map((final int value) => mapper(value)).toSet(),
+                      ...updated.values
+                          .map((final ObservableItemChange<int> change) => mapper(change.oldValue))
+                          .toSet(),
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.removeAt(0);
+          expect(rxSource.value, <int>[2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 5);
+          expect(rxTransformed.value.leftOrThrow, <String>{'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.insert(0, 7);
+          expect(rxSource.value, <int>[7, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>{'E14', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource[0] = 8;
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>{'E16', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.add(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6, -1]);
+          expect(rxTransformed.length, null);
+          expect(rxTransformed.value.leftOrNull, null);
+          expect(rxTransformed.value.rightOrThrow, 'empty');
+
+          rxSource.remove(-1);
+          expect(rxSource.value, <int>[8, 2, 3, 4, 5, 6]);
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value.leftOrThrow, <String>{'E16', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSource.clear();
+          expect(rxSource.value, <int>[]);
+          expect(rxTransformed.length, 0);
+          expect(rxTransformed.value.leftOrThrow, <String>{});
+
+          await rxSource.dispose();
+          expect(rxTransformed.disposed, true);
         });
       });
     });
@@ -777,7 +1537,7 @@ void main() {
 
         rxResult.listen();
 
-        expect(rxResult.value.listView.length, 2);
+        expect(rxResult.value.length, 2);
       });
     });
   });

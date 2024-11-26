@@ -1,16 +1,16 @@
 import '../../../dart_observable.dart';
 import '_base.dart';
 
-abstract class RxCollectionStatefulBase<T, CS extends ObservableCollectionState<T, S>, C, S>
-    extends RxCollectionBase<CS, Either<C, S>> implements ObservableCollectionStateful<C, S, CS> {
-  CS? _previous;
+abstract class RxCollectionStatefulBase<T, C, S>
+    extends RxCollectionBase<Either<T, S>, Either<C, S>> implements ObservableCollectionStateful<C, S, Either<T, S>> {
+  Either<T, S>? _previous;
 
   RxCollectionStatefulBase(super.value, {super.distinct});
 
   @override
-  CS? get previous {
-    final CS? previous = _previous;
-    final CS current = value;
+  Either<T, S>? get previous {
+    final Either<T, S>? previous = _previous;
+    final Either<T, S> current = value;
     if (previous == null) {
       return null;
     }
@@ -21,7 +21,7 @@ abstract class RxCollectionStatefulBase<T, CS extends ObservableCollectionState<
   }
 
   @override
-  set value(final CS value) {
+  set value(final Either<T, S> value) {
     _previous = super.value;
     super.value = value;
   }

@@ -3,7 +3,7 @@ import '../../../collections/set/stateful/rx_stateful.dart';
 import '../_base_transform.dart';
 
 class StatefulSetTransform<T, E, S> extends RxStatefulSetImpl<E, S>
-    with BaseTransformOperator<T, ObservableStatefulSetState<E, S>, Either<Set<E>, S>> {
+    with BaseTransformOperator<T, Either<Set<E>, S>, Either<Set<E>, S>> {
   @override
   final Observable<T> source;
 

@@ -3,7 +3,7 @@ import '../../../collections/map/stateful/rx_stateful.dart';
 import '../_base_transform.dart';
 
 class StatefulMapTransform<T, K, V, S> extends RxStatefulMapImpl<K, V, S>
-    with BaseTransformOperator<T, ObservableStatefulMapState<K, V, S>, Either<Map<K, V>, S>> {
+    with BaseTransformOperator<T, Either<Map<K, V>, S>, Either<Map<K, V>, S>> {
   @override
   final Observable<T> source;
 

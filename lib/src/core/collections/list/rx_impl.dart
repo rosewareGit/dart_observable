@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../../../../dart_observable.dart';
 import '../_base.dart';
 import 'change_elements.dart';
@@ -10,14 +12,20 @@ import 'operators/sorted.dart';
 import 'rx_actions.dart';
 import 'update_action_handler.dart';
 
-class RxListImpl<E> extends RxCollectionBase<ObservableListState<E>, ObservableListChange<E>>
+class RxListImpl<E> extends RxCollectionBase<List<E>, ObservableListChange<E>>
     with RxListActionsImpl<E>, ObservableListUpdateActionHandlerImpl<E>
     implements RxList<E>, ObservableListUpdateActionHandler<E> {
   late ObservableListChange<E> _change;
+  final RxListState<E> _state;
 
   RxListImpl({
     final Iterable<E>? initial,
-  }) : super(RxListState<E>.fromData(initial ?? <E>[])) {
+  }) : this._(RxListState<E>.fromData(initial ?? <E>[]));
+
+  RxListImpl._(
+    final RxListState<E> state,
+  )   : _state = state,
+        super(state.listView) {
     _change = currentStateAsChange;
     _value.onUpdated();
   }
@@ -40,7 +48,15 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListState<E>, ObservableL
   @override
   int get length => data.length;
 
-  RxListState<E> get _value => value as RxListState<E>;
+  @override
+  UnmodifiableListView<E> get value => _value.listView;
+
+  @override
+  set value(final List<E> value) {
+    setData(value);
+  }
+
+  RxListState<E> get _value => _state;
 
   @override
   E? operator [](final int position) {
@@ -111,7 +127,7 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListState<E>, ObservableL
   @override
   void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change) {
     _change = change;
-    super.value = RxListState<E>(data);
+    _updateData(data);
   }
 
   @override
@@ -120,5 +136,10 @@ class RxListImpl<E> extends RxCollectionBase<ObservableListState<E>, ObservableL
       comparator: comparator,
       source: this,
     );
+  }
+
+  void _updateData(final List<ObservableListElement<E>> data) {
+    _state.setData(data);
+    notify();
   }
 }

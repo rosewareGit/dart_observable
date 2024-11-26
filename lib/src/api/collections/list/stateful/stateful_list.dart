@@ -7,7 +7,7 @@ abstract class ObservableStatefulList<E, S>
         ObservableCollectionStateful<
             ObservableListChange<E>, // the collection change type
             S, // The custom state
-            ObservableStatefulListState<E, S> // The state type
+            Either<List<E>, S> // The state type
             > {
   factory ObservableStatefulList.custom(final S custom) {
     return RxStatefulList<E, S>.custom(custom);
@@ -15,7 +15,7 @@ abstract class ObservableStatefulList<E, S>
 
   factory ObservableStatefulList.fromStream({
     required final Stream<Either<ObservableListUpdateAction<E>, S>> stream,
-    final ObservableStatefulListState<E, S>? initial,
+    final Either<List<E>, S>? initial,
     final Either<List<E>, S> Function(dynamic error)? onError,
   }) {
     return ObservableStatefulListFromStream<E, S>(

@@ -5,7 +5,6 @@ export 'item_change.dart';
 export 'map/change.dart';
 export 'map/observable_map.dart';
 export 'map/rx_map.dart';
-export 'map/state.dart';
 
 abstract interface class ObservableCollection<T, C> implements Observable<T> {
   C get change;
@@ -14,7 +13,7 @@ abstract interface class ObservableCollection<T, C> implements Observable<T> {
 
   ObservableCollectionSwitchMaps<C> get switchMapChangeAs;
 
-  ObservableCollectionTransforms<C> get transformChangeAs;
+  ObservableCollectionTransforms<C, T> get transformChangeAs;
 
   Disposable onChange({
     required final void Function(C change) onChange,

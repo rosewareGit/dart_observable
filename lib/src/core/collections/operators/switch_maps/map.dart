@@ -5,8 +5,8 @@ import '../_base_switch_map.dart';
 
 class MapChangeSwitchMap<K, V, C, T> extends RxMapImpl<K, V>
     with
-        BaseSwitchMapOperator<ObservableMap<K, V>, T, ObservableMapState<K, V>>,
-        BaseSwitchMapChangeOperator<ObservableMap<K, V>, T, C, ObservableMapState<K, V>, ObservableMapChange<K, V>> {
+        BaseSwitchMapOperator<ObservableMap<K, V>, T, Map<K,V>>,
+        BaseSwitchMapChangeOperator<ObservableMap<K, V>, T, C, Map<K,V>, ObservableMapChange<K, V>> {
   @override
   final ObservableCollection<T, C> source;
   @override

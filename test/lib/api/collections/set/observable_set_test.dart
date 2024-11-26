@@ -181,15 +181,15 @@ void main() {
 
         controller.add(ObservableSetUpdateAction<int>(addItems: <int>{1, 2}));
         expect(rxList.length, 3);
-        expect(rxList.value.setView, <int>{0, 1, 2});
+        expect(rxList.value, <int>{0, 1, 2});
 
         controller.add(ObservableSetUpdateAction<int>(addItems: <int>{3, 4}));
         expect(rxList.length, 5);
-        expect(rxList.value.setView, <int>{0, 1, 2, 3, 4});
+        expect(rxList.value, <int>{0, 1, 2, 3, 4});
 
         controller.add(ObservableSetUpdateAction<int>(removeItems: <int>{0}));
         expect(rxList.length, 4);
-        expect(rxList.value.setView, <int>{1, 2, 3, 4});
+        expect(rxList.value, <int>{1, 2, 3, 4});
 
         await controller.close();
         await rxList.dispose();
@@ -212,7 +212,7 @@ void main() {
         controller.add(ObservableSetUpdateAction<int>(addItems: <int>{3}));
 
         expect(rxList.length, 4);
-        expect(rxList.value.setView, <int>[0, 1, 2, 3]);
+        expect(rxList.value, <int>[0, 1, 2, 3]);
       });
 
       test('Should respect factory', () {
@@ -238,7 +238,7 @@ void main() {
         controller.add(ObservableSetUpdateAction<int>(addItems: <int>{3}));
 
         expect(rxList.length, 4);
-        expect(rxList.value.setView, <int>[3, 2, 1, 0]);
+        expect(rxList.value, <int>[3, 2, 1, 0]);
       });
 
       test('Should handle stream errors when onError is set', () async {
@@ -257,7 +257,7 @@ void main() {
         controller.addError(Exception('Stream error'));
 
         expect(rxList.length, 1);
-        expect(rxList.value.setView, <int>[-1]);
+        expect(rxList.value, <int>[-1]);
 
         await controller.close();
         await rxList.dispose();
@@ -281,7 +281,7 @@ void main() {
         controller.addError(Exception('Stream error'));
 
         expect(rxList.length, 1);
-        expect(rxList.value.setView, <int>[0]);
+        expect(rxList.value, <int>[0]);
       });
 
       test('Should propagate error to downstream handler', () {
@@ -330,7 +330,7 @@ void main() {
         expect(catchError, true);
 
         expect(rxList.length, 1);
-        expect(rxList.value.setView, <int>[0]);
+        expect(rxList.value, <int>[0]);
 
         await controller.close();
         await rxList.dispose();
@@ -354,7 +354,7 @@ void main() {
         Disposable listener = rxList.listen();
 
         expect(rxList.length, 4);
-        expect(rxList.value.setView, <int>[0, 1, 2, 3]);
+        expect(rxList.value, <int>[0, 1, 2, 3]);
 
         await listener.dispose();
 
@@ -364,7 +364,15 @@ void main() {
         listener = rxList.listen();
 
         expect(rxList.length, 6);
-        expect(rxList.value.setView, <int>[0, 1, 2, 3, 4, 5]);
+        expect(rxList.value, <int>[0, 1, 2, 3, 4, 5]);
+      });
+    });
+
+    group('value', () {
+      test('Should return an unmodifiable view of the set', () {
+        final ObservableSet<int> rx = ObservableSet<int>.just(<int>{1, 2, 3});
+        expect(rx.value, <int>{1, 2, 3});
+        expect(() => rx.value.add(4), throwsUnsupportedError);
       });
     });
 
@@ -403,7 +411,7 @@ void main() {
       });
     });
 
-    group('sorted', (){
+    group('sorted', () {
       test('Should return a new ObservableSet with the items sorted by the given comparator', () async {
         final RxSet<int> rx = RxSet<int>(initial: <int>{3, 1, 2});
         final ObservableSet<int> rxSorted = rx.sorted((final int a, final int b) => a.compareTo(b));
@@ -659,6 +667,268 @@ void main() {
           initial: <int>{1, 2, 3},
         );
         expect(rx.toList(), <int>[3, 2, 1]);
+      });
+    });
+
+    group('transformAs', () {
+      group('list', () {
+        test('Should return an ObservableList with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableList<String> rxList = rx.transformAs.list<String>(
+            transform: (
+              final ObservableList<String> state,
+              final Set<int> value,
+              final Emitter<List<String>> updater,
+            ) {
+              updater(value.map((final int item) => item.toString()).toList());
+            },
+          );
+          final Disposable listener = rxList.listen();
+
+          expect(rxList.value, <String>['1', '2', '3', '4']);
+
+          rx.remove(2);
+          expect(rxList.value, <String>['1', '3', '4']);
+
+          await listener.dispose();
+          // add buffered changes
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxList.value, <String>['1', '3', '4']);
+
+          rxList.listen();
+
+          expect(rxList.value, <String>['1', '4', '6', '7']);
+
+          await rx.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should return an ObservableStatefulList with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableStatefulList<String, int> rxList = rx.transformAs.statefulList<String, int>(
+            transform: (
+              final ObservableStatefulList<String, int> state,
+              final Set<int> value,
+              final Emitter<Either<List<String>, int>> updater,
+            ) {
+              updater(Either<List<String>, int>.left(value.map((final int item) => item.toString()).toList()));
+            },
+          );
+          final Disposable listener = rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <String>['1', '2', '3', '4']);
+
+          rx.remove(2);
+          expect(rxList.value.leftOrThrow, <String>['1', '3', '4']);
+
+          await listener.dispose();
+          // add buffered changes
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxList.value.leftOrThrow, <String>['1', '3', '4']);
+
+          rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <String>['1', '4', '6', '7']);
+
+          await rx.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should return an ObservableMap with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableMap<int, String> rxMap = rx.transformAs.map<int, String>(
+            transform: (
+              final ObservableMap<int, String> state,
+              final Set<int> value,
+              final Emitter<Map<int, String>> updater,
+            ) {
+              // convert to E+index
+              updater(
+                value.fold<Map<int, String>>(<int, String>{}, (final Map<int, String> acc, final int item) {
+                  acc[item] = 'E${item.toString()}';
+                  return acc;
+                }),
+              );
+            },
+          );
+          final Disposable listener = rxMap.listen();
+
+          expect(rxMap.value, <int, String>{1: 'E1', 2: 'E2', 3: 'E3', 4: 'E4'});
+
+          rx.remove(2);
+          expect(rxMap.value, <int, String>{1: 'E1', 3: 'E3', 4: 'E4'});
+
+          await listener.dispose();
+          // add buffered changes
+
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxMap.value, <int, String>{1: 'E1', 3: 'E3', 4: 'E4'});
+
+          rxMap.listen();
+
+          expect(rxMap.value, <int, String>{1: 'E1', 4: 'E4', 6: 'E6', 7: 'E7'});
+
+          await rx.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should return an ObservableStatefulMap with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableStatefulMap<int, String, int> rxMap = rx.transformAs.statefulMap<int, String, int>(
+            transform: (
+              final ObservableStatefulMap<int, String, int> state,
+              final Set<int> value,
+              final Emitter<Either<Map<int, String>, int>> updater,
+            ) {
+              // convert to E+index
+              updater(
+                Either<Map<int, String>, int>.left(
+                  value.fold<Map<int, String>>(<int, String>{}, (final Map<int, String> acc, final int item) {
+                    acc[item] = 'E${item.toString()}';
+                    return acc;
+                  }),
+                ),
+              );
+            },
+          );
+          final Disposable listener = rxMap.listen();
+
+          expect(rxMap.value.leftOrThrow, <int, String>{1: 'E1', 2: 'E2', 3: 'E3', 4: 'E4'});
+
+          rx.remove(2);
+          expect(rxMap.value.leftOrThrow, <int, String>{1: 'E1', 3: 'E3', 4: 'E4'});
+
+          await listener.dispose();
+          // add buffered changes
+
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxMap.value.leftOrThrow, <int, String>{1: 'E1', 3: 'E3', 4: 'E4'});
+
+          rxMap.listen();
+
+          expect(rxMap.value.leftOrThrow, <int, String>{1: 'E1', 4: 'E4', 6: 'E6', 7: 'E7'});
+
+          await rx.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should return an ObservableSet with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableSet<String> rxSet = rx.transformAs.set<String>(
+            transform: (
+              final ObservableSet<String> state,
+              final Set<int> value,
+              final Emitter<Set<String>> updater,
+            ) {
+              // convert to E+index
+              updater(
+                value.map((final int item) => 'E${item.toString()}').toSet(),
+              );
+            },
+          );
+          final Disposable listener = rxSet.listen();
+
+          expect(rxSet.toList(), <String>['E1', 'E2', 'E3', 'E4']);
+
+          rx.remove(2);
+          expect(rxSet.toList(), <String>['E1', 'E3', 'E4']);
+
+          await listener.dispose();
+          // add buffered changes
+
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxSet.toList(), <String>['E1', 'E3', 'E4']);
+
+          rxSet.listen();
+
+          expect(rxSet.toList(), <String>['E1', 'E4', 'E6', 'E7']);
+
+          await rx.dispose();
+          expect(rxSet.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should return an ObservableStatefulSet with the given transform', () async {
+          final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+          rx.add(4);
+
+          final ObservableStatefulSet<String, int> rxSet = rx.transformAs.statefulSet<String, int>(
+            transform: (
+              final ObservableStatefulSet<String, int> state,
+              final Set<int> value,
+              final Emitter<Either<Set<String>, int>> updater,
+            ) {
+              // convert to E+index
+              updater(
+                Either<Set<String>, int>.left(
+                  value.map((final int item) => 'E${item.toString()}').toSet(),
+                ),
+              );
+            },
+          );
+          final Disposable listener = rxSet.listen();
+
+          expect(rxSet.value.leftOrThrow, <String>{'E1', 'E2', 'E3', 'E4'});
+
+          rx.remove(2);
+          expect(rxSet.value.leftOrThrow, <String>{'E1', 'E3', 'E4'});
+
+          await listener.dispose();
+          // add buffered changes
+
+          rx.addAll(<int>[5, 6]);
+          rx.remove(5);
+          rx.add(7);
+          rx.removeAll(<int>[2, 3]);
+
+          expect(rxSet.value.leftOrThrow, <String>{'E1', 'E3', 'E4'});
+
+          rxSet.listen();
+
+          expect(rxSet.value.leftOrThrow, <String>{'E1', 'E4', 'E6', 'E7'});
+
+          await rx.dispose();
+          expect(rxSet.disposed, true);
+        });
       });
     });
   });

@@ -2,7 +2,7 @@ import '../../../../../../dart_observable.dart';
 import '../../../operators/transforms/map_stateful.dart';
 
 class OperatorStatefulMapChangeFactory<K, V, S> extends OperatorCollectionTransformMapStateful<K, V, S,
-    ObservableStatefulMapState<K, V, S>, Either<ObservableMapChange<K, V>, S>> {
+    Either<Map<K, V>, S>, Either<ObservableMapChange<K, V>, S>> {
   OperatorStatefulMapChangeFactory({
     required super.source,
     required super.factory,

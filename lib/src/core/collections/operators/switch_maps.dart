@@ -6,10 +6,10 @@ import 'switch_maps/stateful_list.dart';
 import 'switch_maps/stateful_map.dart';
 import 'switch_maps/stateful_set.dart';
 
-class ObservableCollectionFlatMapsImpl<T, C> implements ObservableCollectionSwitchMaps<C> {
+class ObservableCollectionSwitchMapsImpl<T, C> implements ObservableCollectionSwitchMaps<C> {
   final ObservableCollection<T, C> source;
 
-  ObservableCollectionFlatMapsImpl(this.source);
+  ObservableCollectionSwitchMapsImpl(this.source);
 
   @override
   ObservableList<E> list<E>({

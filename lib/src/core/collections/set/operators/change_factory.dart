@@ -1,7 +1,7 @@
 import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
-class ObservableSetFactoryOperator<E> extends SetChangeTransform<E, ObservableSetChange<E>, ObservableSetState<E>> {
+class ObservableSetFactoryOperator<E> extends SetChangeTransform<E, ObservableSetChange<E>, Set<E>> {
   ObservableSetFactoryOperator({
     required super.factory,
     required super.source,

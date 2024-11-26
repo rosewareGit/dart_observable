@@ -4,13 +4,12 @@ import '../../list/rx_impl.dart';
 import '../_base_transform.dart';
 
 class ListChangeTransform<
-        E, //
-        C,
-        T> extends RxListImpl<E>
-    with BaseCollectionTransformOperator<T, ObservableListState<E>, C, ObservableListChange<E>> {
+    E, // type of the transformed items
+    T, // type of the source items
+    C> extends RxListImpl<E> with BaseCollectionTransformOperator<T, List<E>, C, ObservableListChange<E>> {
   @override
   final ObservableCollection<T, C> source;
-  final ListChangeUpdater<E, C>? transformFn;
+  final ListChangeUpdater<E, C, T>? transformFn;
 
   ListChangeTransform({
     required this.source,
@@ -21,6 +20,6 @@ class ListChangeTransform<
   void handleChange(final C change) {
     assert(transformFn != null, 'override handleChange or provide a transformFn');
 
-    transformFn?.call(this, change, applyAction);
+    transformFn?.call(this, source.value, change, applyAction);
   }
 }

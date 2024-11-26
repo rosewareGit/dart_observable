@@ -3,7 +3,7 @@ import '../../../operators/transforms/map_stateful.dart';
 import '../../operators/filter_item.dart';
 
 class OperatorStatefulMapFilterItemWithState<K, V, S> extends OperatorCollectionTransformMapStateful<K, V, S,
-    ObservableStatefulMapState<K, V, S>, Either<ObservableMapChange<K, V>, S>> {
+    Either<Map<K, V>, S>, Either<ObservableMapChange<K, V>, S>> {
   final bool Function(Either<MapEntry<K, V>, S>) predicate;
 
   OperatorStatefulMapFilterItemWithState({

@@ -13,7 +13,7 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
     required this.source,
     required this.predicate,
   }) : super(
-          value: source.value.setView.firstWhereOrNull(predicate),
+          value: source.value.firstWhereOrNull(predicate),
         );
 
   @override
@@ -47,7 +47,7 @@ class OperatorObservableSetRxItem<E> extends RxnImpl<E> {
     }
 
     // initial value
-    final E? initial = source.value.setView.firstWhereOrNull(predicate);
+    final E? initial = source.value.firstWhereOrNull(predicate);
     value = initial;
 
     _listener = source.onChange(

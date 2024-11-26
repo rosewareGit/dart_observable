@@ -3,10 +3,18 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxStatefulMap', () {
+    group('value', () {
+      test('should return the unmodifiable view of the map', () {
+        final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>();
+        expect(() => rxMap.value.leftOrThrow[0] = 'value', throwsUnsupportedError);
+      });
+    });
+
     test('Should create RxStatefulMap with custom', () {
       final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>.custom('custom');
       expect(rxMap.value.rightOrNull, 'custom');
     });
+
     group('set custom', () {
       test('Should set custom', () {
         final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>();
@@ -60,7 +68,7 @@ void main() {
         );
         rxMap.clear();
         expect(rxMap.length, 0);
-        expect(rxMap.value.leftOrThrow.mapView.isEmpty, true);
+        expect(rxMap.value.leftOrThrow.isEmpty, true);
       });
     });
 

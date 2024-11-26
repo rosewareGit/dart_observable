@@ -142,6 +142,15 @@ abstract interface class Observable<T> {
   });
 }
 
+extension ObservableExtension<T> on Observable<T> {
+  Observable<T> recover(
+    final void Function(dynamic error, Emitter<T> emitter) handler, {
+    final bool Function(dynamic error)? predicate,
+  }) {
+    return handleError(handler, predicate: predicate);
+  }
+}
+
 enum ObservableState {
   active,
   inactive,

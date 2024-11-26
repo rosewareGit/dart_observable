@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/set/rx_impl.dart';
 import '../_base_transform.dart';
 
-class SetTransform<T, E> extends RxSetImpl<E> with BaseTransformOperator<T, ObservableSetState<E>, Set<E>> {
+class SetTransform<T, E> extends RxSetImpl<E> with BaseTransformOperator<T, Set<E>, Set<E>> {
   @override
   final Observable<T> source;
   final SetUpdater<E, T>? transformFn;

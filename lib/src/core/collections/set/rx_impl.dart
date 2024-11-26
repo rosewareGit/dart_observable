@@ -7,7 +7,6 @@ import 'operators/filter_item.dart';
 import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'rx_actions.dart';
-import 'set_state.dart';
 
 Set<E> Function(Iterable<E>? items) defaultSetFactory<E>() {
   return (final Iterable<E>? items) {
@@ -21,7 +20,7 @@ Set<E> Function(Iterable<E>? items) _splayTreeSetFactory<E>(final Comparator<E> 
   };
 }
 
-class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSetChange<E>>
+class RxSetImpl<E> extends RxCollectionBase<Set<E>, ObservableSetChange<E>>
     with RxSetActionsImpl<E>
     implements RxSet<E> {
   late ObservableSetChange<E> _change;
@@ -29,18 +28,19 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSet
   RxSetImpl({
     final Iterable<E>? initial,
     final Set<E> Function(Iterable<E>? items)? factory,
-  }) : super(
-          RxSetState<E>.initial((factory ?? defaultSetFactory<E>()).call(initial)),
-        ) {
+  }) : super((factory ?? defaultSetFactory<E>()).call(initial)) {
     _change = currentStateAsChange;
+  }
+
+  @override
+  UnmodifiableSetView<E> get value {
+    return UnmodifiableSetView<E>(super.value);
   }
 
   RxSetImpl.splayTreeSet({
     required final Comparator<E> compare,
     final Iterable<E>? initial,
-  }) : super(
-          RxSetState<E>.initial(_splayTreeSetFactory<E>(compare)(initial)),
-        ) {
+  }) : super(_splayTreeSetFactory<E>(compare)(initial)) {
     _change = currentStateAsChange;
   }
 
@@ -51,25 +51,25 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSet
 
   @override
   ObservableSetChange<E> get currentStateAsChange {
-    return ObservableSetChange<E>(added: _value.data);
+    return ObservableSetChange<E>(added: _value);
   }
 
   @override
-  Set<E> get data => _value.data;
+  Set<E> get data => _value;
 
   @override
-  int get length => _value.data.length;
+  int get length => _value.length;
 
   @override
-  set value(final ObservableSetState<E> value) {
-    setData(value.setView);
+  set value(final Set<E> value) {
+    setData(value);
   }
 
-  RxSetState<E> get _value => value as RxSetState<E>;
+  Set<E> get _value => super.value;
 
   @override
   ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action) {
-    final Set<E> updated = _value.data;
+    final Set<E> updated = _value;
     final ObservableSetChange<E> change = action.apply(updated);
     if (change.isEmpty) {
       return null;
@@ -95,7 +95,7 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSet
 
   @override
   bool contains(final E item) {
-    return _value.data.contains(item);
+    return _value.contains(item);
   }
 
   @override
@@ -137,6 +137,6 @@ class RxSetImpl<E> extends RxCollectionBase<ObservableSetState<E>, ObservableSet
 
   @override
   List<E> toList() {
-    return _value.data.toList();
+    return _value.toList();
   }
 }

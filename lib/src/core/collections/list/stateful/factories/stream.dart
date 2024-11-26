@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../../../../../../dart_observable.dart';
 import '../rx_stateful.dart';
-import '../state.dart';
 
 class ObservableStatefulListFromStream<E, S> extends RxStatefulListImpl<E, S> {
   final Stream<Either<ObservableListUpdateAction<E>, S>> stream;
@@ -15,8 +14,8 @@ class ObservableStatefulListFromStream<E, S> extends RxStatefulListImpl<E, S> {
   ObservableStatefulListFromStream({
     required this.stream,
     required this.onError,
-    final ObservableStatefulListState<E, S>? initial,
-  }) : super.state(initial ?? RxStatefulListState<E, S>.fromList(<E>[]));
+    final Either<List<E>, S>? initial,
+  }) : super.state(initial ?? Either<List<E>, S>.left(<E>[]));
 
   @override
   void onActive() {

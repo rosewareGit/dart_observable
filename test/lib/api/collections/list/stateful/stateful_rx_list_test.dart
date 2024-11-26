@@ -3,6 +3,13 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxListEmptyResult', () {
+    group('value', () {
+      test('Should return an unmodifiable list', () {
+        final RxStatefulList<int, String> list = RxStatefulList<int, String>(initial: <int>[1, 2, 3]);
+        expect(() => list.value.leftOrThrow.add(4), throwsUnsupportedError);
+      });
+    });
+
     group('operator []=', () {
       test('Should set the item on the given position', () {
         final RxStatefulList<int, dynamic> rxList = RxStatefulList<int, dynamic>(
@@ -22,7 +29,7 @@ void main() {
         expect(rxList[0], 4);
 
         expect(rxList.value.rightOrNull, null);
-        expect(rxList.value.leftOrNull!.listView, <int>[4]);
+        expect(rxList.value.leftOrNull!, <int>[4]);
       });
     });
 

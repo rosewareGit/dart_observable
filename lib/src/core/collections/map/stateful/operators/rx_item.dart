@@ -2,15 +2,15 @@ import '../../../../../../dart_observable.dart';
 import '../../../../rx/_impl.dart';
 
 Either<V?, S> _getStateForKey<K, V, S>({
-  required final ObservableStatefulMapState<K, V, S> state,
+  required final Either<Map<K, V>, S> state,
   required final K key,
   required final bool isInitial,
 }) {
   return state.fold(
-    onData: (final ObservableMapState<K, V> map) {
-      return Either<V?, S>.left(map.mapView[key]);
+    onLeft: (final Map<K, V> map) {
+      return Either<V?, S>.left(map[key]);
     },
-    onCustom: (final S state) {
+    onRight: (final S state) {
       return Either<V?, S>.right(state);
     },
   );
@@ -63,7 +63,7 @@ class OperatorObservableMapStatefulRxItem<K, V, S> extends RxImpl<Either<V?, S>>
     value = newState;
 
     _listener = source.listen(
-      onChange: (final ObservableStatefulMapState<K, V, S> value) {
+      onChange: (final Either<Map<K, V>, S> value) {
         final Either<V?, S> newState = _getStateForKey(state: value, key: key, isInitial: false);
         this.value = newState;
       },

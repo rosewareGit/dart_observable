@@ -11,7 +11,7 @@ void main() {
     group('just', () {
       test('should create a new instance', () {
         final ObservableStatefulSet<int, String> set = ObservableStatefulSet<int, String>.just(<int>{1, 2, 3});
-        expect(set.value.leftOrThrow.setView, <int>{1, 2, 3});
+        expect(set.value.leftOrThrow, <int>{1, 2, 3});
       });
 
       test('Should respect the factory', () {
@@ -21,7 +21,7 @@ void main() {
             return SplayTreeSet<int>.of(items ?? <int>[], (final int a, final int b) => b.compareTo(a));
           },
         );
-        expect(set.value.leftOrThrow.setView, <int>{3, 2, 1});
+        expect(set.value.leftOrThrow, <int>{3, 2, 1});
       });
     });
 
@@ -67,13 +67,13 @@ void main() {
 
         rxMerged.listen();
 
-        expect(rxMerged.value.leftOrThrow.setView, <int>{1, 2, 3});
+        expect(rxMerged.value.leftOrThrow, <int>{1, 2, 3});
 
         set2.remove(2);
-        expect(rxMerged.value.leftOrThrow.setView, <int>{1, 2, 3});
+        expect(rxMerged.value.leftOrThrow, <int>{1, 2, 3});
 
         set1.remove(2);
-        expect(rxMerged.value.leftOrThrow.setView, <int>{1, 3});
+        expect(rxMerged.value.leftOrThrow, <int>{1, 3});
       });
 
       test('should handle one empty set and one non-empty set', () {
@@ -87,7 +87,7 @@ void main() {
         rxMerged.listen();
 
         expect(rxMerged.length, 1);
-        expect(rxMerged.value.leftOrThrow.setView, <int>{1});
+        expect(rxMerged.value.leftOrThrow, <int>{1});
       });
 
       test('Should handle custom state with state resolver', () {
@@ -129,7 +129,7 @@ void main() {
 
         set1.setState('custom');
 
-        expect(rxMerged.value.leftOrNull!.setView, <int>{1, 3});
+        expect(rxMerged.value.leftOrNull!, <int>{1, 3});
         expect(rxMerged.value.rightOrNull, null);
       });
     });
@@ -150,21 +150,21 @@ void main() {
           ),
         );
 
-        expect(rxSet.value.leftOrThrow.setView, <int>{1});
+        expect(rxSet.value.leftOrThrow, <int>{1});
 
         controller.add(
           Either<ObservableSetUpdateAction<int>, String>.left(
             ObservableSetUpdateAction<int>(addItems: <int>{2}),
           ),
         );
-        expect(rxSet.value.leftOrThrow.setView, <int>{1, 2});
+        expect(rxSet.value.leftOrThrow, <int>{1, 2});
 
         controller.add(
           Either<ObservableSetUpdateAction<int>, String>.left(
             ObservableSetUpdateAction<int>(removeItems: <int>{1}),
           ),
         );
-        expect(rxSet.value.leftOrThrow.setView, <int>{2});
+        expect(rxSet.value.leftOrThrow, <int>{2});
 
         controller.add(
           Either<ObservableSetUpdateAction<int>, String>.right('custom'),
@@ -226,7 +226,7 @@ void main() {
 
         Disposable listener = rxSet.listen();
 
-        expect(rxSet.value.leftOrThrow.setView, <int>{1, 2});
+        expect(rxSet.value.leftOrThrow, <int>{1, 2});
 
         listener.dispose();
 
@@ -238,7 +238,16 @@ void main() {
 
         listener = rxSet.listen();
 
-        expect(rxSet.value.leftOrThrow.setView, <int>{1, 2, 3});
+        expect(rxSet.value.leftOrThrow, <int>{1, 2, 3});
+      });
+    });
+
+    group('value', () {
+      test('Should return an unmodifiable view of the set', () {
+        final ObservableStatefulSet<int, String> set = ObservableStatefulSet<int, String>.just(<int>{1, 2, 3});
+        final UnmodifiableSetView<int> value = set.value.leftOrThrow;
+
+        expect(() => value.add(4), throwsUnsupportedError);
       });
     });
 
@@ -261,22 +270,22 @@ void main() {
         final ObservableStatefulSet<int, String> rxSorted = rxSet.sorted((final int a, final int b) => b.compareTo(a));
 
         rxSorted.listen();
-        expect(rxSorted.value.leftOrThrow.setView, <int>[3, 2, 1]);
+        expect(rxSorted.value.leftOrThrow, <int>[3, 2, 1]);
 
         rxSet.add(4);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[4, 3, 2, 1]);
+        expect(rxSorted.value.leftOrThrow, <int>[4, 3, 2, 1]);
 
         rxSet.setState('custom');
         expect(rxSorted.value.leftOrNull, null);
 
         rxSet.add(5);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[5]);
+        expect(rxSorted.value.leftOrThrow, <int>[5]);
 
         rxSet.addAll(<int>[6, 7, 8]);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[8, 7, 6, 5]);
+        expect(rxSorted.value.leftOrThrow, <int>[8, 7, 6, 5]);
 
         rxSet.removeAll(<int>[7, 8, 6]);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[5]);
+        expect(rxSorted.value.leftOrThrow, <int>[5]);
 
         await rxSet.dispose();
         expect(rxSorted.disposed, true);
@@ -291,22 +300,22 @@ void main() {
         });
 
         rxSorted.listen();
-        expect(rxSorted.value.leftOrThrow.setView, <int>[3, 2, 1]);
+        expect(rxSorted.value.leftOrThrow, <int>[3, 2, 1]);
 
         rxSet.add(4);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[4, 3, 2, 1]);
+        expect(rxSorted.value.leftOrThrow, <int>[4, 3, 2, 1]);
 
         rxSet.setState('custom');
         expect(rxSorted.value.leftOrNull, null);
 
         rxSet.add(5);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[5]);
+        expect(rxSorted.value.leftOrThrow, <int>[5]);
 
         rxSet.addAll(<int>[6, 7, 8]);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[8, 7, 6, 5]);
+        expect(rxSorted.value.leftOrThrow, <int>[8, 7, 6, 5]);
 
         rxSet.removeAll(<int>[7, 8, 6]);
-        expect(rxSorted.value.leftOrThrow.setView, <int>[5]);
+        expect(rxSorted.value.leftOrThrow, <int>[5]);
 
         await rxSet.dispose();
         expect(rxSorted.disposed, true);
@@ -319,31 +328,31 @@ void main() {
         final ObservableStatefulSet<int, String> rxFiltered = rxSet.filterItem((final int item) => item.isOdd);
 
         rxFiltered.listen();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5});
 
         rxSet.add(6);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5});
 
         rxSet.add(7);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5, 7});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5, 7});
 
         rxSet.remove(3);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[1, 5, 7]);
+        expect(rxFiltered.value.leftOrThrow, <int>[1, 5, 7]);
 
         rxSet.setState('custom');
         expect(rxFiltered.value.leftOrNull, null);
 
         rxSet.add(8);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         rxSet.add(9);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[9]);
+        expect(rxFiltered.value.leftOrThrow, <int>[9]);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[9, 11]);
+        expect(rxFiltered.value.leftOrThrow, <int>[9, 11]);
 
         rxSet.clear();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         await rxSet.dispose();
 
@@ -360,32 +369,32 @@ void main() {
         );
 
         rxFiltered.listen();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{5, 3, 1});
 
         rxSet.add(6);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{5, 3, 1});
 
         rxSet.add(7);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{7, 5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{7, 5, 3, 1});
 
         rxSet.remove(3);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{7, 5, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{7, 5, 1});
 
         rxSet.setState('custom');
         expect(rxFiltered.value.leftOrNull, null);
         expect(rxFiltered.value.rightOrThrow, 'custom');
 
         rxSet.add(8);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{});
+        expect(rxFiltered.value.leftOrThrow, <int>{});
 
         rxSet.add(9);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{9});
+        expect(rxFiltered.value.leftOrThrow, <int>{9});
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{11, 9});
+        expect(rxFiltered.value.leftOrThrow, <int>{11, 9});
 
         rxSet.clear();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         await rxSet.dispose();
         expect(rxFiltered.disposed, true);
@@ -404,19 +413,19 @@ void main() {
         });
 
         rxFiltered.listen();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5});
 
         rxSet.add(6);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5});
 
         rxSet.add(7);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{1, 3, 5, 7});
+        expect(rxFiltered.value.leftOrThrow, <int>{1, 3, 5, 7});
 
         rxSet.remove(3);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[1, 5, 7]);
+        expect(rxFiltered.value.leftOrThrow, <int>[1, 5, 7]);
 
         rxSet.setState('test');
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[1, 5, 7]);
+        expect(rxFiltered.value.leftOrThrow, <int>[1, 5, 7]);
 
         rxSet.setState('custom');
         expect(rxFiltered.value.leftOrNull, null);
@@ -427,16 +436,16 @@ void main() {
         expect(rxFiltered.value.rightOrThrow, 'custom');
 
         rxSet.add(8);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         rxSet.add(9);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[9]);
+        expect(rxFiltered.value.leftOrThrow, <int>[9]);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[9, 11]);
+        expect(rxFiltered.value.leftOrThrow, <int>[9, 11]);
 
         rxSet.clear();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         await rxSet.dispose();
         expect(rxFiltered.disposed, true);
@@ -457,19 +466,19 @@ void main() {
         );
 
         rxFiltered.listen();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{5, 3, 1});
 
         rxSet.add(6);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{5, 3, 1});
 
         rxSet.add(7);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{7, 5, 3, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{7, 5, 3, 1});
 
         rxSet.remove(3);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{7, 5, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{7, 5, 1});
 
         rxSet.setState('test');
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{7, 5, 1});
+        expect(rxFiltered.value.leftOrThrow, <int>{7, 5, 1});
 
         rxSet.setState('custom');
         expect(rxFiltered.value.leftOrNull, null);
@@ -480,16 +489,16 @@ void main() {
         expect(rxFiltered.value.rightOrThrow, 'custom');
 
         rxSet.add(8);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{});
+        expect(rxFiltered.value.leftOrThrow, <int>{});
 
         rxSet.add(9);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{9});
+        expect(rxFiltered.value.leftOrThrow, <int>{9});
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxFiltered.value.leftOrThrow.setView, <int>{11, 9});
+        expect(rxFiltered.value.leftOrThrow, <int>{11, 9});
 
         rxSet.clear();
-        expect(rxFiltered.value.leftOrThrow.setView, <int>[]);
+        expect(rxFiltered.value.leftOrThrow, <int>[]);
 
         await rxSet.dispose();
         expect(rxFiltered.disposed, true);
@@ -549,38 +558,38 @@ void main() {
         final ObservableStatefulSet<String, String> rxNew = rxSet.mapItem((final int item) => item.toString());
 
         rxNew.listen();
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5']);
 
         rxSet.add(6);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5', '6']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5', '6']);
 
         rxSet.add(7);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5', '6', '7']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5', '6', '7']);
 
         rxSet.remove(3);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '4', '5', '6', '7']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '4', '5', '6', '7']);
 
         rxSet.setState('custom');
         expect(rxNew.value.leftOrNull, null);
         expect(rxNew.value.rightOrThrow, 'custom');
 
         rxSet.add(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8']);
+        expect(rxNew.value.leftOrThrow, <String>['8']);
 
         rxSet.add(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8', '9']);
+        expect(rxNew.value.leftOrThrow, <String>['8', '9']);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8', '9', '10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['8', '9', '10', '11', '12']);
 
         rxSet.remove(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '10', '11', '12']);
 
         rxSet.remove(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['10', '11', '12']);
 
         rxSet.clear();
-        expect(rxNew.value.leftOrThrow.setView, <String>[]);
+        expect(rxNew.value.leftOrThrow, <String>[]);
 
         await rxSet.dispose();
 
@@ -597,32 +606,32 @@ void main() {
         );
 
         rxNew.listen();
-        expect(rxNew.value.leftOrThrow.setView, <String>['5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['5', '4', '3', '2', '1']);
 
         rxSet.add(6);
-        expect(rxNew.value.leftOrThrow.setView, <String>['6', '5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['6', '5', '4', '3', '2', '1']);
 
         rxSet.add(7);
-        expect(rxNew.value.leftOrThrow.setView, <String>['7', '6', '5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['7', '6', '5', '4', '3', '2', '1']);
 
         rxSet.remove(3);
-        expect(rxNew.value.leftOrThrow.setView, <String>['7', '6', '5', '4', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['7', '6', '5', '4', '2', '1']);
 
         rxSet.setState('custom');
         expect(rxNew.value.leftOrNull, null);
         expect(rxNew.value.rightOrThrow, 'custom');
 
         rxSet.add(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8']);
+        expect(rxNew.value.leftOrThrow, <String>['8']);
 
         rxSet.add(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '8']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '8']);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '8', '12', '11', '10']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '8', '12', '11', '10']);
 
         rxSet.remove(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '12', '11', '10']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '12', '11', '10']);
 
         await rxSet.dispose();
         expect(rxNew.disposed, true);
@@ -638,38 +647,38 @@ void main() {
         );
 
         rxNew.listen();
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5']);
 
         rxSet.add(6);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5', '6']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5', '6']);
 
         rxSet.add(7);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '3', '4', '5', '6', '7']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '3', '4', '5', '6', '7']);
 
         rxSet.remove(3);
-        expect(rxNew.value.leftOrThrow.setView, <String>['1', '2', '4', '5', '6', '7']);
+        expect(rxNew.value.leftOrThrow, <String>['1', '2', '4', '5', '6', '7']);
 
         rxSet.setState('custom');
         expect(rxNew.value.leftOrNull, null);
         expect(rxNew.value.rightOrThrow, 'CUSTOM');
 
         rxSet.add(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8']);
+        expect(rxNew.value.leftOrThrow, <String>['8']);
 
         rxSet.add(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8', '9']);
+        expect(rxNew.value.leftOrThrow, <String>['8', '9']);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8', '9', '10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['8', '9', '10', '11', '12']);
 
         rxSet.remove(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '10', '11', '12']);
 
         rxSet.remove(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['10', '11', '12']);
+        expect(rxNew.value.leftOrThrow, <String>['10', '11', '12']);
 
         rxSet.clear();
-        expect(rxNew.value.leftOrThrow.setView, <String>[]);
+        expect(rxNew.value.leftOrThrow, <String>[]);
 
         await rxSet.dispose();
         expect(rxNew.disposed, true);
@@ -686,35 +695,286 @@ void main() {
         );
 
         rxNew.listen();
-        expect(rxNew.value.leftOrThrow.setView, <String>['5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['5', '4', '3', '2', '1']);
 
         rxSet.add(6);
-        expect(rxNew.value.leftOrThrow.setView, <String>['6', '5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['6', '5', '4', '3', '2', '1']);
 
         rxSet.add(7);
-        expect(rxNew.value.leftOrThrow.setView, <String>['7', '6', '5', '4', '3', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['7', '6', '5', '4', '3', '2', '1']);
 
         rxSet.remove(3);
-        expect(rxNew.value.leftOrThrow.setView, <String>['7', '6', '5', '4', '2', '1']);
+        expect(rxNew.value.leftOrThrow, <String>['7', '6', '5', '4', '2', '1']);
 
         rxSet.setState('custom');
         expect(rxNew.value.leftOrNull, null);
         expect(rxNew.value.rightOrThrow, 'CUSTOM');
 
         rxSet.add(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['8']);
+        expect(rxNew.value.leftOrThrow, <String>['8']);
 
         rxSet.add(9);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '8']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '8']);
 
         rxSet.addAll(<int>[10, 11, 12]);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '8', '12', '11', '10']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '8', '12', '11', '10']);
 
         rxSet.remove(8);
-        expect(rxNew.value.leftOrThrow.setView, <String>['9', '12', '11', '10']);
+        expect(rxNew.value.leftOrThrow, <String>['9', '12', '11', '10']);
 
         await rxSet.dispose();
         expect(rxNew.disposed, true);
+      });
+    });
+
+    group('transformAs', () {
+      group('list', () {
+        test('Should transform the set to a list', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableList<int> rxList = rxSet.transformAs.list(
+            transform: (
+              final ObservableList<int> state,
+              final Either<Set<int>, String> value,
+              final Emitter<List<int>> updater,
+            ) {
+              // convert to i*2, or -1 if it's a custom state
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => items.map<int>((final int item) => item * 2).toList(),
+                  onRight: (final _) => <int>[-1],
+                ),
+              );
+            },
+          );
+
+          rxList.listen();
+
+          expect(rxList.value, <int>[2, 4, 6, 8, 10, 12]);
+
+          rxSet.setState('custom');
+          expect(rxList.value, <int>[-1]);
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxList.value, <int>[8, 12, 14]);
+
+          rxSet.remove(4);
+          expect(rxList.value, <int>[12, 14]);
+
+          await rxSet.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should transform the set to a stateful list', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulList<int, String> rxList = rxSet.transformAs.statefulList(
+            transform: (
+              final ObservableStatefulList<int, String> state,
+              final Either<Set<int>, String> value,
+              final Emitter<Either<List<int>, String>> updater,
+            ) {
+              // convert to i*2, or to custom state
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => Either<List<int>, String>.left(
+                    items.map<int>((final int item) => item * 2).toList(),
+                  ),
+                  onRight: (final String state) => Either<List<int>, String>.right(state),
+                ),
+              );
+            },
+          );
+
+          rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <int>[2, 4, 6, 8, 10, 12]);
+
+          rxSet.setState('custom');
+          expect(rxList.value.leftOrNull, null);
+          expect(rxList.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxList.value.leftOrThrow, <int>[8, 12, 14]);
+
+          rxSet.remove(4);
+          expect(rxList.value.leftOrThrow, <int>[12, 14]);
+
+          await rxSet.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform the set to a map', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableMap<int, String> rxMap = rxSet.transformAs.map(
+            transform: (
+              final ObservableMap<int, String> state,
+              final Either<Set<int>, String> value,
+              final Emitter<Map<int, String>> updater,
+            ) {
+              // convert to i*2, or -1:custom state
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => items.fold<Map<int, String>>(
+                    <int, String>{},
+                    (final Map<int, String> acc, final int item) => acc..[item] = (item * 2).toString(),
+                  ),
+                  onRight: (final String state) => <int, String>{-1: state},
+                ),
+              );
+            },
+          );
+
+          rxMap.listen();
+
+          expect(rxMap.value, <int, String>{1: '2', 2: '4', 3: '6', 4: '8', 5: '10', 6: '12'});
+
+          rxSet.setState('custom');
+          expect(rxMap.value, <int, String>{-1: 'custom'});
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxMap.value, <int, String>{4: '8', 6: '12', 7: '14'});
+
+          rxSet.remove(4);
+          expect(rxMap.value, <int, String>{6: '12', 7: '14'});
+
+          await rxSet.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform the set to a stateful map', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulMap<int, String, String> rxMap = rxSet.transformAs.statefulMap(
+            transform: (
+              final ObservableStatefulMap<int, String, String> state,
+              final Either<Set<int>, String> value,
+              final Emitter<Either<Map<int, String>, String>> updater,
+            ) {
+              // convert to i*2, or to custom state
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => Either<Map<int, String>, String>.left(
+                    items.fold<Map<int, String>>(
+                      <int, String>{},
+                      (final Map<int, String> acc, final int item) => acc..[item] = (item * 2).toString(),
+                    ),
+                  ),
+                  onRight: (final String state) => Either<Map<int, String>, String>.right(state),
+                ),
+              );
+            },
+          );
+
+          rxMap.listen();
+
+          expect(rxMap.value.leftOrThrow, <int, String>{1: '2', 2: '4', 3: '6', 4: '8', 5: '10', 6: '12'});
+
+          rxSet.setState('custom');
+          expect(rxMap.value.leftOrNull, null);
+          expect(rxMap.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxMap.value.leftOrThrow, <int, String>{4: '8', 6: '12', 7: '14'});
+
+          rxSet.remove(4);
+          expect(rxMap.value.leftOrThrow, <int, String>{6: '12', 7: '14'});
+
+          await rxSet.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform the set to a set', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableSet<String> rxSetTransformed = rxSet.transformAs.set(
+            transform: (
+              final ObservableSet<String> state,
+              final Either<Set<int>, String> value,
+              final Emitter<Set<String>> updater,
+            ) {
+              // convert to 'Ei*2', or to -1 if custom
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => items.map<String>((final int item) => 'E${item * 2}').toSet(),
+                  onRight: (final String state) => <String>{'-1'},
+                ),
+              );
+            },
+          );
+
+          rxSetTransformed.listen();
+
+          expect(rxSetTransformed.value, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxSetTransformed.value, <String>{'-1'});
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSetTransformed.value, <String>{'E8', 'E12', 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSetTransformed.value, <String>{'E12', 'E14'});
+
+          await rxSet.dispose();
+          expect(rxSetTransformed.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform the set to a stateful set', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulSet<String, String> rxSetTransformed = rxSet.transformAs.statefulSet(
+            transform: (
+              final ObservableStatefulSet<String, String> state,
+              final Either<Set<int>, String> value,
+              final Emitter<Either<Set<String>, String>> updater,
+            ) {
+              // convert to 'Ei*2', or to custom state
+              updater(
+                value.fold(
+                  onLeft: (final Set<int> items) => Either<Set<String>, String>.left(
+                    items.map<String>((final int item) => 'E${item * 2}').toSet(),
+                  ),
+                  onRight: (final String state) => Either<Set<String>, String>.right(state),
+                ),
+              );
+            },
+          );
+
+          rxSetTransformed.listen();
+
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxSetTransformed.value.leftOrNull, null);
+          expect(rxSetTransformed.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E8', 'E12', 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E12', 'E14'});
+
+          await rxSet.dispose();
+          expect(rxSetTransformed.disposed, true);
+        });
       });
     });
   });

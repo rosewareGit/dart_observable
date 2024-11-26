@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import '../../../../../dart_observable.dart';
 import '../../_base_stateful.dart';
 import '../change_elements.dart';
@@ -11,26 +13,39 @@ import 'operators/map_item.dart';
 import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
 import 'operators/sorted.dart';
-import 'state.dart';
 
-class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListState<E>,
-        ObservableStatefulListState<E, S>, ObservableListChange<E>, S>
+class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, ObservableListChange<E>, S>
     with RxListActionsImpl<E>, ObservableListUpdateActionHandlerImpl<E>
     implements RxStatefulList<E, S>, ObservableListUpdateActionHandler<E> {
   late Either<ObservableListChangeElements<E>, S> _change;
 
+  final Rx<Either<RxListState<E>, S>> _rxState;
+
   RxStatefulListImpl(final List<E> data)
       : this.state(
-          RxStatefulListState<E, S>.fromState(RxListState<E>.fromData(data)),
+          Either<List<E>, S>.left(data),
         );
 
   factory RxStatefulListImpl.custom(final S state) {
     return RxStatefulListImpl<E, S>.state(
-      RxStatefulListState<E, S>.custom(state),
+      Either<List<E>, S>.right(state),
     );
   }
 
-  RxStatefulListImpl.state(final ObservableStatefulListState<E, S> state) : super(state) {
+  @override
+  set value(final Either<List<E>, S> value) {
+    _setState(value);
+    super.value = value;
+  }
+
+  RxStatefulListImpl.state(final Either<List<E>, S> state)
+      : _rxState = Rx<Either<RxListState<E>, S>>(
+          state.fold(
+            onLeft: (final List<E> data) => Either<RxListState<E>, S>.left(RxListState<E>.fromData(data)),
+            onRight: (final S state) => Either<RxListState<E>, S>.right(state),
+          ),
+        ),
+        super(state) {
     _change = currentStateAsChange;
   }
 
@@ -39,45 +54,55 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
 
   @override
   Either<ObservableListChangeElements<E>, S> get currentStateAsChange {
-    return value.fold(
-      onData: (final ObservableListState<E> data) {
+    return _rxState.value.fold(
+      onLeft: (final RxListState<E> state) {
         return Either<ObservableListChangeElements<E>, S>.left(
           ObservableListChangeElements<E>(
             added: <int, ObservableListElement<E>>{
-              for (int i = 0; i < data.listView.length; i++) i: (data as RxListState<E>).data[i],
+              for (int i = 0; i < state.data.length; i++) i: state.data[i],
             },
           ),
         );
       },
-      onCustom: (final S custom) {
+      onRight: (final S custom) {
         return Either<ObservableListChangeElements<E>, S>.right(custom);
       },
     );
   }
 
   @override
-  List<ObservableListElement<E>> get data => value.fold(
-        onData: (final ObservableListState<E> data) => (data as RxListState<E>).data,
-        onCustom: (final _) => <ObservableListElement<E>>[],
+  List<ObservableListElement<E>> get data => _rxState.value.fold(
+        onLeft: (final RxListState<E> state) => state.data,
+        onRight: (final _) => <ObservableListElement<E>>[],
       );
 
   @override
-  int? get length => value.fold(
-        onData: (final ObservableListState<E> data) => data.listView.length,
-        onCustom: (final S state) => null,
+  int? get length => _rxState.value.fold(
+        onLeft: (final RxListState<E> state) => state.data.length,
+        onRight: (final S state) => null,
       );
+
+  Either<RxListState<E>, S>? get previousState => _rxState.previous;
+
+  @override
+  Either<List<E>, S> get value {
+    return _rxState.value.fold(
+      onLeft: (final RxListState<E> state) => Either<List<E>, S>.left(state.listView),
+      onRight: (final S custom) => Either<List<E>, S>.right(custom),
+    );
+  }
 
   @override
   E? operator [](final int position) {
-    return value.fold(
-      onData: (final ObservableListState<E> data) {
-        final List<E> currentData = data.listView;
+    return _rxState.value.fold(
+      onLeft: (final RxListState<E> state) {
+        final UnmodifiableListView<E> currentData = state.listView;
         if (position < 0 || position >= currentData.length) {
           return null;
         }
         return currentData[position];
       },
-      onCustom: (final _) => null,
+      onRight: (final _) => null,
     );
   }
 
@@ -85,12 +110,12 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
   Either<ObservableListChangeElements<E>, S>? applyAction(
     final Either<ObservableListUpdateAction<E>, S> action,
   ) {
-    final ObservableStatefulListState<E, S> currentValue = value;
+    final Either<RxListState<E>, S> currentState = _rxState.value;
+
     return action.fold<Either<ObservableListChangeElements<E>, S>?>(
       onLeft: (final ObservableListUpdateAction<E> listUpdateAction) {
-        return currentValue.fold(
-          onData: (final ObservableListState<E> data) {
-            final RxListState<E> state = data as RxListState<E>;
+        return currentState.fold(
+          onLeft: (final RxListState<E> state) {
             final List<ObservableListElement<E>> updatedList = state.data;
             final (List<ObservableListElement<E>>, ObservableListChangeElements<E>) result =
                 handleListUpdateAction(updatedList, listUpdateAction);
@@ -105,26 +130,24 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
             notify();
             return _change;
           },
-          onCustom: (final S state) {
+          onRight: (final S state) {
             final (List<ObservableListElement<E>> data, ObservableListChangeElements<E> change) result =
                 handleListUpdateAction(data, listUpdateAction);
 
             final RxListState<E> rxListState = RxListState<E>(result.$1);
-            final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.fromState(
-              rxListState,
-            );
+            _rxState.value = Either<RxListState<E>, S>.left(rxListState);
 
             rxListState.onUpdated();
             _change = Either<ObservableListChangeElements<E>, S>.left(result.$2);
-            super.value = newState;
+            super.value = Either<List<E>, S>.left(rxListState.listView);
             return _change;
           },
         );
       },
       onRight: (final S action) {
-        final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.custom(action);
+        _rxState.value = Either<RxListState<E>, S>.right(action);
         _change = Either<ObservableListChangeElements<E>, S>.right(action);
-        super.value = newState;
+        super.value = Either<List<E>, S>.right(action);
         return _change;
       },
     );
@@ -175,31 +198,38 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
 
   @override
   void onEmptyData() {
-    final RxStatefulListState<E, S> newState = RxStatefulListState<E, S>.fromState(
-      RxListState<E>(<ObservableListElement<E>>{}),
+    final Either<RxListState<E>, S> current = _rxState.value;
+    current.when(
+      onRight: (final S custom) {
+        // transition to data state
+        final RxListState<E> newState = RxListState<E>(<ObservableListElement<E>>{});
+        _rxState.value = Either<RxListState<E>, S>.left(newState);
+        newState.onUpdated();
+        super.value = Either<List<E>, S>.left(newState.listView);
+      },
     );
-
-    super.value = newState;
   }
 
   @override
   void onSyncComplete(final ObservableListChangeElements<E> change) {
-    final RxStatefulListState<E, S> value = this.value as RxStatefulListState<E, S>;
-    final ObservableListState<E>? left = value.leftOrNull;
+    final Either<RxListState<E>, S> current = _rxState.value;
+    final RxListState<E>? left = current.leftOrNull;
     if (left != null) {
       if (change.isEmpty) {
         return;
       }
       _change = Either<ObservableListChangeElements<E>, S>.left(change);
-      (left as RxListState<E>).onUpdated();
+      left.onUpdated();
       notify();
     } else {
       _change = Either<ObservableListChangeElements<E>, S>.left(change);
-      super.value = RxStatefulListState<E, S>.fromState(
-        RxListState<E>(<ObservableListElement<E>>[
+      final RxListState<E> newState = RxListState<E>(
+        <ObservableListElement<E>>[
           for (final ObservableListElement<E> element in change.addedElements.values) element,
-        ]),
+        ],
       );
+      _rxState.value = Either<RxListState<E>, S>.left(newState);
+      super.value = Either<List<E>, S>.left(newState.listView);
     }
   }
 
@@ -214,7 +244,9 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
   @override
   void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change) {
     _change = Either<ObservableListChangeElements<E>, S>.left(change);
-    super.value = RxStatefulListState<E, S>.fromState(RxListState<E>(data));
+    final RxListState<E> newState = RxListState<E>(data);
+    _rxState.value = Either<RxListState<E>, S>.left(newState);
+    super.value = Either<List<E>, S>.left(newState.listView);
   }
 
   @override
@@ -227,6 +259,13 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<ObservableListSt
     return ObservableStatefulListSortedOperator<E, S>(
       source: this,
       comparator: comparator,
+    );
+  }
+
+  void _setState(final Either<List<E>, S> value) {
+    _rxState.value = value.fold(
+      onLeft: (final List<E> data) => Either<RxListState<E>, S>.left(RxListState<E>.fromData(data)),
+      onRight: (final S state) => Either<RxListState<E>, S>.right(state),
     );
   }
 }

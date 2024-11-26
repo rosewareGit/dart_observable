@@ -11,7 +11,7 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
     required this.source,
     required this.index,
   }) : super(
-          value: source.value.listView.length > index ? source.value.listView[index] : null,
+          value: source.value.length > index ? source.value[index] : null,
         );
 
   @override
@@ -40,7 +40,7 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
   }
 
   void _handleInitialState() {
-    final E? initial = source.value.listView.length > index ? source.value.listView[index] : null;
+    final E? initial = source.value.length > index ? source.value[index] : null;
     if (initial != null) {
       value = initial;
     }
@@ -69,7 +69,7 @@ class OperatorObservableListRxItem<E> extends RxnImpl<E> {
 
         final E? removed = change.removed[index];
         if (removed != null) {
-          value = source.value.listView.length > index ? source.value.listView[index] : null;
+          value = source.value.length > index ? source.value[index] : null;
         }
       },
     );

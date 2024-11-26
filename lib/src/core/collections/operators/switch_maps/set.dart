@@ -5,8 +5,8 @@ import '../_base_switch_map.dart';
 
 class SetChangeSwitchMap<E, C, T> extends RxSetImpl<E>
     with
-        BaseSwitchMapOperator<ObservableSet<E>, T, ObservableSetState<E>>,
-        BaseSwitchMapChangeOperator<ObservableSet<E>, T, C, ObservableSetState<E>, ObservableSetChange<E>> {
+        BaseSwitchMapOperator<ObservableSet<E>, T, Set<E>>,
+        BaseSwitchMapChangeOperator<ObservableSet<E>, T, C, Set<E>, ObservableSetChange<E>> {
   @override
   final ObservableCollection<T, C> source;
   @override

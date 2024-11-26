@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:dart_observable/dart_observable.dart';
 import 'package:test/test.dart';
 
@@ -419,6 +420,7 @@ void main() {
         expect(sorted.disposed, true);
       });
     });
+
     group('fromStream', () {
       test('Should map data from stream', () async {
         final StreamController<ObservableMapUpdateAction<String, int>> streamController =
@@ -578,6 +580,25 @@ void main() {
         expect(map['b'], null);
         expect(map['c'], 3);
         expect(map['d'], 4);
+      });
+    });
+
+    group('value', () {
+      test('Should return an unmodifiable map', () {
+        final ObservableMap<String, int> map = ObservableMap<String, int>.just(<String, int>{
+          'a': 1,
+          'b': 2,
+        });
+
+        final Map<String, int> value = map.value;
+
+        expect(value.length, 2);
+        expect(value['a'], 1);
+        expect(value['b'], 2);
+
+        expect(() => value['a'] = 3, throwsUnsupportedError);
+        expect(() => value['c'] = 3, throwsUnsupportedError);
+        expect(() => value.remove('a'), throwsUnsupportedError);
       });
     });
 
@@ -922,7 +943,7 @@ void main() {
           'b': 2,
         });
 
-        expect(rxMap.value.mapView.values.toList(), <int>[1, 2]);
+        expect(rxMap.value.values.toList(), <int>[1, 2]);
 
         final ObservableMap<String, int> rxKeyReversed = rxMap.changeFactory((final Map<String, int>? items) {
           return SplayTreeMap<String, int>.of(
@@ -936,18 +957,18 @@ void main() {
         expect(rxKeyReversed['a'], 1);
         expect(rxKeyReversed['b'], 2);
 
-        expect(rxKeyReversed.value.mapView.values.toList(), <int>[2, 1]);
+        expect(rxKeyReversed.value.values.toList(), <int>[2, 1]);
 
         rxMap['c'] = 0;
 
-        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 2, 1]);
+        expect(rxKeyReversed.value.values.toList(), <int>[0, 2, 1]);
 
         rxMap['a'] = 3;
-        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 2, 3]);
+        expect(rxKeyReversed.value.values.toList(), <int>[0, 2, 3]);
 
         rxMap.remove('b');
 
-        expect(rxKeyReversed.value.mapView.values.toList(), <int>[0, 3]);
+        expect(rxKeyReversed.value.values.toList(), <int>[0, 3]);
       });
 
       test('Should dispose when source disposed', () async {
@@ -978,13 +999,13 @@ void main() {
         rxSource.add(4, 'd');
         rxSource[1] = 'a2';
 
-        String transformer(final ObservableMapState<int, String> state) {
-          return state.mapView.values.join(',');
+        String transformer(final Map<int, String> state) {
+          return state.values.join(',');
         }
 
         final Observable<String> rxTransformed = rxSource.transform<String>(
           initialProvider: transformer,
-          onChanged: (final ObservableMapState<int, String> value, final Emitter<String> emitter) {
+          onChanged: (final Map<int, String> value, final Emitter<String> emitter) {
             emitter(transformer(value));
           },
         );
@@ -1020,129 +1041,800 @@ void main() {
     });
 
     group('transformAs', () {
-      test('Should transform change', () async {
-        final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
-          1: 'a',
-          2: 'b',
-          3: 'c',
+      group('list', () {
+        test('Should transform as a new list', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+            1: 'a',
+            2: 'b',
+            3: 'c',
+          });
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableList<String> rxReversedUpperCased = rxSource.transformAs.list<String>(
+            transform: (
+              final ObservableList<String> current,
+              final Map<int, String> value,
+              final Emitter<List<String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final List<String> newItems = value.values.map((final String item) {
+                return item.toUpperCase();
+              }).sorted((final String a, final String b) {
+                return b.compareTo(a);
+              }).toList();
+
+              emitter(newItems);
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>['D', 'C', 'B', 'A2']);
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value, <String>['E', 'D', 'C', 'B', 'A2']);
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value, <String>['E', 'D', 'C', 'A2']);
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value, <String>['E', 'D', 'C', 'A2']);
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>['F', 'E', 'D', 'C2', 'A2']);
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
         });
-        rxSource.add(4, 'd');
-        rxSource[1] = 'a2';
+      });
 
-        final ObservableSet<String> rxReversedUpperCased = rxSource.transformAs.set<String>(
-          factory: (final Iterable<String>? items) {
-            return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
-              return right.compareTo(left);
-            });
-          },
-          transform: (
-            final ObservableSet<String> current,
-            final ObservableMapState<int, String> value,
-            final Emitter<Set<String>> emitter,
-          ) {
-            // map change to list while transforming the value to uppercase
-            final Set<String> newItems = value.mapView.values.map((final String item) {
-              return item.toUpperCase();
-            }).toSet();
+      group('statefulList', () {
+        test('Should transform as a new stateful list', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+            1: 'a',
+            2: 'b',
+            3: 'c',
+          });
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
 
-            emitter(newItems);
-          },
-        );
+          final ObservableStatefulList<String, String> rxReversedUpperCased =
+              rxSource.transformAs.statefulList<String, String>(
+            transform: (
+              final ObservableStatefulList<String, String> current,
+              final Map<int, String> value,
+              final Emitter<Either<List<String>, String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final List<String> newItems = value.values.map((final String item) {
+                return item.toUpperCase();
+              }).sorted((final String a, final String b) {
+                return b.compareTo(a);
+              }).toList();
 
-        final Disposable listener = rxReversedUpperCased.listen();
+              emitter(Either<List<String>, String>.left(newItems));
+            },
+          );
 
-        expect(rxReversedUpperCased.value.setView, <String>{'D', 'C', 'B', 'A2'});
+          final Disposable listener = rxReversedUpperCased.listen();
 
-        rxSource.add(5, 'e');
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'B', 'A2'});
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>['D', 'C', 'B', 'A2']);
 
-        rxSource.remove(2);
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>['E', 'D', 'C', 'B', 'A2']);
 
-        await listener.dispose();
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>['E', 'D', 'C', 'A2']);
 
-        rxSource[3] = 'c2';
-        rxSource.add(6, 'f');
+          await listener.dispose();
 
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
 
-        rxReversedUpperCased.listen();
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>['E', 'D', 'C', 'A2']);
 
-        expect(rxReversedUpperCased.value.setView, <String>{'F', 'E', 'D', 'C2', 'A2'});
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>['F', 'E', 'D', 'C2', 'A2']);
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform as a new map', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableMap<int, String> rxReversedUpperCased = rxSource.transformAs.map<int, String>(
+            transform: (
+              final ObservableMap<int, String> current,
+              final Map<int, String> value,
+              final Emitter<Map<int, String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> newItems = value.map((final int key, final String item) {
+                return MapEntry<int, String>(key, item.toUpperCase());
+              });
+
+              emitter(newItems);
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <int, String>{1: 'A2', 3: 'C2', 4: 'D', 5: 'E', 6: 'F'});
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform as a new stateful map', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableStatefulMap<int, String, String> rxReversedUpperCased =
+              rxSource.transformAs.statefulMap<int, String, String>(
+            transform: (
+              final ObservableStatefulMap<int, String, String> current,
+              final Map<int, String> value,
+              final Emitter<Either<Map<int, String>, String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> newItems = value.map((final int key, final String item) {
+                return MapEntry<int, String>(key, item.toUpperCase());
+              });
+
+              emitter(Either<Map<int, String>, String>.left(newItems));
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value.leftOrThrow, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C2', 4: 'D', 5: 'E', 6: 'F'});
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform on change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+            1: 'a',
+            2: 'b',
+            3: 'c',
+          });
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableSet<String> rxReversedUpperCased = rxSource.transformAs.set<String>(
+            factory: (final Iterable<String>? items) {
+              return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
+                return right.compareTo(left);
+              });
+            },
+            transform: (
+              final ObservableSet<String> current,
+              final Map<int, String> value,
+              final Emitter<Set<String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Set<String> newItems = value.values.map((final String item) {
+                return item.toUpperCase();
+              }).toSet();
+
+              emitter(newItems);
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>{'D', 'C', 'B', 'A2'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'A2'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'A2'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>{'F', 'E', 'D', 'C2', 'A2'});
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform as a new stateful set', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+            1: 'a',
+            2: 'b',
+            3: 'c',
+          });
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableStatefulSet<String, String> rxReversedUpperCased =
+              rxSource.transformAs.statefulSet<String, String>(
+            transform: (
+              final ObservableStatefulSet<String, String> current,
+              final Map<int, String> value,
+              final Emitter<Either<Set<String>, String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Set<String> newItems = value.values.map((final String item) {
+                return item.toUpperCase();
+              }).toSet();
+
+              emitter(Either<Set<String>, String>.left(newItems));
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'D', 'C', 'B', 'A2'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'A2'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'A2'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'F', 'E', 'D', 'C2', 'A2'});
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
+        });
       });
     });
 
     group('transformChangeAs', () {
-      test('Should transform change', () async {
-        final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
-          1: 'a',
-          2: 'b',
-          3: 'c',
+      group('list', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableList<String> rxUppercased = rxSource.transformChangeAs.list<String>(
+            transform: (
+              final ObservableList<String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<ObservableListUpdateAction<String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final List<String> addItems = <String>[];
+              final Set<int> removeIndexes = <int>{};
+              final Map<int, String> updatedItems = <int, String>{};
+
+              for (final MapEntry<int, String> entry in change.added.entries) {
+                addItems.add(entry.value.toUpperCase());
+              }
+
+              for (final String value in change.removed.values) {
+                final int index = current.value.indexOf(value.toUpperCase());
+                if (index != -1) {
+                  removeIndexes.add(index);
+                }
+              }
+
+              for (final MapEntry<int, ObservableItemChange<String>> entry in change.updated.entries) {
+                final String oldValue = entry.value.oldValue.toUpperCase();
+                final int index = current.value.indexOf(oldValue);
+                if (index != -1) {
+                  updatedItems[index] = entry.value.newValue.toUpperCase();
+                }
+              }
+
+              emitter(
+                ObservableListUpdateAction<String>(
+                  addItems: addItems,
+                  removeItems: removeIndexes,
+                  updateItems: updatedItems,
+                ),
+              );
+            },
+          );
+
+          final Disposable listener = rxUppercased.listen();
+
+          expect(rxUppercased.value, <String>['A2', 'B', 'C', 'D']);
+
+          rxSource.add(5, 'e');
+          expect(rxSource.value, <int, String>{1: 'a2', 2: 'b', 3: 'c', 4: 'd', 5: 'e'});
+          expect(rxUppercased.value, <String>['A2', 'B', 'C', 'D', 'E']);
+
+          rxSource.add(6, 'f');
+          expect(rxSource.value, <int, String>{1: 'a2', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value, <String>['A2', 'B', 'C', 'D', 'E', 'F']);
+
+          rxSource[1] = 'b2';
+          expect(rxSource.value, <int, String>{1: 'b2', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value, <String>['B2', 'B', 'C', 'D', 'E', 'F']);
+
+          rxSource.remove(2);
+          expect(rxSource.value, <int, String>{1: 'b2', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value, <String>['B2', 'C', 'D', 'E', 'F']);
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(7, 'g');
+
+          expect(rxUppercased.value, <String>['B2', 'C', 'D', 'E', 'F']);
+
+          rxUppercased.listen();
+
+          expect(rxUppercased.value, <String>['B2', 'C2', 'D', 'E', 'F', 'G']);
+
+          await rxSource.dispose();
+          expect(rxUppercased.disposed, true);
         });
-        rxSource.add(4, 'd');
-        rxSource[1] = 'a2';
+      });
 
-        final ObservableSet<String> rxReversedUpperCased = rxSource.transformChangeAs.set<String>(
-          factory: (final Iterable<String>? items) {
-            return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
-              return right.compareTo(left);
-            });
-          },
-          transform: (
-            final ObservableSet<String> current,
-            final ObservableMapChange<int, String> change,
-            final Emitter<ObservableSetUpdateAction<String>> emitter,
-          ) {
-            // map change to list while transforming the value to uppercase
-            final Map<int, String> added = change.added;
-            final Map<int, String> removed = change.removed;
-            final Map<int, ObservableItemChange<String>> updated = change.updated;
+      group('statefulList', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
 
-            final Set<String> newItems = <String>{};
-            final Set<String> removedItems = <String>{};
+          final ObservableStatefulList<String, String> rxUppercased =
+              rxSource.transformChangeAs.statefulList<String, String>(
+            transform: (
+              final ObservableStatefulList<String, String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<Either<ObservableListUpdateAction<String>, String>> emitter,
+            ) {
+              if (state.isEmpty) {
+                emitter(Either<ObservableListUpdateAction<String>, String>.right('empty'));
+                return;
+              }
 
-            for (final MapEntry<int, String> entry in added.entries) {
-              newItems.add(entry.value.toUpperCase());
-            }
+              // map change to list while transforming the value to uppercase
+              final List<String> addItems = <String>[];
+              final Set<int> removeIndexes = <int>{};
+              final Map<int, String> updatedItems = <int, String>{};
 
-            for (final MapEntry<int, String> entry in removed.entries) {
-              removedItems.add(entry.value.toUpperCase());
-            }
+              for (final MapEntry<int, String> entry in change.added.entries) {
+                addItems.add(entry.value.toUpperCase());
+              }
 
-            for (final MapEntry<int, ObservableItemChange<String>> entry in updated.entries) {
-              newItems.add(entry.value.newValue.toUpperCase());
-              removedItems.add(entry.value.oldValue.toUpperCase());
-            }
+              int indexOf(final String original) {
+                return current.value.fold(
+                  onLeft: (final List<String> data) => data.indexOf(original.toUpperCase()),
+                  onRight: (_) => -1,
+                );
+              }
 
-            emitter(
-              ObservableSetUpdateAction<String>(
-                addItems: newItems,
-                removeItems: removedItems,
-              ),
-            );
-          },
-        );
+              for (final String value in change.removed.values) {
+                final int index = indexOf(value);
+                if (index != -1) {
+                  removeIndexes.add(index);
+                }
+              }
 
-        final Disposable listener = rxReversedUpperCased.listen();
+              for (final MapEntry<int, ObservableItemChange<String>> entry in change.updated.entries) {
+                final int index = indexOf(entry.value.oldValue);
+                if (index != -1) {
+                  updatedItems[index] = entry.value.newValue.toUpperCase();
+                }
+              }
 
-        expect(rxReversedUpperCased.value.setView, <String>{'D', 'C', 'B', 'A2'});
+              emitter(
+                Either<ObservableListUpdateAction<String>, String>.left(
+                  ObservableListUpdateAction<String>(
+                    addItems: addItems,
+                    removeItems: removeIndexes,
+                    updateItems: updatedItems,
+                  ),
+                ),
+              );
+            },
+          );
 
-        rxSource.add(5, 'e');
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'B', 'A2'});
+          final Disposable listener = rxUppercased.listen();
 
-        rxSource.remove(2);
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+          expect(rxUppercased.value.leftOrThrow, <String>['A2', 'B', 'C', 'D']);
 
-        await listener.dispose();
+          rxSource.add(5, 'e');
+          expect(rxSource.value, <int, String>{1: 'a2', 2: 'b', 3: 'c', 4: 'd', 5: 'e'});
+          expect(rxUppercased.value.leftOrThrow, <String>['A2', 'B', 'C', 'D', 'E']);
 
-        rxSource[3] = 'c2';
-        rxSource.add(6, 'f');
+          rxSource.add(6, 'f');
+          expect(rxSource.value, <int, String>{1: 'a2', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value.leftOrThrow, <String>['A2', 'B', 'C', 'D', 'E', 'F']);
 
-        expect(rxReversedUpperCased.value.setView, <String>{'E', 'D', 'C', 'A2'});
+          rxSource[1] = 'b2';
+          expect(rxSource.value, <int, String>{1: 'b2', 2: 'b', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value.leftOrThrow, <String>['B2', 'B', 'C', 'D', 'E', 'F']);
 
-        rxReversedUpperCased.listen();
+          rxSource.remove(2);
+          expect(rxSource.value, <int, String>{1: 'b2', 3: 'c', 4: 'd', 5: 'e', 6: 'f'});
+          expect(rxUppercased.value.leftOrThrow, <String>['B2', 'C', 'D', 'E', 'F']);
 
-        expect(rxReversedUpperCased.value.setView, <String>{'F', 'E', 'D', 'C2', 'A2'});
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(7, 'g');
+
+          expect(rxUppercased.value.leftOrThrow, <String>['B2', 'C', 'D', 'E', 'F']);
+
+          rxUppercased.listen();
+
+          expect(rxUppercased.value.leftOrThrow, <String>['B2', 'C2', 'D', 'E', 'F', 'G']);
+
+          rxSource.clear();
+          expect(rxUppercased.value.leftOrNull, null);
+          expect(rxUppercased.value.rightOrThrow, 'empty');
+
+          rxSource[1] = 'a';
+          expect(rxUppercased.value.leftOrThrow, <String>['A']);
+
+          await rxSource.dispose();
+          expect(rxUppercased.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableMap<int, String> rxUppercased = rxSource.transformChangeAs.map<int, String>(
+            transform: (
+              final ObservableMap<int, String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<ObservableMapUpdateAction<int, String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> addItems = <int, String>{};
+              final Set<int> removeItems = <int>{};
+
+              for (final MapEntry<int, String> entry in change.added.entries) {
+                addItems[entry.key] = entry.value.toUpperCase();
+              }
+
+              for (final MapEntry<int, String> entry in change.removed.entries) {
+                removeItems.add(entry.key);
+              }
+
+              for (final MapEntry<int, ObservableItemChange<String>> entry in change.updated.entries) {
+                addItems[entry.key] = entry.value.newValue.toUpperCase();
+              }
+
+              emitter(
+                ObservableMapUpdateAction<int, String>(
+                  addItems: addItems,
+                  removeKeys: removeItems,
+                ),
+              );
+            },
+          );
+
+          final Disposable listener = rxUppercased.listen();
+
+          expect(rxUppercased.value, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D'});
+
+          rxSource.add(5, 'e');
+          expect(rxUppercased.value, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxSource.remove(2);
+          expect(rxUppercased.value, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxUppercased.value, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxUppercased.listen();
+
+          expect(rxUppercased.value, <int, String>{1: 'A2', 3: 'C2', 4: 'D', 5: 'E', 6: 'F'});
+
+          await rxSource.dispose();
+          expect(rxUppercased.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableStatefulMap<int, String, String> rxUppercased =
+              rxSource.transformChangeAs.statefulMap<int, String, String>(
+            transform: (
+              final ObservableStatefulMap<int, String, String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<Either<ObservableMapUpdateAction<int, String>, String>> emitter,
+            ) {
+              if (state.isEmpty) {
+                emitter(Either<ObservableMapUpdateAction<int, String>, String>.right('empty'));
+                return;
+              }
+
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> addItems = <int, String>{};
+              final Set<int> removeItems = <int>{};
+
+              for (final MapEntry<int, String> entry in change.added.entries) {
+                addItems[entry.key] = entry.value.toUpperCase();
+              }
+
+              for (final MapEntry<int, String> entry in change.removed.entries) {
+                removeItems.add(entry.key);
+              }
+
+              for (final MapEntry<int, ObservableItemChange<String>> entry in change.updated.entries) {
+                addItems[entry.key] = entry.value.newValue.toUpperCase();
+              }
+
+              emitter(
+                Either<ObservableMapUpdateAction<int, String>, String>.left(
+                  ObservableMapUpdateAction<int, String>(
+                    addItems: addItems,
+                    removeKeys: removeItems,
+                  ),
+                ),
+              );
+            },
+          );
+
+          final Disposable listener = rxUppercased.listen();
+
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D'});
+
+          rxSource.add(5, 'e');
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A2', 2: 'B', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxSource.remove(2);
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C', 4: 'D', 5: 'E'});
+
+          rxUppercased.listen();
+
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A2', 3: 'C2', 4: 'D', 5: 'E', 6: 'F'});
+
+          rxSource.clear();
+          expect(rxUppercased.value.rightOrThrow, 'empty');
+
+          rxSource[1] = 'a';
+          expect(rxUppercased.value.leftOrThrow, <int, String>{1: 'A'});
+
+          await rxSource.dispose();
+          expect(rxUppercased.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{
+            1: 'a',
+            2: 'b',
+            3: 'c',
+          });
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableSet<String> rxReversedUpperCased = rxSource.transformChangeAs.set<String>(
+            factory: (final Iterable<String>? items) {
+              return SplayTreeSet<String>.of(items ?? <String>{}, (final String left, final String right) {
+                return right.compareTo(left);
+              });
+            },
+            transform: (
+              final ObservableSet<String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<ObservableSetUpdateAction<String>> emitter,
+            ) {
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> added = change.added;
+              final Map<int, String> removed = change.removed;
+              final Map<int, ObservableItemChange<String>> updated = change.updated;
+
+              final Set<String> newItems = <String>{};
+              final Set<String> removedItems = <String>{};
+
+              for (final MapEntry<int, String> entry in added.entries) {
+                newItems.add(entry.value.toUpperCase());
+              }
+
+              for (final MapEntry<int, String> entry in removed.entries) {
+                removedItems.add(entry.value.toUpperCase());
+              }
+
+              for (final MapEntry<int, ObservableItemChange<String>> entry in updated.entries) {
+                newItems.add(entry.value.newValue.toUpperCase());
+                removedItems.add(entry.value.oldValue.toUpperCase());
+              }
+
+              emitter(
+                ObservableSetUpdateAction<String>(
+                  addItems: newItems,
+                  removeItems: removedItems,
+                ),
+              );
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>{'D', 'C', 'B', 'A2'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'A2'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value, <String>{'E', 'D', 'C', 'A2'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value, <String>{'F', 'E', 'D', 'C2', 'A2'});
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform change', () async {
+          final RxMap<int, String> rxSource = RxMap<int, String>(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          rxSource.add(4, 'd');
+          rxSource[1] = 'a2';
+
+          final ObservableStatefulSet<String, String> rxReversedUpperCased =
+              rxSource.transformChangeAs.statefulSet<String, String>(
+            transform: (
+              final ObservableStatefulSet<String, String> current,
+              final Map<int, String> state,
+              final ObservableMapChange<int, String> change,
+              final Emitter<Either<ObservableSetUpdateAction<String>, String>> emitter,
+            ) {
+              if (state.isEmpty) {
+                emitter(Either<ObservableSetUpdateAction<String>, String>.right('empty'));
+                return;
+              }
+
+              // map change to list while transforming the value to uppercase
+              final Map<int, String> added = change.added;
+              final Map<int, String> removed = change.removed;
+              final Map<int, ObservableItemChange<String>> updated = change.updated;
+
+              final Set<String> newItems = <String>{};
+              final Set<String> removedItems = <String>{};
+
+              for (final MapEntry<int, String> entry in added.entries) {
+                newItems.add(entry.value.toUpperCase());
+              }
+
+              for (final MapEntry<int, String> entry in removed.entries) {
+                removedItems.add(entry.value.toUpperCase());
+              }
+
+              for (final MapEntry<int, ObservableItemChange<String>> entry in updated.entries) {
+                newItems.add(entry.value.newValue.toUpperCase());
+                removedItems.add(entry.value.oldValue.toUpperCase());
+              }
+
+              emitter(
+                Either<ObservableSetUpdateAction<String>, String>.left(
+                  ObservableSetUpdateAction<String>(
+                    addItems: newItems,
+                    removeItems: removedItems,
+                  ),
+                ),
+              );
+            },
+          );
+
+          final Disposable listener = rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'D', 'C', 'B', 'A2'});
+
+          rxSource.add(5, 'e');
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'B', 'A2'});
+
+          rxSource.remove(2);
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'A2'});
+
+          await listener.dispose();
+
+          rxSource[3] = 'c2';
+          rxSource.add(6, 'f');
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'E', 'D', 'C', 'A2'});
+
+          rxReversedUpperCased.listen();
+
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'F', 'E', 'D', 'C2', 'A2'});
+
+          rxSource.clear();
+          expect(rxReversedUpperCased.value.rightOrThrow, 'empty');
+
+          rxSource[1] = 'a';
+          expect(rxReversedUpperCased.value.leftOrThrow, <String>{'A'});
+
+          await rxSource.dispose();
+          expect(rxReversedUpperCased.disposed, true);
+        });
       });
     });
   });

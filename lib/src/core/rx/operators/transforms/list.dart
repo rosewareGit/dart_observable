@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/list/rx_impl.dart';
 import '../_base_transform.dart';
 
-class ListTransform<T, E> extends RxListImpl<E> with BaseTransformOperator<T, ObservableListState<E>, List<E>> {
+class ListTransform<T, E> extends RxListImpl<E> with BaseTransformOperator<T, List<E>, List<E>> {
   @override
   final Observable<T> source;
   final ListUpdater<E, T>? transformFn;

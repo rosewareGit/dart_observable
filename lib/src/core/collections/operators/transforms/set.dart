@@ -10,12 +10,12 @@ class SetChangeTransform<
     with
         BaseCollectionTransformOperator<
             T, //
-            ObservableSetState<E>,
+            Set<E>,
             C,
             ObservableSetChange<E>> {
   @override
   final ObservableCollection<T, C> source;
-  final SetChangeUpdater<E, C>? transformFn;
+  final SetChangeUpdater<E, C, T>? transformFn;
 
   SetChangeTransform({
     required this.source,
@@ -27,6 +27,6 @@ class SetChangeTransform<
   void handleChange(final C change) {
     assert(transformFn != null, 'override handleChange or provide a transformFn');
 
-    transformFn?.call(this, change, applyAction);
+    transformFn?.call(this, source.value, change, applyAction);
   }
 }

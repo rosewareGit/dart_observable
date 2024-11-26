@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../operators/transforms/list.dart';
 import '../list_sync_helper.dart';
 
-class ObservableListFilterOperator<E> extends ListChangeTransform<E, ObservableListChange<E>, ObservableListState<E>> {
+class ObservableListFilterOperator<E> extends ListChangeTransform<E, List<E>, ObservableListChange<E>> {
   final bool Function(E item) predicate;
 
   late final ObservableListSyncHelper<E> _helper = ObservableListSyncHelper<E>(

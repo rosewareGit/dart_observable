@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dart_observable/dart_observable.dart';
 import 'package:test/test.dart';
 
@@ -191,7 +192,7 @@ void main() {
 
         map1.setState('custom');
 
-        expect(mergedMap.value.leftOrNull!.mapView, <int, String>{1: 'newValue1', 3: 'value3'});
+        expect(mergedMap.value.leftOrNull!, <int, String>{1: 'newValue1', 3: 'value3'});
         expect(mergedMap.value.rightOrNull, null);
       });
     });
@@ -309,6 +310,15 @@ void main() {
         listener = rxMap.listen();
 
         expect(rxMap[3], 'newValue');
+      });
+    });
+
+    group('value', () {
+      test('should return the unmodifiable view of the map', () {
+        final ObservableStatefulMap<int, String, String> rxMap = ObservableStatefulMap<int, String, String>.just(
+          <int, String>{},
+        );
+        expect(() => rxMap.value.leftOrThrow[0] = 'value', throwsUnsupportedError);
       });
     });
 
@@ -578,7 +588,6 @@ void main() {
         rxMap.setState('test');
         expect(rxFiltered[1], null);
         expect(rxFiltered.toList(), <String>['a']);
-
       });
     });
 
@@ -676,7 +685,7 @@ void main() {
       });
     });
 
-    group('sorted', (){
+    group('sorted', () {
       test('Should sort the items by the value', () async {
         final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
           initial: <int, String>{
@@ -686,7 +695,8 @@ void main() {
           },
         );
 
-        final ObservableStatefulMap<int, String, String> rxSorted = rxMap.sorted((final String left, final String right) => left.compareTo(right));
+        final ObservableStatefulMap<int, String, String> rxSorted =
+            rxMap.sorted((final String left, final String right) => left.compareTo(right));
         rxSorted.listen();
 
         expect(rxSorted.toList(), <String>['a', 'b', 'value']);
@@ -794,6 +804,388 @@ void main() {
         rxMap.remove(4);
         expect(rxMapped[4], null);
         expect(rxMapped.toList(), <String>[]);
+      });
+    });
+
+    group('transformAs', () {
+      group('list', () {
+        test('Should transform the map to a list', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableList<String> rxList = rxMap.transformAs.list(
+            transform: (
+              final ObservableList<String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<List<String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final List<String> newItems = data.values.map((final String item) {
+                    return item.toUpperCase();
+                  }).sorted((final String a, final String b) {
+                    return b.compareTo(a);
+                  }).toList();
+
+                  emitter(newItems);
+                },
+                onRight: (final String custom) {
+                  emitter(<String>[custom]);
+                },
+              );
+            },
+          );
+
+          rxList.listen();
+
+          expect(rxList.value, <String>['VALUE', 'D', 'C']);
+
+          rxMap.setState('custom');
+          expect(rxList.value, <String>['custom']);
+
+          rxMap[5] = 'e';
+          expect(rxList.value, <String>['E']);
+
+          rxMap.remove(5);
+          expect(rxList.value, <String>[]);
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxList.value, <String>['C', 'B', 'A']);
+
+          rxMap[1] = 'd';
+          expect(rxList.value, <String>['D', 'C', 'B']);
+
+          await rxMap.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should transform the map to a stateful list', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableStatefulList<String, String> rxList = rxMap.transformAs.statefulList<String, String>(
+            transform: (
+              final ObservableStatefulList<String, String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<Either<List<String>, String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final List<String> newItems = data.values.map((final String item) {
+                    return item.toUpperCase();
+                  }).sorted((final String a, final String b) {
+                    return b.compareTo(a);
+                  }).toList();
+
+                  emitter(Either<List<String>, String>.left(newItems));
+                },
+                onRight: (final String custom) {
+                  emitter(Either<List<String>, String>.right(custom));
+                },
+              );
+            },
+          );
+
+          rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <String>['VALUE', 'D', 'C']);
+
+          rxMap.setState('custom');
+          expect(rxList.value.rightOrThrow, 'custom');
+
+          rxMap[5] = 'e';
+          expect(rxList.value.leftOrThrow, <String>['E']);
+
+          rxMap.remove(5);
+          expect(rxList.value.leftOrThrow, <String>[]);
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxList.value.leftOrThrow, <String>['C', 'B', 'A']);
+
+          rxMap[1] = 'd';
+          expect(rxList.value.leftOrThrow, <String>['D', 'C', 'B']);
+
+          await rxMap.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform the map to a map', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableMap<int, String> rxTransformed = rxMap.transformAs.map(
+            transform: (
+              final ObservableMap<int, String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<Map<int, String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final Map<int, String> newItems = data.map((final int key, final String value) {
+                    return MapEntry<int, String>(key, value.toUpperCase());
+                  });
+
+                  emitter(newItems);
+                },
+                onRight: (final String custom) {
+                  emitter(<int, String>{0: custom});
+                },
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed[1], 'VALUE');
+          expect(rxTransformed[2], 'D');
+          expect(rxTransformed[4], 'C');
+
+          rxMap.setState('custom');
+          expect(rxTransformed.length, 1);
+          expect(rxTransformed.value[0], 'custom');
+
+          rxMap[5] = 'e';
+          expect(rxTransformed[5], 'E');
+
+          rxMap.remove(5);
+          expect(rxTransformed[5], null);
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxTransformed[1], 'A');
+          expect(rxTransformed[2], 'B');
+          expect(rxTransformed[3], 'C');
+
+          rxMap[1] = 'd';
+          expect(rxTransformed[1], 'D');
+
+          await rxMap.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform the map to a stateful map', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableStatefulMap<int, String, String> rxTransformed =
+              rxMap.transformAs.statefulMap<int, String, String>(
+            transform: (
+              final ObservableStatefulMap<int, String, String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<Either<Map<int, String>, String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final Map<int, String> newItems = data.map((final int key, final String value) {
+                    return MapEntry<int, String>(key, value.toUpperCase());
+                  });
+
+                  emitter(Either<Map<int, String>, String>.left(newItems));
+                },
+                onRight: (final String custom) {
+                  emitter(Either<Map<int, String>, String>.right(custom));
+                },
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed[1], 'VALUE');
+          expect(rxTransformed[2], 'D');
+          expect(rxTransformed[4], 'C');
+
+          rxMap.setState('custom');
+          expect(rxTransformed.value.rightOrNull, 'custom');
+
+          rxMap[5] = 'e';
+          expect(rxTransformed[5], 'E');
+
+          rxMap.remove(5);
+          expect(rxTransformed[5], null);
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxTransformed[1], 'A');
+          expect(rxTransformed[2], 'B');
+          expect(rxTransformed[3], 'C');
+
+          rxMap[1] = 'd';
+          expect(rxTransformed[1], 'D');
+
+          await rxMap.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform the map to a set', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableSet<String> rxTransformed = rxMap.transformAs.set(
+            transform: (
+              final ObservableSet<String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<Set<String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final Set<String> newItems = data.values.map((final String item) {
+                    return item.toUpperCase();
+                  }).toSet();
+
+                  emitter(newItems);
+                },
+                onRight: (final String custom) {
+                  emitter(<String>{custom});
+                },
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.value, <String>{'VALUE', 'D', 'C'});
+
+          rxMap.setState('custom');
+          expect(rxTransformed.value, <String>{'custom'});
+
+          rxMap[5] = 'e';
+          expect(rxTransformed.value, <String>{'E'});
+
+          rxMap.remove(5);
+          expect(rxTransformed.value, <String>{});
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxTransformed.value, <String>{'A', 'B', 'C'});
+
+          rxMap[1] = 'd';
+          expect(rxTransformed.value, <String>{'D', 'B', 'C'});
+
+          await rxMap.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform the map to a stateful set', () async {
+          final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>(
+            initial: <int, String>{
+              1: 'value',
+              2: 'a',
+              3: 'b',
+            },
+          );
+
+          rxMap[4] = 'c';
+          rxMap[2] = 'd';
+          rxMap.remove(3);
+
+          final ObservableStatefulSet<String, String> rxTransformed = rxMap.transformAs.statefulSet<String, String>(
+            transform: (
+              final ObservableStatefulSet<String, String> current,
+              final Either<Map<int, String>, String> value,
+              final Emitter<Either<Set<String>, String>> emitter,
+            ) {
+              value.fold(
+                onLeft: (final Map<int, String> data) {
+                  // map change to list while transforming the value to uppercase
+                  final Set<String> newItems = data.values.map((final String item) {
+                    return item.toUpperCase();
+                  }).toSet();
+
+                  emitter(Either<Set<String>, String>.left(newItems));
+                },
+                onRight: (final String custom) {
+                  emitter(Either<Set<String>, String>.right(custom));
+                },
+              );
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.value.leftOrThrow, <String>{'VALUE', 'D', 'C'});
+
+          rxMap.setState('custom');
+          expect(rxTransformed.value.rightOrThrow, 'custom');
+
+          rxMap[5] = 'e';
+          expect(rxTransformed.value.leftOrThrow, <String>{'E'});
+
+          rxMap.remove(5);
+          expect(rxTransformed.value.leftOrThrow, <String>{});
+
+          rxMap.addAll(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+          expect(rxTransformed.value.leftOrThrow, <String>{'A', 'B', 'C'});
+
+          rxMap[1] = 'd';
+          expect(rxTransformed.value.leftOrThrow, <String>{'D', 'B', 'C'});
+
+          await rxMap.dispose();
+          expect(rxTransformed.disposed, true);
+        });
+      });
+    });
+
+    group('transformChangeAs', (){
+      group('list', (){
+
       });
     });
   });

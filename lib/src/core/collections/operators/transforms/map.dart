@@ -7,12 +7,12 @@ class MapChangeTransform<C, T, K, V> extends RxMapImpl<K, V>
     with
         BaseCollectionTransformOperator<
             T, //
-            ObservableMapState<K, V>,
+            Map<K, V>,
             C,
             ObservableMapChange<K, V>> {
   @override
   final ObservableCollection<T, C> source;
-  final MapChangeUpdater<K, V, C>? transformFn;
+  final MapChangeUpdater<K, V, C, T>? transformFn;
 
   MapChangeTransform({
     required this.source,
@@ -21,11 +21,9 @@ class MapChangeTransform<C, T, K, V> extends RxMapImpl<K, V>
   });
 
   @override
-  void handleChange(
-    final C change,
-  ) {
+  void handleChange(final C change) {
     assert(transformFn != null, 'override handleChange or provide a transformFn');
 
-    transformFn?.call(this, change, applyAction);
+    transformFn?.call(this, source.value, change, applyAction);
   }
 }

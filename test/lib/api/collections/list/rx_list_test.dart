@@ -3,6 +3,14 @@ import 'package:test/test.dart';
 
 void main() {
   group('RxList', () {
+    group('value', () {
+      test('Should return an unmodifiable list', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final List<int> value = rxList.value;
+        expect(() => value.add(4), throwsUnsupportedError);
+      });
+    });
+
     group('[]=', () {
       test('Should set the item at the specified index', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
@@ -13,7 +21,7 @@ void main() {
       test('Should add the item if the index is greater than the length of the list', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         rxList[10] = 4;
-        expect(rxList.value.listView, <int>[1, 2, 3, 4]);
+        expect(rxList.value, <int>[1, 2, 3, 4]);
         expect(rxList[3], 4);
       });
     });
@@ -42,7 +50,7 @@ void main() {
       test('Should insert the item at the specified index', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         final ObservableListChange<int>? change = rxList.insert(1, 4);
-        expect(rxList.value.listView, <int>[1, 4, 2, 3]);
+        expect(rxList.value, <int>[1, 4, 2, 3]);
         expect(change!.added[1], 4);
         expect(rxList[1], 4);
       });
@@ -63,7 +71,7 @@ void main() {
       test('Should remove the item from the list', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         final ObservableListChange<int>? change = rxList.remove(2);
-        expect(rxList.value.listView, <int>[1, 3]);
+        expect(rxList.value, <int>[1, 3]);
         expect(rxList[1], 3);
         expect(change!.removed[1], 2);
       });
@@ -99,7 +107,7 @@ void main() {
           ),
         );
 
-        expect(rxList.value.listView, <int>[4, 5, 1, 2, 3, 0]);
+        expect(rxList.value, <int>[4, 5, 1, 2, 3, 0]);
         expect(change!.added[0], 4);
         expect(change.added[1], 5);
       });
@@ -115,7 +123,7 @@ void main() {
         );
 
         expect(change!.added[0], 4);
-        expect(rxList.value.listView, <int>[4, 1, 2, 3, 0]);
+        expect(rxList.value, <int>[4, 1, 2, 3, 0]);
       });
 
       test('Should not do anything if add action is empty', () {
@@ -153,7 +161,7 @@ void main() {
           ),
         );
 
-        expect(rxList.value.listView, <int>[1]);
+        expect(rxList.value, <int>[1]);
       });
 
       test('Should apply update action to the list', () {
@@ -168,7 +176,7 @@ void main() {
           ),
         );
 
-        expect(rxList.value.listView, <int>[4, 5, 3, 10]);
+        expect(rxList.value, <int>[4, 5, 3, 10]);
       });
     });
 
@@ -187,7 +195,7 @@ void main() {
           1: ObservableItemChange<int>(oldValue: 2, newValue: 5),
         });
 
-        expect(rxList.value.listView, <int>[4, 5, 3, 6]);
+        expect(rxList.value, <int>[4, 5, 3, 6]);
       });
 
       test('Should set the list data with empty list', () {
@@ -203,7 +211,7 @@ void main() {
         });
         expect(change.updated, <int, ObservableItemChange<int>>{});
 
-        expect(rxList.value.listView, <int>[]);
+        expect(rxList.value, <int>[]);
       });
     });
   });
