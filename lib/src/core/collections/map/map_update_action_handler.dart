@@ -9,8 +9,14 @@ mixin MapUpdateActionHandler<K, V> {
     final Map<K, V> removed = <K, V>{};
     final Map<K, ObservableItemChange<V>> updated = <K, ObservableItemChange<V>>{};
 
-    final Iterable<K> removeKeys = action.removeKeys;
     final Map<K, V> addItems = action.addItems;
+    final List<K> removeKeys = <K>[];
+
+    if(action.clear) {
+      removeKeys.addAll(data.keys);
+    } else {
+      removeKeys.addAll(action.removeKeys);
+    }
 
     for (final K key in removeKeys) {
       final V? current = data[key];

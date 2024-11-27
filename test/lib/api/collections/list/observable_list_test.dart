@@ -44,7 +44,7 @@ void main() {
         expect(rxList.length, 5);
         expect(rxList.value, <int>[3, 4, 0, 1, 2]);
 
-        controller.add(ObservableListUpdateAction<int>(removeItems: <int>{0}));
+        controller.add(ObservableListUpdateAction<int>(removeAtPositions: <int>{0}));
         expect(rxList.length, 4);
         expect(rxList.value, <int>[4, 0, 1, 2]);
 
@@ -1069,7 +1069,7 @@ void main() {
                   insertAt: <int, List<String>>{
                     for (final MapEntry<int, int> entry in added.entries) entry.key: <String>[mapper(entry.value)],
                   },
-                  removeItems: removed.keys.toSet(),
+                  removeAtPositions: removed.keys.toSet(),
                   updateItems: <int, String>{
                     for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
                       entry.key: mapper(entry.value.newValue),
@@ -1151,7 +1151,7 @@ void main() {
                     insertAt: <int, List<String>>{
                       for (final MapEntry<int, int> entry in added.entries) entry.key: <String>[mapper(entry.value)],
                     },
-                    removeItems: removed.keys.toSet(),
+                    removeAtPositions: removed.keys.toSet(),
                     updateItems: <int, String>{
                       for (final MapEntry<int, ObservableItemChange<int>> entry in updated.entries)
                         entry.key: mapper(entry.value.newValue),

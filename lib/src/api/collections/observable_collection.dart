@@ -11,8 +11,6 @@ abstract interface class ObservableCollection<T, C> implements Observable<T> {
 
   C get currentStateAsChange;
 
-  ObservableCollectionSwitchMaps<C> get switchMapChangeAs;
-
   ObservableCollectionTransforms<C, T> get transformChangeAs;
 
   Disposable onChange({

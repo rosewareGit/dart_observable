@@ -1390,7 +1390,7 @@ void main() {
               emitter(
                 ObservableListUpdateAction<String>(
                   addItems: addItems,
-                  removeItems: removeIndexes,
+                  removeAtPositions: removeIndexes,
                   updateItems: updatedItems,
                 ),
               );
@@ -1486,7 +1486,7 @@ void main() {
                 Either<ObservableListUpdateAction<String>, String>.left(
                   ObservableListUpdateAction<String>(
                     addItems: addItems,
-                    removeItems: removeIndexes,
+                    removeAtPositions: removeIndexes,
                     updateItems: updatedItems,
                   ),
                 ),

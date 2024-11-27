@@ -151,7 +151,7 @@ void main() {
         expect(list.value.leftOrThrow, <int>[2, 0, 1]);
 
         controller.add(
-          Either<ObservableListUpdateAction<int>, String>.left(ObservableListUpdateAction<int>(removeItems: <int>{1})),
+          Either<ObservableListUpdateAction<int>, String>.left(ObservableListUpdateAction<int>(removeAtPositions: <int>{1})),
         );
         expect(list.value.leftOrThrow, <int>[2, 1]);
 
@@ -223,7 +223,7 @@ void main() {
           ),
         );
         controller.add(
-          Either<ObservableListUpdateAction<int>, String>.left(ObservableListUpdateAction<int>(removeItems: <int>{1})),
+          Either<ObservableListUpdateAction<int>, String>.left(ObservableListUpdateAction<int>(removeAtPositions: <int>{1})),
         );
 
         Disposable listener = list.listen();
@@ -1077,7 +1077,7 @@ void main() {
                       insertAt: <int, Iterable<String>>{
                         for (final MapEntry<int, int> entry in added.entries) entry.key: <String>[mapItem(entry.value)],
                       },
-                      removeItems: removed.keys.toSet(),
+                      removeAtPositions: removed.keys.toSet(),
                       updateItems: updated.map((final int key, final ObservableItemChange<int> value) {
                         return MapEntry<int, String>(key, mapItem(value.newValue));
                       }),
@@ -1087,7 +1087,7 @@ void main() {
                 onRight: (final String state) {
                   emitter(
                     ObservableListUpdateAction<String>(
-                      removeItems: List<int>.generate(current.length, (final int index) => index).toSet(),
+                      removeAtPositions: List<int>.generate(current.length, (final int index) => index).toSet(),
                     ),
                   );
                 },
@@ -1151,7 +1151,7 @@ void main() {
                           for (final MapEntry<int, int> entry in added.entries)
                             entry.key: <String>[mapItem(entry.value)],
                         },
-                        removeItems: removed.keys.toSet(),
+                        removeAtPositions: removed.keys.toSet(),
                         updateItems: updated.map((final int key, final ObservableItemChange<int> value) {
                           return MapEntry<int, String>(key, mapItem(value.newValue));
                         }),

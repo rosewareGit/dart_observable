@@ -41,7 +41,7 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
 
     return applyListUpdateAction(
       ObservableListUpdateAction<E>(
-        removeItems: <int>{for (int i = 0; i < items.length; i++) i},
+        removeAtPositions: <int>{for (int i = 0; i < items.length; i++) i},
       ),
     );
   }
@@ -80,7 +80,7 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     for (int i = 0; i < data.length; i++) {
       if (data[i].value == item) {
         return applyListUpdateAction(
-          ObservableListUpdateAction<E>(removeItems: <int>{i}),
+          ObservableListUpdateAction<E>(removeAtPositions: <int>{i}),
         );
       }
     }
@@ -101,7 +101,7 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     }
 
     return applyListUpdateAction(
-      ObservableListUpdateAction<E>(removeItems: <int>{index}),
+      ObservableListUpdateAction<E>(removeAtPositions: <int>{index}),
     );
   }
 
@@ -127,7 +127,7 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     }
 
     return applyListUpdateAction(
-      ObservableListUpdateAction<E>(removeItems: removed),
+      ObservableListUpdateAction<E>(removeAtPositions: removed),
     );
   }
 

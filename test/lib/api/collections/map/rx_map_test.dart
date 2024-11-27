@@ -63,5 +63,23 @@ void main() {
         expect(rxMap['c'], null);
       });
     });
+
+    group('applyAction', () {
+      test('Should clear the map on clear action', () {
+        final RxMap<String, int> rxMap = RxMap<String, int>(<String, int>{'a': 1, 'b': 2, 'c': 3});
+
+        final ObservableMapChange<String, int>? change = rxMap.applyAction(
+          ObservableMapUpdateAction<String, int>(clear: true),
+        );
+
+        expect(change!.added.length, 0);
+        expect(change.removed.length, 3);
+        expect(change.updated.length, 0);
+
+        expect(rxMap['a'], null);
+        expect(rxMap['b'], null);
+        expect(rxMap['c'], null);
+      });
+    });
   });
 }

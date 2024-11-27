@@ -21,6 +21,7 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
     final Set<int> remove = action.removeItems;
     final Map<int, E> update = action.updateItems;
     final Map<int, Iterable<E>> insert = action.insertAt;
+    final bool clear = action.clear;
 
     final ObservableListChangeElements<E> change = ObservableListChangeElements<E>(
       added: <int, ObservableListElement<E>>{},
@@ -39,6 +40,7 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
       data: data,
       change: change,
       removedIndexes: remove,
+      clear: clear,
     );
 
     _handleInsert(
@@ -104,20 +106,34 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
     required final List<ObservableListElement<E>> data,
     required final ObservableListChangeElements<E> change,
     required final Set<int> removedIndexes,
+    required final bool clear,
   }) {
-    final List<int> sortedDescend = removedIndexes.toList()..sort((final int a, final int b) => b.compareTo(a));
-
-    for (final int index in sortedDescend) {
-      if (index >= data.length) {
-        continue;
+    if (clear) {
+      for (int i = 0; i < data.length; i++) {
+        final ObservableListElement<E> item = data[i];
+        item.unlink();
+        change.removedElements[i] = ObservableListElementChange<E>(
+          element: item,
+          oldValue: item.value,
+          newValue: item.value,
+        );
       }
-      final ObservableListElement<E> item = data.removeAt(index);
-      item.unlink();
-      change.removedElements[index] = ObservableListElementChange<E>(
-        element: item,
-        oldValue: item.value,
-        newValue: item.value,
-      );
+      data.clear();
+    } else {
+      final List<int> sortedDescend = removedIndexes.toList()..sort((final int a, final int b) => b.compareTo(a));
+
+      for (final int index in sortedDescend) {
+        if (index >= data.length) {
+          continue;
+        }
+        final ObservableListElement<E> item = data.removeAt(index);
+        item.unlink();
+        change.removedElements[index] = ObservableListElementChange<E>(
+          element: item,
+          oldValue: item.value,
+          newValue: item.value,
+        );
+      }
     }
   }
 

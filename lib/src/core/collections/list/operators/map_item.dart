@@ -37,7 +37,7 @@ class ObservableListMapItemOperator<E, E2> extends ListChangeTransform<E2, List<
 
     updater(
       ObservableListUpdateAction<E2>(
-        removeItems: removedIndexes,
+        removeAtPositions: removedIndexes,
         updateItems: updateItems,
         addItems: itemsToAdd,
       ),

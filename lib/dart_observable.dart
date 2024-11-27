@@ -1,6 +1,5 @@
 library dart_observable;
 
-export 'src/api/collections/collection_switch_maps.dart';
 export 'src/api/collections/item_change.dart';
 export 'src/api/collections/list/change.dart';
 export 'src/api/collections/list/observable_list.dart';

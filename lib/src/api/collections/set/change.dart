@@ -27,13 +27,18 @@ class ObservableSetChange<E> {
     required final Set<E> sourceToUpdate,
     required final Set<E> addItems,
     required final Set<E> removeItems,
+    required final bool clear,
   }) {
     final Set<E> added = <E>{};
     final Set<E> removed = <E>{};
 
-    for (final E entry in removeItems) {
-      if (sourceToUpdate.contains(entry)) {
-        removed.add(entry);
+    if (clear) {
+      removed.addAll(sourceToUpdate);
+    } else {
+      for (final E entry in removeItems) {
+        if (sourceToUpdate.contains(entry)) {
+          removed.add(entry);
+        }
       }
     }
 

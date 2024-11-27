@@ -117,5 +117,17 @@ void main() {
         expect(change.removed, <int>{1, 3});
       });
     });
+
+    group('applyAction', () {
+      test('Should apply clear action', () {
+        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
+        final ObservableSetChange<int>? change = set.applyAction(ObservableSetUpdateAction<int>(clear: true));
+
+        expect(change, isNotNull);
+        expect(change!.added, <int>{});
+        expect(change.removed, <int>{1, 2, 3});
+        expect(set.value, <int>{});
+      });
+    });
   });
 }

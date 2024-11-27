@@ -977,5 +977,436 @@ void main() {
         });
       });
     });
+
+    group('transformChangeAs', () {
+      group('list', () {
+        test('Should transform the set to a list', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableList<String> rxList = rxSet.transformChangeAs.list(
+            transform: (
+              final ObservableList<String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<ObservableListUpdateAction<String>> updater,
+            ) {
+              // convert to 'Ei*2', or to empty if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final ObservableListUpdateAction<String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  final Set<int> indexesToRemove = <int>{};
+                  for (final int item in removed) {
+                    final int index = current.value.indexOf(mapItem(item));
+                    if (index != -1) {
+                      indexesToRemove.add(index);
+                    }
+                  }
+
+                  return ObservableListUpdateAction<String>(
+                    removeAtPositions: indexesToRemove,
+                    addItems: added.map<String>(mapItem).toList(),
+                  );
+                },
+                onRight: (final String state) {
+                  return ObservableListUpdateAction<String>(clear: true);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxList.listen();
+
+          expect(rxList.value, <String>['E2', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSet.setState('custom');
+          expect(rxList.value, <String>[]);
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxList.value, <String>['E8', 'E12', 'E14']);
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxList.value, <String>['E12', 'E14']);
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+          expect(rxList.value, <String>['E12', 'E14']);
+
+          rxList.listen();
+
+          expect(rxList.value, <String>['E14', 'E16']);
+
+          await rxSet.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('statefulList', () {
+        test('Should transform the set to a stateful list', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulList<String, String> rxList = rxSet.transformChangeAs.statefulList(
+            transform: (
+              final ObservableStatefulList<String, String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<Either<ObservableListUpdateAction<String>, String>> updater,
+            ) {
+              // convert to 'Ei*2', or to custom if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final Either<ObservableListUpdateAction<String>, String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  final Set<int> indexesToRemove = <int>{};
+                  for (final int item in removed) {
+                    final int index = current.value.leftOrThrow.indexOf(mapItem(item));
+                    if (index != -1) {
+                      indexesToRemove.add(index);
+                    }
+                  }
+
+                  return Either<ObservableListUpdateAction<String>, String>.left(
+                    ObservableListUpdateAction<String>(
+                      removeAtPositions: indexesToRemove,
+                      addItems: added.map<String>(mapItem).toList(),
+                    ),
+                  );
+                },
+                onRight: (final String state) {
+                  return Either<ObservableListUpdateAction<String>, String>.right(state);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <String>['E2', 'E4', 'E6', 'E8', 'E10', 'E12']);
+
+          rxSet.setState('custom');
+          expect(rxList.value.leftOrNull, null);
+          expect(rxList.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxList.value.leftOrThrow, <String>['E8', 'E12', 'E14']);
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxList.value.leftOrThrow, <String>['E12', 'E14']);
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+          expect(rxList.value.leftOrThrow, <String>['E12', 'E14']);
+
+          rxList.listen();
+
+          expect(rxList.value.leftOrThrow, <String>['E14', 'E16']);
+
+          await rxSet.dispose();
+          expect(rxList.disposed, true);
+        });
+      });
+
+      group('map', () {
+        test('Should transform the set to a map', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableMap<int, String> rxMap = rxSet.transformChangeAs.map(
+            transform: (
+              final ObservableMap<int, String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<ObservableMapUpdateAction<int, String>> updater,
+            ) {
+              // convert to key: 'Ei*2', or to empty if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final ObservableMapUpdateAction<int, String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  return ObservableMapUpdateAction<int, String>(
+                    removeKeys: removed,
+                    addItems: added.fold<Map<int, String>>(
+                      <int, String>{},
+                      (final Map<int, String> acc, final int item) => acc..[item] = mapItem(item),
+                    ),
+                  );
+                },
+                onRight: (final String state) {
+                  return ObservableMapUpdateAction<int, String>(clear: true);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxMap.listen();
+
+          expect(rxMap.value, <int, String>{1: 'E2', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxMap.value, <int, String>{});
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxMap.value, <int, String>{4: 'E8', 6: 'E12', 7: 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxMap.value, <int, String>{6: 'E12', 7: 'E14'});
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+
+          rxMap.listen();
+          expect(rxMap.value, <int, String>{8: 'E16', 7: 'E14'});
+
+          await rxSet.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('statefulMap', () {
+        test('Should transform the set to a stateful map', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulMap<int, String, String> rxMap = rxSet.transformChangeAs.statefulMap(
+            transform: (
+              final ObservableStatefulMap<int, String, String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<Either<ObservableMapUpdateAction<int, String>, String>> updater,
+            ) {
+              // convert to key: 'Ei*2', or to custom if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final Either<ObservableMapUpdateAction<int, String>, String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  return Either<ObservableMapUpdateAction<int, String>, String>.left(
+                    ObservableMapUpdateAction<int, String>(
+                      removeKeys: removed,
+                      addItems: added.fold<Map<int, String>>(
+                        <int, String>{},
+                        (final Map<int, String> acc, final int item) => acc..[item] = mapItem(item),
+                      ),
+                    ),
+                  );
+                },
+                onRight: (final String state) {
+                  return Either<ObservableMapUpdateAction<int, String>, String>.right(state);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxMap.listen();
+
+          expect(rxMap.value.leftOrThrow, <int, String>{1: 'E2', 2: 'E4', 3: 'E6', 4: 'E8', 5: 'E10', 6: 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxMap.value.leftOrNull, null);
+          expect(rxMap.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxMap.value.leftOrThrow, <int, String>{4: 'E8', 6: 'E12', 7: 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxMap.value.leftOrThrow, <int, String>{6: 'E12', 7: 'E14'});
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+
+          rxMap.listen();
+          expect(rxMap.value.leftOrThrow, <int, String>{8: 'E16', 7: 'E14'});
+
+          await rxSet.dispose();
+          expect(rxMap.disposed, true);
+        });
+      });
+
+      group('set', () {
+        test('Should transform the set to a set', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableSet<String> rxSetTransformed = rxSet.transformChangeAs.set(
+            transform: (
+              final ObservableSet<String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<ObservableSetUpdateAction<String>> updater,
+            ) {
+              // convert to 'Ei*2', or to empty if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final ObservableSetUpdateAction<String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  return ObservableSetUpdateAction<String>(
+                    removeItems: removed.map<String>(mapItem).toSet(),
+                    addItems: added.map<String>(mapItem).toSet(),
+                  );
+                },
+                onRight: (final String state) {
+                  return ObservableSetUpdateAction<String>(clear: true);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxSetTransformed.listen();
+
+          expect(rxSetTransformed.value, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxSetTransformed.value, <String>{});
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxSetTransformed.value, <String>{'E8', 'E12', 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxSetTransformed.value, <String>{'E12', 'E14'});
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+          expect(rxSetTransformed.value, <String>{'E12', 'E14'});
+
+          rxSetTransformed.listen();
+          expect(rxSetTransformed.value, <String>{'E14', 'E16'});
+
+          await rxSet.dispose();
+          expect(rxSetTransformed.disposed, true);
+        });
+      });
+
+      group('statefulSet', () {
+        test('Should transform the set to a stateful set', () async {
+          final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3, 4, 5]);
+          rxSet.add(6);
+
+          final ObservableStatefulSet<String, String> rxSetTransformed = rxSet.transformChangeAs.statefulSet(
+            transform: (
+              final ObservableStatefulSet<String, String> current,
+              final Either<Set<int>, String> state,
+              final Either<ObservableSetChange<int>, String> change,
+              final Emitter<Either<ObservableSetUpdateAction<String>, String>> updater,
+            ) {
+              // convert to 'Ei*2', or to custom if custom
+
+              String mapItem(final int item) => 'E${item * 2}';
+
+              final Either<ObservableSetUpdateAction<String>, String> action = change.fold(
+                onLeft: (final ObservableSetChange<int> change) {
+                  final Set<int> added = change.added;
+                  final Set<int> removed = change.removed;
+
+                  return Either<ObservableSetUpdateAction<String>, String>.left(
+                    ObservableSetUpdateAction<String>(
+                      removeItems: removed.map<String>(mapItem).toSet(),
+                      addItems: added.map<String>(mapItem).toSet(),
+                    ),
+                  );
+                },
+                onRight: (final String state) {
+                  return Either<ObservableSetUpdateAction<String>, String>.right(state);
+                },
+              );
+
+              updater(action);
+            },
+          );
+
+          final Disposable listener = rxSetTransformed.listen();
+
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E2', 'E4', 'E6', 'E8', 'E10', 'E12'});
+
+          rxSet.setState('custom');
+          expect(rxSetTransformed.value.leftOrNull, null);
+          expect(rxSetTransformed.value.rightOrThrow, 'custom');
+
+          rxSet.addAll(<int>[4, 6, 7]);
+          expect(rxSet.value.leftOrThrow, <int>{4, 6, 7});
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E8', 'E12', 'E14'});
+
+          rxSet.remove(4);
+          expect(rxSet.value.leftOrThrow, <int>{6, 7});
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E12', 'E14'});
+
+          await listener.dispose();
+
+          // buffer changes
+          rxSet.add(8);
+          rxSet.remove(6);
+          expect(rxSet.value.leftOrThrow, <int>{8, 7});
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E12', 'E14'});
+
+          rxSetTransformed.listen();
+          expect(rxSetTransformed.value.leftOrThrow, <String>{'E14', 'E16'});
+
+          await rxSet.dispose();
+          expect(rxSetTransformed.disposed, true);
+        });
+      });
+    });
   });
 }

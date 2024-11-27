@@ -138,7 +138,7 @@ void main() {
       test('Should not do anything if remove action is empty', () {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(removeItems: <int>{}),
+          ObservableListUpdateAction<int>(removeAtPositions: <int>{}),
         );
 
         expect(change, null);
@@ -157,7 +157,7 @@ void main() {
         final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
         rxList.applyAction(
           ObservableListUpdateAction<int>(
-            removeItems: <int>{1, 2},
+            removeAtPositions: <int>{1, 2},
           ),
         );
 
@@ -177,6 +177,13 @@ void main() {
         );
 
         expect(rxList.value, <int>[4, 5, 3, 10]);
+      });
+
+      test('Should clear the list on clear action', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        rxList.applyAction(ObservableListUpdateAction<int>(clear: true));
+
+        expect(rxList.value, <int>[]);
       });
     });
 
