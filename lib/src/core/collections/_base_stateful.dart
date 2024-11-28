@@ -1,8 +1,8 @@
 import '../../../dart_observable.dart';
 import '_base.dart';
 
-abstract class RxCollectionStatefulBase<T, C, S>
-    extends RxCollectionBase<Either<T, S>, Either<C, S>> implements ObservableCollectionStateful<C, S, Either<T, S>> {
+abstract class RxCollectionStatefulBase<T, C, S> extends RxCollectionBase<Either<T, S>, Either<C, S>>
+    implements ObservableCollectionStateful<C, S, Either<T, S>> {
   Either<T, S>? _previous;
 
   RxCollectionStatefulBase(super.value, {super.distinct});

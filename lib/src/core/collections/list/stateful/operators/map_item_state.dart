@@ -3,7 +3,7 @@ import '../../../operators/transforms/list_stateful.dart';
 import '../../operators/map_item.dart';
 
 class OperatorStatefulListMapItemState<E, E2, S, S2>
-    extends StatefulListChangeTransform<E2, S2, Either<List<E>,S>, Either<ObservableListChange<E>, S>> {
+    extends StatefulListChangeTransform<E2, S2, Either<List<E>, S>, Either<ObservableListChange<E>, S>> {
   final E2 Function(E item) mapper;
   final S2 Function(S state) stateMapper;
 

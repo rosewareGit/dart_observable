@@ -32,11 +32,6 @@ class RxSetImpl<E> extends RxCollectionBase<Set<E>, ObservableSetChange<E>>
     _change = currentStateAsChange;
   }
 
-  @override
-  UnmodifiableSetView<E> get value {
-    return UnmodifiableSetView<E>(super.value);
-  }
-
   RxSetImpl.splayTreeSet({
     required final Comparator<E> compare,
     final Iterable<E>? initial,
@@ -59,6 +54,11 @@ class RxSetImpl<E> extends RxCollectionBase<Set<E>, ObservableSetChange<E>>
 
   @override
   int get length => _value.length;
+
+  @override
+  UnmodifiableSetView<E> get value {
+    return UnmodifiableSetView<E>(super.value);
+  }
 
   @override
   set value(final Set<E> value) {

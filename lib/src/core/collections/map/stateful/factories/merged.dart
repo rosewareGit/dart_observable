@@ -91,7 +91,7 @@ class ObservableStatefulMapMerged<K, V, S> extends RxStatefulMapImpl<K, V, S> {
       final Either<Map<K, V>, S>? previous = collection.previous;
       if (previous != null) {
         previous.when(
-          onLeft: (final  Map<K, V> data) {
+          onLeft: (final Map<K, V> data) {
             handleChange(
               collection: collection,
               change: Either<ObservableMapChange<K, V>, S>.left(

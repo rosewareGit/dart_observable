@@ -142,6 +142,12 @@ abstract interface class Observable<T> {
   });
 }
 
+enum ObservableState {
+  active,
+  inactive,
+  disposed,
+}
+
 extension ObservableExtension<T> on Observable<T> {
   Observable<T> recover(
     final void Function(dynamic error, Emitter<T> emitter) handler, {
@@ -149,10 +155,4 @@ extension ObservableExtension<T> on Observable<T> {
   }) {
     return handleError(handler, predicate: predicate);
   }
-}
-
-enum ObservableState {
-  active,
-  inactive,
-  disposed,
 }

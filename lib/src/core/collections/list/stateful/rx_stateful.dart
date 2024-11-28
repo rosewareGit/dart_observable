@@ -32,12 +32,6 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
     );
   }
 
-  @override
-  set value(final Either<List<E>, S> value) {
-    _setState(value);
-    super.value = value;
-  }
-
   RxStatefulListImpl.state(final Either<List<E>, S> state)
       : _rxState = Rx<Either<RxListState<E>, S>>(
           state.fold(
@@ -90,6 +84,12 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
       onLeft: (final RxListState<E> state) => Either<List<E>, S>.left(state.listView),
       onRight: (final S custom) => Either<List<E>, S>.right(custom),
     );
+  }
+
+  @override
+  set value(final Either<List<E>, S> value) {
+    _setState(value);
+    super.value = value;
   }
 
   @override

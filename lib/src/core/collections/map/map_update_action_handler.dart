@@ -12,7 +12,7 @@ mixin MapUpdateActionHandler<K, V> {
     final Map<K, V> addItems = action.addItems;
     final List<K> removeKeys = <K>[];
 
-    if(action.clear) {
+    if (action.clear) {
       removeKeys.addAll(data.keys);
     } else {
       removeKeys.addAll(action.removeKeys);

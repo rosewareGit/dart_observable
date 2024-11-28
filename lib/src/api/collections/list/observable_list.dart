@@ -29,10 +29,10 @@ abstract interface class ObservableList<E> implements ObservableCollection<List<
     );
   }
 
+  int get length;
+
   @override
   UnmodifiableListView<E> get value;
-
-  int get length;
 
   E? operator [](final int position);
 

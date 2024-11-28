@@ -1,8 +1,7 @@
 import '../../../../../dart_observable.dart';
 import '../../operators/transforms/set.dart';
 
-class ObservableSetMapItemOperator<E, E2>
-    extends SetChangeTransform<E2, ObservableSetChange<E>, Set<E>> {
+class ObservableSetMapItemOperator<E, E2> extends SetChangeTransform<E2, ObservableSetChange<E>, Set<E>> {
   final E2 Function(E item) mapper;
 
   ObservableSetMapItemOperator({

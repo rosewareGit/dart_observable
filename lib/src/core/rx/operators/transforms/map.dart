@@ -2,7 +2,7 @@ import '../../../../../dart_observable.dart';
 import '../../../collections/map/rx_impl.dart';
 import '../_base_transform.dart';
 
-class MapTransform<T, K, V> extends RxMapImpl<K, V> with BaseTransformOperator<T, Map<K,V>, Map<K, V>> {
+class MapTransform<T, K, V> extends RxMapImpl<K, V> with BaseTransformOperator<T, Map<K, V>, Map<K, V>> {
   @override
   final Observable<T> source;
   final MapUpdater<K, V, T>? transformFn;

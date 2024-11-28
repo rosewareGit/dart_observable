@@ -32,6 +32,12 @@ class RxListState<E> {
     }
   }
 
+  void setData(final List<ObservableListElement<E>> data) {
+    _data.clear();
+    _data.addAll(data);
+    onUpdated();
+  }
+
   static Iterable<ObservableListElement<E>> _convertToObservableListElement<E>(final Iterable<E>? data) {
     if (data == null) {
       return <ObservableListElement<E>>[];
@@ -58,11 +64,5 @@ class RxListState<E> {
     required final Iterable<ObservableListElement<E>> initial,
   }) {
     return List<ObservableListElement<E>>.of(initial);
-  }
-
-  void setData(final List<ObservableListElement<E>> data) {
-    _data.clear();
-    _data.addAll(data);
-    onUpdated();
   }
 }

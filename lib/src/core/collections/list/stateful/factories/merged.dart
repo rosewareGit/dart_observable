@@ -73,7 +73,7 @@ class ObservableStatefulListMerged<E, S> extends RxStatefulListImpl<E, S> {
           // remove items from collection
           if (previous != null) {
             previous.when(
-              onLeft: (final  RxListState<E> state) {
+              onLeft: (final RxListState<E> state) {
                 final List<ObservableListElement<E>> items = state.data;
                 final Map<int, ObservableListElementChange<E>> removed = <int, ObservableListElementChange<E>>{};
                 for (int i = 0; i < items.length; i++) {

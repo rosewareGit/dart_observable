@@ -17,16 +17,6 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
   final FactorySet<E> _factory;
   late Either<ObservableSetChange<E>, S> _change;
 
-  Either<Set<E>, S> get _value => super.value;
-
-  @override
-  Either<UnmodifiableSetView<E>, S> get value {
-    return _value.fold(
-      onLeft: (final Set<E> data) => Either<UnmodifiableSetView<E>, S>.left(UnmodifiableSetView<E>(data)),
-      onRight: (final S state) => Either<UnmodifiableSetView<E>, S>.right(state),
-    );
-  }
-
   RxStatefulSetImpl(
     final Iterable<E> data, {
     final FactorySet<E>? factory,
@@ -84,6 +74,16 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
         onLeft: (final Set<E> data) => data.length,
         onRight: (final S state) => null,
       );
+
+  @override
+  Either<UnmodifiableSetView<E>, S> get value {
+    return _value.fold(
+      onLeft: (final Set<E> data) => Either<UnmodifiableSetView<E>, S>.left(UnmodifiableSetView<E>(data)),
+      onRight: (final S state) => Either<UnmodifiableSetView<E>, S>.right(state),
+    );
+  }
+
+  Either<Set<E>, S> get _value => super.value;
 
   @override
   Either<ObservableSetChange<E>, S>? applyAction(
@@ -215,11 +215,11 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
     return changeFactory((final Iterable<E>? initial) => SplayTreeSet<E>.of(initial ?? <E>{}, compare));
   }
 
-  void _setData(final Set<E> data) {
-    super.value = Either<Set<E>, S>.left(data);
-  }
-
   void _setCustom(final S custom) {
     super.value = Either<Set<E>, S>.right(custom);
+  }
+
+  void _setData(final Set<E> data) {
+    super.value = Either<Set<E>, S>.left(data);
   }
 }

@@ -28,9 +28,6 @@ abstract class ObservableStatefulSet<E, S>
     );
   }
 
-  @override
-  Either<UnmodifiableSetView<E>, S> get value;
-
   factory ObservableStatefulSet.just(
     final Set<E> data, {
     final FactorySet<E>? factory,
@@ -51,6 +48,9 @@ abstract class ObservableStatefulSet<E, S>
   }
 
   int? get length;
+
+  @override
+  Either<UnmodifiableSetView<E>, S> get value;
 
   ObservableStatefulSet<E, S> changeFactory(final FactorySet<E> factory);
 
