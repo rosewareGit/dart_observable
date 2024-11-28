@@ -3,7 +3,7 @@ import '../../../operators/transforms/list_stateful.dart';
 import '../../operators/map_item.dart';
 
 class OperatorStatefulListMapItem<E, E2, S>
-    extends StatefulListChangeTransform<E2, S, Either<List<E>, S>, Either<ObservableListChange<E>, S>> {
+    extends StatefulListChangeTransform<E2, S, Either<List<E>, S>, StatefulListChange<E,S>> {
   final E2 Function(E item) mapper;
 
   OperatorStatefulListMapItem({
@@ -12,7 +12,7 @@ class OperatorStatefulListMapItem<E, E2, S>
   });
 
   @override
-  void handleChange(final Either<ObservableListChange<E>, S> change) {
+  void handleChange(final StatefulListChange<E,S> change) {
     change.fold(
       onLeft: (final ObservableListChange<E> change) {
         ObservableListMapItemOperator.mapChange<E, E2>(

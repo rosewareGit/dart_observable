@@ -4,12 +4,12 @@ import '../../../../../../dart_observable.dart';
 import '../rx_stateful.dart';
 
 class ObservableStatefulListFromStream<E, S> extends RxStatefulListImpl<E, S> {
-  final Stream<Either<ObservableListUpdateAction<E>, S>> stream;
+  final Stream<StatefulListAction<E,S>> stream;
   final Either<List<E>, S>? Function(dynamic error)? onError;
-  StreamSubscription<Either<ObservableListUpdateAction<E>, S>>? _subscription;
+  StreamSubscription<StatefulListAction<E,S>>? _subscription;
 
-  late final List<Either<ObservableListUpdateAction<E>, S>> _bufferedActions =
-      <Either<ObservableListUpdateAction<E>, S>>[];
+  late final List<StatefulListAction<E,S>> _bufferedActions =
+      <StatefulListAction<E,S>>[];
 
   ObservableStatefulListFromStream({
     required this.stream,
@@ -37,7 +37,7 @@ class ObservableStatefulListFromStream<E, S> extends RxStatefulListImpl<E, S> {
   void _startCollect() {
     if (_subscription != null) {
       // apply buffered actions
-      for (final Either<ObservableListUpdateAction<E>, S> action in _bufferedActions) {
+      for (final StatefulListAction<E,S> action in _bufferedActions) {
         applyAction(action);
       }
       _bufferedActions.clear();
@@ -45,7 +45,7 @@ class ObservableStatefulListFromStream<E, S> extends RxStatefulListImpl<E, S> {
     }
 
     _subscription = stream.listen(
-      (final Either<ObservableListUpdateAction<E>, S> action) {
+      (final StatefulListAction<E,S> action) {
         if (state == ObservableState.inactive) {
           _bufferedActions.add(action);
           return;

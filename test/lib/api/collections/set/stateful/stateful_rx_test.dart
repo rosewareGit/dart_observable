@@ -12,6 +12,37 @@ void main() {
 
         expect(() => value.add(4), throwsUnsupportedError);
       });
+
+      test('Should set a new state', () {
+        final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>{1, 2, 3});
+        rxSet.value = Either<Set<int>, String>.right('custom');
+        expect(rxSet.value.rightOrNull, 'custom');
+        expect(rxSet.change.rightOrNull, 'custom');
+
+        rxSet.value = Either<Set<int>, String>.right('custom2');
+        expect(rxSet.value.rightOrNull, 'custom2');
+        expect(rxSet.change.rightOrNull, 'custom2');
+
+        rxSet.value = Either<Set<int>, String>.left(<int>{1, 2, 3});
+        expect(rxSet.value.leftOrThrow, <int>{1, 2, 3});
+        expect(rxSet.change.leftOrThrow.added, <int>{1, 2, 3});
+        expect(rxSet.change.leftOrThrow.removed.length, 0);
+
+        rxSet.value = Either<Set<int>, String>.left(<int>{2, 3, 4});
+        expect(rxSet.value.leftOrThrow, <int>{2, 3, 4});
+        expect(rxSet.change.leftOrThrow.added, <int>{4});
+        expect(rxSet.change.leftOrThrow.removed, <int>{1});
+
+        rxSet.value = Either<Set<int>, String>.left(<int>{});
+        expect(rxSet.value.leftOrThrow, <int>{});
+        expect(rxSet.change.leftOrThrow.removed, <int>{2, 3, 4});
+        expect(rxSet.change.leftOrThrow.added.length, 0);
+
+        rxSet.value = Either<Set<int>, String>.left(<int>{1, 2, 3});
+        expect(rxSet.value.leftOrThrow, <int>{1, 2, 3});
+        expect(rxSet.change.leftOrThrow.added, <int>{1, 2, 3});
+        expect(rxSet.change.leftOrThrow.removed.length, 0);
+      });
     });
 
     group('factory', () {
@@ -31,46 +62,6 @@ void main() {
         final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>();
         rxSet.setState('custom');
         expect(rxSet.value.rightOrThrow, 'custom');
-      });
-    });
-
-    group('applyAction', () {
-      test('Should apply data action', () {
-        final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
-        final Either<ObservableSetUpdateAction<int>, String> action =
-            Either<ObservableSetUpdateAction<int>, String>.left(
-          ObservableSetUpdateAction<int>(
-            removeItems: <int>{1},
-            addItems: <int>{1000},
-          ),
-        );
-
-        final Either<ObservableSetChange<int>, String>? result = rxSet.applyAction(action);
-        expect(result!.leftOrThrow.added, <int>{1000});
-        expect(result.leftOrThrow.removed, <int>{1});
-      });
-
-      test('Should apply failure action', () {
-        final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
-        final Either<ObservableSetUpdateAction<int>, String> action =
-            Either<ObservableSetUpdateAction<int>, String>.right('custom');
-
-        final Either<ObservableSetChange<int>, String>? result = rxSet.applyAction(action);
-        expect(result!.rightOrThrow, 'custom');
-      });
-    });
-
-    group('applySetUpdateAction', () {
-      test('Should apply data action', () {
-        final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(initial: <int>[1, 2, 3]);
-        final ObservableSetUpdateAction<int> action = ObservableSetUpdateAction<int>(
-          removeItems: <int>{1},
-          addItems: <int>{1000},
-        );
-
-        final ObservableSetChange<int>? change = rxSet.applySetUpdateAction(action);
-        expect(change!.added, <int>{1000});
-        expect(change.removed, <int>{1});
       });
     });
 

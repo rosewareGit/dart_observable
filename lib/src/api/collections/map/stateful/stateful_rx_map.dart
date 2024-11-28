@@ -31,11 +31,7 @@ abstract interface class RxStatefulMap<K, V, S> implements ObservableStatefulMap
     );
   }
 
-  // Either<ObservableMapChange<K, V>, S>? applyAction(
-  //   final Either<ObservableMapUpdateAction<K, V>, S> action,
-  // );
-  //
-  // ObservableMapChange<K, V>? applyMapUpdateAction(final ObservableMapUpdateAction<K, V> action);
+  set value(final Either<Map<K, V>, S> value);
 
   Either<ObservableMapChange<K, V>, S>? setState(final S newState);
 }

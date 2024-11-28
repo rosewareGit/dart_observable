@@ -2,6 +2,8 @@ import '../../../../../dart_observable.dart';
 import '../../../../core/collections/list/stateful/factories/merged.dart';
 import '../../../../core/collections/list/stateful/factories/stream.dart';
 
+typedef StatefulListChange<E, S> = Either<ObservableListChange<E>, S>;
+
 abstract class ObservableStatefulList<E, S>
     implements
         ObservableCollectionStateful<
@@ -14,7 +16,7 @@ abstract class ObservableStatefulList<E, S>
   }
 
   factory ObservableStatefulList.fromStream({
-    required final Stream<Either<ObservableListUpdateAction<E>, S>> stream,
+    required final Stream<StatefulListAction<E, S>> stream,
     final Either<List<E>, S>? initial,
     final Either<List<E>, S> Function(dynamic error)? onError,
   }) {

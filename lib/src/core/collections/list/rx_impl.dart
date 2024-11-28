@@ -65,7 +65,6 @@ class RxListImpl<E> extends RxCollectionBase<List<E>, ObservableListChange<E>>
     return data[position].value;
   }
 
-  @override
   ObservableListChangeElements<E>? applyAction(final ObservableListUpdateAction<E> action) {
     if (action.isEmpty) {
       return null;

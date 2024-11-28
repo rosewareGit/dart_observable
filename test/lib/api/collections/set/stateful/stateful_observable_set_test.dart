@@ -530,12 +530,8 @@ void main() {
         rxSet.add(todoItem2);
         expect(rxTodoItem.value.leftOrNull, todoItem2);
 
-        rxSet.applySetUpdateAction(
-          ObservableSetUpdateAction<TodoItem>(
-            addItems: <TodoItem>{todoItem2Copy},
-            removeItems: <TodoItem>{todoItem2},
-          ),
-        );
+        rxSet.remove(todoItem2);
+        rxSet.add(todoItem2Copy);
 
         expect(rxTodoItem.value.leftOrNull, todoItem2Copy);
 

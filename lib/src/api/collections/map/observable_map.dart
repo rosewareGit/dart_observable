@@ -43,10 +43,20 @@ abstract interface class ObservableMap<K, V> implements ObservableCollection<Map
     );
   }
 
+  Iterable<MapEntry<K, V>> get entries;
+
+  bool get isEmpty;
+
+  bool get isNotEmpty;
+
+  Iterable<K> get keys;
+
   int get length;
 
   @override
   UnmodifiableMapView<K, V> get value;
+
+  Iterable<V> get values;
 
   V? operator [](final K key);
 
@@ -54,10 +64,14 @@ abstract interface class ObservableMap<K, V> implements ObservableCollection<Map
 
   bool containsKey(final K key);
 
+  bool containsValue(final V value);
+
   ObservableMap<K, V> filterItem(
     final bool Function(K key, V value) predicate, {
     final FactoryMap<K, V>? factory,
   });
+
+  void forEach(final void Function(K key, V value) action);
 
   ObservableMap<K, V2> mapItem<V2>(
     final V2 Function(K key, V value) valueMapper, {

@@ -7,5 +7,5 @@ abstract interface class RxList<E> implements ObservableList<E>, RxListActions<E
     return RxListImpl<E>(initial: initial);
   }
 
-  ObservableListChange<E>? applyAction(final ObservableListUpdateAction<E> action);
+  set value(final List<E> value);
 }

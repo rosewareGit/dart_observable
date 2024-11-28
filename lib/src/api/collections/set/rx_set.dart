@@ -15,6 +15,4 @@ abstract interface class RxSet<E> implements ObservableSet<E>, RxSetActions<E> {
   }
 
   set value(final Set<E> value);
-
-  ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action);
 }

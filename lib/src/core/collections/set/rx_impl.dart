@@ -67,7 +67,6 @@ class RxSetImpl<E> extends RxCollectionBase<Set<E>, ObservableSetChange<E>>
 
   Set<E> get _value => super.value;
 
-  @override
   ObservableSetChange<E>? applyAction(final ObservableSetUpdateAction<E> action) {
     final Set<E> updated = _value;
     final ObservableSetChange<E> change = action.apply(updated);

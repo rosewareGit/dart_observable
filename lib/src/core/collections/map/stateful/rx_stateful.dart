@@ -1,7 +1,5 @@
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
-
 import '../../../../../dart_observable.dart';
 import '../../_base_stateful.dart';
 import '../map_update_action_handler.dart';
@@ -73,6 +71,32 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
       );
 
   @override
+  Iterable<MapEntry<K, V>>? get entries {
+    return value.fold(
+      onLeft: (final Map<K, V> data) => data.entries,
+      onRight: (final _) => null,
+    );
+  }
+
+  @override
+  bool get isEmpty => value.fold(
+        onLeft: (final Map<K, V> data) => data.isEmpty,
+        onRight: (final _) => true,
+      );
+
+  @override
+  bool get isNotEmpty => value.fold(
+        onLeft: (final Map<K, V> data) => data.isNotEmpty,
+        onRight: (final _) => false,
+      );
+
+  @override
+  Iterable<K>? get keys => value.fold(
+        onLeft: (final Map<K, V> data) => data.keys,
+        onRight: (final _) => null,
+      );
+
+  @override
   int? get length => value.fold(
         onLeft: (final Map<K, V> data) => data.length,
         onRight: (final S state) => null,
@@ -87,6 +111,24 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
   }
 
   @override
+  set value(final Either<Map<K, V>, S> value) {
+    value.fold(
+      onLeft: (final Map<K, V> data) {
+        setData(data);
+      },
+      onRight: (final S state) {
+        setState(state);
+      },
+    );
+  }
+
+  @override
+  Iterable<V>? get values => value.fold(
+        onLeft: (final Map<K, V> data) => data.values,
+        onRight: (final _) => null,
+      );
+
+  @override
   V? operator [](final K key) {
     return value.fold(
       onLeft: (final Map<K, V> data) {
@@ -96,10 +138,7 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
     );
   }
 
-  @protected
-  Either<ObservableMapChange<K, V>, S>? applyAction(
-    final Either<ObservableMapUpdateAction<K, V>, S> action,
-  ) {
+  Either<ObservableMapChange<K, V>, S>? applyAction(final Either<ObservableMapUpdateAction<K, V>, S> action) {
     final Either<Map<K, V>, S> currentValue = super.value;
     return action.fold<Either<ObservableMapChange<K, V>, S>?>(
       onLeft: (final ObservableMapUpdateAction<K, V> listUpdateAction) {
@@ -164,6 +203,14 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
   }
 
   @override
+  bool containsValue(final V value) {
+    return this.value.fold(
+          onLeft: (final Map<K, V> data) => data.containsValue(value),
+          onRight: (final _) => false,
+        );
+  }
+
+  @override
   ObservableStatefulMap<K, V, S> filterItem(
     final bool Function(K key, V value) predicate, {
     final FactoryMap<K, V>? factory,
@@ -184,6 +231,14 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
       source: this,
       predicate: predicate,
       factory: factory,
+    );
+  }
+
+  @override
+  void forEach(final void Function(K key, V value) action) {
+    value.fold(
+      onLeft: (final Map<K, V> data) => data.forEach(action),
+      onRight: (final _) {},
     );
   }
 

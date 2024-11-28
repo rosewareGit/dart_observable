@@ -8,7 +8,6 @@ class StreamObservableN<T> extends RxnImpl<T> {
 
   StreamObservableN({
     required this.stream,
-    final bool lazy = true,
     final bool distinct = true,
   }) : super(
           distinct: distinct,

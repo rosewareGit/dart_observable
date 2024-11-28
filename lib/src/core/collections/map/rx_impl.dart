@@ -57,10 +57,25 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
   Map<K, V> get data => _value;
 
   @override
+  Iterable<MapEntry<K, V>> get entries => _value.entries;
+
+  @override
+  bool get isEmpty => _value.isEmpty;
+
+  @override
+  bool get isNotEmpty => _value.isNotEmpty;
+
+  @override
+  Iterable<K> get keys => _value.keys;
+
+  @override
   int get length => _value.length;
 
   @override
   UnmodifiableMapView<K, V> get value => UnmodifiableMapView<K, V>(_value);
+
+  @override
+  Iterable<V> get values => _value.values;
 
   Map<K, V> get _value => super.value;
 
@@ -69,7 +84,6 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
     return _value[key];
   }
 
-  @override
   @protected
   ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action) {
     final ObservableMapChange<K, V> change = applyActionAndComputeChange(
@@ -105,6 +119,11 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
   }
 
   @override
+  bool containsValue(final V value) {
+    return _value.containsValue(value);
+  }
+
+  @override
   ObservableMap<K, V> filterItem(
     final bool Function(K key, V value) predicate, {
     final FactoryMap<K, V>? factory,
@@ -114,6 +133,11 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
       source: this,
       factory: factory,
     );
+  }
+
+  @override
+  void forEach(final void Function(K key, V value) action) {
+    _value.forEach(action);
   }
 
   @override
@@ -140,6 +164,11 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
   void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
     _change = change;
     super.value = data;
+  }
+
+  @override
+  set value(final Map<K, V> value) {
+    setData(value);
   }
 
   @override

@@ -9,6 +9,28 @@ void main() {
         final List<int> value = rxList.value;
         expect(() => value.add(4), throwsUnsupportedError);
       });
+
+      test('Should set the new list value', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        rxList.value = <int>[4, 5, 6];
+        expect(rxList.change.updated.length, 3);
+        expect(rxList.value, <int>[4, 5, 6]);
+
+        rxList.value = <int>[];
+        expect(rxList.change.removed.length, 3);
+        expect(rxList.value, <int>[]);
+
+        rxList.value = <int>[1, 2, 3];
+        expect(rxList.change.added.length, 3);
+        expect(rxList.value, <int>[1, 2, 3]);
+
+        rxList.value = <int>[1, 2, 3, 4];
+        expect(rxList.change.added.length, 1);
+        expect(rxList.change.updated.length, 0);
+        expect(rxList.change.removed.length, 0);
+
+        expect(rxList.value, <int>[1, 2, 3, 4]);
+      });
     });
 
     group('[]=', () {
@@ -93,97 +115,6 @@ void main() {
         expect(change!.removed[1], 2);
         expect(rxList[0], 1);
         expect(rxList[1], 3);
-      });
-    });
-
-    group('applyAction', () {
-      test('Should insert multiple items', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 0]);
-        final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(
-            insertAt: <int, Iterable<int>>{
-              0: <int>[4, 5],
-            },
-          ),
-        );
-
-        expect(rxList.value, <int>[4, 5, 1, 2, 3, 0]);
-        expect(change!.added[0], 4);
-        expect(change.added[1], 5);
-      });
-
-      test('Should insert item', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3, 0]);
-        final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(
-            insertAt: <int, Iterable<int>>{
-              0: <int>[4],
-            },
-          ),
-        );
-
-        expect(change!.added[0], 4);
-        expect(rxList.value, <int>[4, 1, 2, 3, 0]);
-      });
-
-      test('Should not do anything if add action is empty', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(addItems: <int>[]),
-        );
-
-        expect(change, null);
-      });
-
-      test('Should not do anything if remove action is empty', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(removeAtPositions: <int>{}),
-        );
-
-        expect(change, null);
-      });
-
-      test('Should not do anything if update action is empty', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        final ObservableListChange<int>? change = rxList.applyAction(
-          ObservableListUpdateAction<int>(updateItems: <int, int>{}),
-        );
-
-        expect(change, null);
-      });
-
-      test('Should apply remove action to the list', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.applyAction(
-          ObservableListUpdateAction<int>(
-            removeAtPositions: <int>{1, 2},
-          ),
-        );
-
-        expect(rxList.value, <int>[1]);
-      });
-
-      test('Should apply update action to the list', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.applyAction(
-          ObservableListUpdateAction<int>(
-            updateItems: <int, int>{
-              0: 4,
-              1: 5,
-              5: 10,
-            },
-          ),
-        );
-
-        expect(rxList.value, <int>[4, 5, 3, 10]);
-      });
-
-      test('Should clear the list on clear action', () {
-        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
-        rxList.applyAction(ObservableListUpdateAction<int>(clear: true));
-
-        expect(rxList.value, <int>[]);
       });
     });
 

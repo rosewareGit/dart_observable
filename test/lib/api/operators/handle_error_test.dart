@@ -128,7 +128,7 @@ void main() {
       }
 
       final Observable<int?> rxFuture = Observable<int?>.fromFuture(
-        future: futureError(),
+        futureProvider: () => futureError(),
         initial: null,
       );
 

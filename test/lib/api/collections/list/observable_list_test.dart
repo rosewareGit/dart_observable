@@ -736,12 +736,10 @@ void main() {
           final RxMap<int, String> rxType1 = RxMap<int, String>(<int, String>{1: '1'});
           final RxMap<int, String> rxType2 = RxMap<int, String>(<int, String>{2: '2'});
           final RxMap<int, String> rxType3 = RxMap<int, String>(<int, String>{3: '3'});
-
-          final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3]);
-
+          final Rx<int> rxSource = Rx<int>(0);
           final ObservableMap<int, String> rxSwitched = rxSource.switchMapAs.map<int, String>(
-            mapper: (final List<int> state) {
-              final int mod = state.length % 3;
+            mapper: (final int value) {
+              final int mod = value % 3;
               if (mod == 0) {
                 return rxType1;
               } else if (mod == 1) {
@@ -762,13 +760,17 @@ void main() {
           rxType1[2] = '5';
           expect(rxSwitched.value, <int, String>{1: '4', 2: '5'});
 
-          rxSource.add(4);
+          rxSource.value = 1;
           expect(rxSwitched.length, 1);
           expect(rxSwitched.value, <int, String>{2: '2'});
 
-          rxSource.remove(4);
+          rxSource.value = 0;
           expect(rxSwitched.length, 2);
           expect(rxSwitched.value, <int, String>{1: '4', 2: '5'});
+
+          rxSource.value = 2;
+          expect(rxSwitched.length, 1);
+          expect(rxSwitched.value, <int, String>{3: '3'});
 
           await rxSource.dispose();
           expect(rxSwitched.disposed, true);
@@ -778,6 +780,28 @@ void main() {
 
     group('transformAs', () {
       group('list', () {
+        test('Should transform the text into characters', () {
+          final Rx<String> rxSource = Rx<String>('Hello World');
+          final ObservableList<String> rxTransformed = rxSource.transformAs.list<String>(
+            transform: (
+              final ObservableList<String> state,
+              final String value,
+              final Emitter<List<String>> emitter,
+            ) {
+              emitter(<String>[for (final String char in value.split('')) char]);
+            },
+          );
+
+          rxTransformed.listen();
+
+          expect(rxTransformed.length, 11);
+          expect(rxTransformed.value, <String>['H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd']);
+
+          rxSource.value = 'Update';
+          expect(rxTransformed.length, 6);
+          expect(rxTransformed.value, <String>['U', 'p', 'd', 'a', 't', 'e']);
+        });
+
         test('Should transform to a new list', () async {
           final RxList<int> rxSource = RxList<int>(<int>[1, 2, 3, 4, 5]);
           final ObservableList<String> rxTransformed = rxSource.transformAs.list<String>(

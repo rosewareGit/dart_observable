@@ -51,16 +51,28 @@ abstract class ObservableStatefulMap<K, V, S>
     );
   }
 
+  Iterable<MapEntry<K, V>>? get entries;
+
+  bool get isEmpty;
+
+  bool get isNotEmpty;
+
+  Iterable<K>? get keys;
+
   int? get length;
 
   @override
   Either<UnmodifiableMapView<K, V>, S> get value;
+
+  Iterable<V>? get values;
 
   V? operator [](final K key);
 
   ObservableStatefulMap<K, V, S> changeFactory(final FactoryMap<K, V> factory);
 
   bool containsKey(final K key);
+
+  bool containsValue(final V value);
 
   ObservableStatefulMap<K, V, S> filterItem(
     final bool Function(K key, V value) predicate, {
@@ -71,6 +83,8 @@ abstract class ObservableStatefulMap<K, V, S>
     final bool Function(Either<MapEntry<K, V>, S>) predicate, {
     final FactoryMap<K, V>? factory,
   });
+
+  void forEach(final void Function(K key, V value) action);
 
   ObservableStatefulMap<K, V2, S> mapItem<V2>(
     final V2 Function(K key, V value) valueMapper, {

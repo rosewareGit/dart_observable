@@ -327,6 +327,7 @@ abstract class RxBase<T>
     onActive();
   }
 
+  // TODO: Make is optional/configurable
   void _initDebugName() {
     final StackTrace stack = StackTrace.current;
     final List<String> lines = stack.toString().split('\n');

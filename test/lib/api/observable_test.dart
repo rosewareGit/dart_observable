@@ -5,6 +5,12 @@ import 'package:test/test.dart';
 
 void main() {
   group('observable', () {
+    group('just', () {
+      test('Should create observable with initial value', () {
+        final Observable<int> rxInt = Observable<int>.just(0);
+        expect(rxInt.value, 0);
+      });
+    });
     group('combineLatest', () {
       test('Should combine latest values', () {
         final Rx<int> rxInt1 = Rx<int>(0);
@@ -12,7 +18,7 @@ void main() {
         final Rx<int> rxInt3 = Rx<int>(0);
 
         final Observable<int> rxInt = Observable<int>.combineLatest(
-          observables: <Observable<dynamic>>[rxInt1, rxInt2, rxInt3],
+          observables: <Observable<int>>[rxInt1, rxInt2, rxInt3],
           combiner: () {
             return rxInt1.value + rxInt2.value + rxInt3.value;
           },
@@ -33,21 +39,6 @@ void main() {
     });
 
     group('fromFuture', () {
-      test('Should get value from future', () async {
-        final Future<int> future = Future<int>.value(10);
-        final Observable<int> rxInt = Observable<int>.fromFuture(
-          initial: 0,
-          future: future,
-        );
-
-        expect(rxInt.value, 0);
-        rxInt.listen();
-        expect(rxInt.value, 0);
-
-        await future;
-        expect(rxInt.value, 10);
-      });
-
       test('Should get value from future provider', () async {
         final Observable<int> rxInt = Observable<int>.fromFuture(
           initial: 0,

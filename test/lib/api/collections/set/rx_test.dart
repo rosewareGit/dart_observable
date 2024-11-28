@@ -9,6 +9,34 @@ void main() {
         expect(rx.value, <int>{1, 2, 3});
         expect(() => rx.value.add(4), throwsUnsupportedError);
       });
+
+      test('Should set new value', () {
+        final RxSet<int> rx = RxSet<int>(initial: <int>{1, 2, 3});
+        rx.value = <int>{2, 4, 6};
+
+        expect(rx.value, <int>{2, 4, 6});
+        final ObservableSetChange<int> change = rx.change;
+        expect(change.added, <int>{4, 6});
+        expect(change.removed, <int>{1, 3});
+
+        // 2,4,6 -> 1,2,3
+        rx.value = <int>{1, 2, 3};
+        expect(rx.value, <int>{1, 2, 3});
+        expect(rx.change.added, <int>{1, 3});
+        expect(rx.change.removed, <int>{4, 6});
+
+        // 1,2,3 -> 1,2,3,4
+        rx.value = <int>{1, 2, 3, 4};
+        expect(rx.value, <int>{1, 2, 3, 4});
+        expect(rx.change.added, <int>{4});
+        expect(rx.change.removed, <int>{});
+
+        // 1,2,3,4 -> {}
+        rx.value = <int>{};
+        expect(rx.value, <int>{});
+        expect(rx.change.added, <int>{});
+        expect(rx.change.removed, <int>{1, 2, 3, 4});
+      });
     });
 
     group('add', () {
@@ -115,18 +143,6 @@ void main() {
 
         expect(change.added, <int>{4, 6});
         expect(change.removed, <int>{1, 3});
-      });
-    });
-
-    group('applyAction', () {
-      test('Should apply clear action', () {
-        final RxSet<int> set = RxSet<int>(initial: <int>[1, 2, 3]);
-        final ObservableSetChange<int>? change = set.applyAction(ObservableSetUpdateAction<int>(clear: true));
-
-        expect(change, isNotNull);
-        expect(change!.added, <int>{});
-        expect(change.removed, <int>{1, 2, 3});
-        expect(set.value, <int>{});
       });
     });
   });

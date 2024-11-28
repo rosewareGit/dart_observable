@@ -31,9 +31,7 @@ abstract interface class RxStatefulSet<E, S> implements ObservableStatefulSet<E,
     );
   }
 
-  Either<ObservableSetChange<E>, S>? applyAction(final Either<ObservableSetUpdateAction<E>, S> action);
-
-  ObservableSetChange<E>? applySetUpdateAction(final ObservableSetUpdateAction<E> action);
+  set value(final Either<Set<E>, S> value);
 
   Either<ObservableSetChange<E>, S>? setState(final S newState);
 }

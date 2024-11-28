@@ -2,6 +2,8 @@ import '../../../../../dart_observable.dart';
 import '../../../../core/collections/list/stateful/rx_stateful.dart';
 import '../rx_actions.dart';
 
+typedef StatefulListAction<E, S> = Either<ObservableListUpdateAction<E>, S>;
+
 abstract interface class RxStatefulList<E, S> implements ObservableStatefulList<E, S>, RxListActions<E> {
   factory RxStatefulList({
     final S? custom,
@@ -18,9 +20,7 @@ abstract interface class RxStatefulList<E, S> implements ObservableStatefulList<
     return RxStatefulListImpl<E, S>.custom(state);
   }
 
-  Either<ObservableListChange<E>, S>? applyAction(
-    final Either<ObservableListUpdateAction<E>, S> action,
-  );
+  set value(final Either<List<E>, S> value);
 
-  Either<ObservableListChange<E>, S>? setState(final S newState);
+  StatefulListChange<E, S>? setState(final S newState);
 }

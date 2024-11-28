@@ -32,13 +32,11 @@ abstract interface class Rx<T> implements Observable<T> {
 
   factory Rx.fromFuture({
     required final T initial,
-    final Future<T>? future,
-    final Future<T> Function()? futureProvider,
+    required final Future<T> Function() futureProvider,
     final bool distinct = true,
   }) {
     return FutureObservable<T>(
       initial: initial,
-      future: future,
       futureProvider: futureProvider,
       distinct: distinct,
     );

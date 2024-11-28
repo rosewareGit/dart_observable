@@ -7,7 +7,6 @@ class FutureObservableN<T> extends RxnImpl<T> {
   FutureObservableN({
     this.future,
     this.futureProvider,
-    final bool lazy = true,
     final bool distinct = true,
   }) : super(
           distinct: distinct,

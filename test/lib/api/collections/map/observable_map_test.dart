@@ -1464,7 +1464,7 @@ void main() {
               int indexOf(final String original) {
                 return current.value.fold(
                   onLeft: (final List<String> data) => data.indexOf(original.toUpperCase()),
-                  onRight: (_) => -1,
+                  onRight: (final _) => -1,
                 );
               }
 

@@ -8,6 +8,36 @@ void main() {
         final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>();
         expect(() => rxMap.value.leftOrThrow[0] = 'value', throwsUnsupportedError);
       });
+
+      test('Should set a new custom state', () {
+        final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>();
+        rxMap.value = Either<Map<int, String>, String>.right('custom');
+        expect(rxMap.value.rightOrNull, 'custom');
+        expect(rxMap.change.rightOrNull, 'custom');
+      });
+
+      test('Should set a new map', () {
+        final RxStatefulMap<int, String, String> rxMap = RxStatefulMap<int, String, String>();
+        rxMap.value = Either<Map<int, String>, String>.left(<int, String>{1: 'a', 2: 'b', 3: 'c'});
+        expect(rxMap.value.leftOrThrow, <int, String>{1: 'a', 2: 'b', 3: 'c'});
+        expect(rxMap.change.leftOrThrow.added, <int, String>{1: 'a', 2: 'b', 3: 'c'});
+        expect(rxMap.change.leftOrThrow.removed.length, 0);
+        expect(rxMap.change.leftOrThrow.updated.length, 0);
+
+        rxMap.value = Either<Map<int, String>, String>.left(<int, String>{2: 'a', 3: 'c', 4: 'd'});
+        expect(rxMap.value.leftOrThrow, <int, String>{2: 'a', 3: 'c', 4: 'd'});
+        expect(rxMap.change.leftOrThrow.added, <int, String>{4: 'd'});
+        expect(rxMap.change.leftOrThrow.removed, <int, String>{1: 'a'});
+        expect(rxMap.change.leftOrThrow.updated, <int, ObservableItemChange<String>>{
+          2: ObservableItemChange<String>(oldValue: 'b', newValue: 'a'),
+        });
+
+        rxMap.value = Either<Map<int, String>, String>.left(<int, String>{});
+        expect(rxMap.value.leftOrThrow, <int, String>{});
+        expect(rxMap.change.leftOrThrow.removed, <int, String>{2: 'a', 3: 'c', 4: 'd'});
+        expect(rxMap.change.leftOrThrow.added.length, 0);
+        expect(rxMap.change.leftOrThrow.updated.length, 0);
+      });
     });
 
     test('Should create RxStatefulMap with custom', () {

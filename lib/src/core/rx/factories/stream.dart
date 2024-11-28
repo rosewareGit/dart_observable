@@ -9,7 +9,6 @@ class StreamObservable<T> extends RxImpl<T> {
   StreamObservable({
     required this.stream,
     required final T initial,
-    final bool lazy = true,
     final bool distinct = true,
   }) : super(
           initial,

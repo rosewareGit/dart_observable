@@ -23,5 +23,5 @@ abstract interface class RxMap<K, V> implements ObservableMap<K, V>, RxMapAction
     );
   }
 
-  ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action);
+  set value(final Map<K, V> value);
 }

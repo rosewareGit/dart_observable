@@ -88,8 +88,14 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
 
   @override
   set value(final Either<List<E>, S> value) {
-    _setState(value);
-    super.value = value;
+    value.fold(
+      onLeft: (final List<E> data) {
+        setData(data);
+      },
+      onRight: (final S state) {
+        setState(state);
+      },
+    );
   }
 
   @override
@@ -106,9 +112,8 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
     );
   }
 
-  @override
   Either<ObservableListChangeElements<E>, S>? applyAction(
-    final Either<ObservableListUpdateAction<E>, S> action,
+    final StatefulListAction<E,S> action,
   ) {
     final Either<RxListState<E>, S> currentState = _rxState.value;
 
@@ -156,7 +161,7 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
   @override
   ObservableListChangeElements<E>? applyListUpdateAction(final ObservableListUpdateAction<E> action) {
     return applyAction(
-      Either<ObservableListUpdateAction<E>, S>.left(action),
+      StatefulListAction<E,S>.left(action),
     )?.leftOrNull;
   }
 
@@ -250,8 +255,8 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
   }
 
   @override
-  Either<ObservableListChange<E>, S>? setState(final S newState) {
-    return applyAction(Either<ObservableListUpdateAction<E>, S>.right(newState));
+  StatefulListChange<E,S>? setState(final S newState) {
+    return applyAction(StatefulListAction<E,S>.right(newState));
   }
 
   @override
@@ -259,13 +264,6 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
     return ObservableStatefulListSortedOperator<E, S>(
       source: this,
       comparator: comparator,
-    );
-  }
-
-  void _setState(final Either<List<E>, S> value) {
-    _rxState.value = value.fold(
-      onLeft: (final List<E> data) => Either<RxListState<E>, S>.left(RxListState<E>.fromData(data)),
-      onRight: (final S state) => Either<RxListState<E>, S>.right(state),
     );
   }
 }

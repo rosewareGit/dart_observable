@@ -48,6 +48,14 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
   }
 
   @override
+  set value(final Either<Set<E>, S> value) {
+    value.fold(
+      onLeft: setData,
+      onRight: setState,
+    );
+  }
+
+  @override
   Either<ObservableSetChange<E>, S> get change => _change;
 
   @override
@@ -85,7 +93,6 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
 
   Either<Set<E>, S> get _value => super.value;
 
-  @override
   Either<ObservableSetChange<E>, S>? applyAction(
     final Either<ObservableSetUpdateAction<E>, S> action,
   ) {
