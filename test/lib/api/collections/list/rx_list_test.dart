@@ -76,6 +76,17 @@ void main() {
         expect(change!.added[1], 4);
         expect(rxList[1], 4);
       });
+
+      test('Should handle adding to the beginning of the list', () {
+        final RxList<int> rxList = RxList<int>(<int>[1, 2, 3]);
+        final ObservableListChange<int>? change = rxList.insert(0, 4);
+        expect(rxList.value, <int>[4, 1, 2, 3]);
+        expect(change!.added[0], 4);
+
+        final ObservableListChange<int>? change2 = rxList.insert(0, 5);
+        expect(rxList.value, <int>[5, 4, 1, 2, 3]);
+        expect(change2!.added[0], 5);
+      });
     });
 
     group('insertAll', () {

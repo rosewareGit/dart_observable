@@ -151,7 +151,7 @@ class ObservableListSyncHelper<E> {
       int index = -1;
       ObservableListElement<E> currentElement = element;
       while (true) {
-        final ObservableListElement<E>? prev = currentElement.previousElement;
+        final ObservableListElement<E>? prev = currentElement.prevElement;
         if (prev == null) {
           break;
         }

@@ -87,8 +87,10 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
       final List<E> items = entry.value.toList();
       final List<ObservableListElement<E>> addElements = <ObservableListElement<E>>[];
       ObservableListElement<E>? prevElement = data.isEmpty || position == 0 ? null : data.elementAt(position - 1);
+      final ObservableListElement<E>? itemAfter = data.isEmpty ? null : data.elementAtOrNull(position);
+      ObservableListElement<E>? element;
       for (int i = 0; i < items.length; i++) {
-        final ObservableListElement<E> element = ObservableListElement<E>(
+        element = ObservableListElement<E>(
           value: items[i],
           previousElement: prevElement,
           nextElement: null,
@@ -98,6 +100,10 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
         addElements.add(element);
         change.addedElements[position + i] = element;
       }
+
+      itemAfter?.prevElement = element;
+      element?.nextElement = itemAfter;
+
       data.insertAll(position, addElements);
     }
   }

@@ -637,19 +637,26 @@ void main() {
         expect(rxMapped.value, <String>['1', '2', '3', '4', '5']);
 
         rxSource.add(6);
-
         expect(rxMapped.length, 6);
         expect(rxMapped.value, <String>['1', '2', '3', '4', '5', '6']);
 
         rxSource.removeAt(0);
-
         expect(rxMapped.length, 5);
         expect(rxMapped.value, <String>['2', '3', '4', '5', '6']);
 
         rxSource[0] = 7;
-
         expect(rxMapped.length, 5);
         expect(rxMapped.value, <String>['7', '3', '4', '5', '6']);
+
+        rxSource.insert(0, 8);
+        expect(rxSource.value, <int>[8, 7, 3, 4, 5, 6]);
+        expect(rxMapped.length, 6);
+        expect(rxMapped.value, <String>['8', '7', '3', '4', '5', '6']);
+
+        rxSource.insertAll(0, <int>[9, 10]);
+        expect(rxSource.value, <int>[9, 10, 8, 7, 3, 4, 5, 6]);
+        expect(rxMapped.length, 8);
+        expect(rxMapped.value, <String>['9', '10', '8', '7', '3', '4', '5', '6']);
       });
 
       test('Should dispose when source disposed', () async {

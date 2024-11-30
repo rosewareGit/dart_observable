@@ -29,9 +29,15 @@ class ObservableListMapItemOperator<E, E2> extends ListChangeTransform<E2, List<
         return MapEntry<int, E2>(index, mapper(item));
       }),
     );
-    final List<E2> itemsToAdd = change.added.values.map(mapper).toList();
+    final Map<int, List<E2>> insertAt = <int, List<E2>>{};
 
-    if (removedIndexes.isEmpty && updateItems.isEmpty && itemsToAdd.isEmpty) {
+    for(final MapEntry<int, E> entry in change.added.entries) {
+      final int index = entry.key;
+      final E item = entry.value;
+      insertAt[index] = <E2>[mapper(item)];
+    }
+
+    if (removedIndexes.isEmpty && updateItems.isEmpty && insertAt.isEmpty) {
       return;
     }
 
@@ -39,7 +45,7 @@ class ObservableListMapItemOperator<E, E2> extends ListChangeTransform<E2, List<
       ObservableListUpdateAction<E2>(
         removeAtPositions: removedIndexes,
         updateItems: updateItems,
-        addItems: itemsToAdd,
+        insertAt: insertAt,
       ),
     );
   }
