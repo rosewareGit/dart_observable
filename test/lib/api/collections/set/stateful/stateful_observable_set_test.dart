@@ -90,7 +90,7 @@ void main() {
         expect(rxMerged.value.leftOrThrow, <int>{1});
       });
 
-      test('Should handle custom state with state resolver', () {
+      test('Should handle custom state with state resolver with custom state', () {
         final RxStatefulSet<int, String> set1 = RxStatefulSet<int, String>(
           initial: <int>{1, 2},
         );
@@ -113,6 +113,29 @@ void main() {
         expect(rxMerged.value.rightOrNull, 'customState');
       });
 
+      test('Should handle custom state with state resolver with data state', () {
+        final RxStatefulSet<int, String> set1 = RxStatefulSet<int, String>(
+          initial: <int>{1, 2},
+        );
+        final RxStatefulSet<int, String> set2 = RxStatefulSet<int, String>(
+          initial: <int>{1, 3},
+        );
+
+        final ObservableStatefulSet<int, String> rxMerged = ObservableStatefulSet<int, String>.merged(
+          collections: <ObservableStatefulSet<int, String>>[set1, set2],
+          stateResolver: (final String state) {
+            expect(state, 'custom');
+            return Either<Set<int>, String>.left(<int>{-1});
+          },
+        );
+
+        rxMerged.listen();
+
+        set1.setState('custom');
+
+        expect(rxMerged.value.leftOrThrow, <int>{-1});
+      });
+
       test('Should remove items when a source transitions to custom without a state resolver', () {
         final RxStatefulSet<int, String> set1 = RxStatefulSet<int, String>(
           initial: <int>{1, 2},
@@ -131,6 +154,34 @@ void main() {
 
         expect(rxMerged.value.leftOrNull!, <int>{1, 3});
         expect(rxMerged.value.rightOrNull, null);
+      });
+
+      test('Should apply buffered changes', () async {
+        final RxStatefulSet<int, String> set1 = RxStatefulSet<int, String>(initial: <int>{1, 2});
+        final RxStatefulSet<int, String> set2 = RxStatefulSet<int, String>(initial: <int>{1, 3});
+
+        final ObservableStatefulSet<int, String> rxMerged = ObservableStatefulSet<int, String>.merged(
+          collections: <ObservableStatefulSet<int, String>>[set1, set2],
+        );
+
+        final Disposable listener = rxMerged.listen();
+
+        expect(rxMerged.value.leftOrThrow, <int>{1, 2, 3});
+
+        await listener.dispose();
+
+        set1.add(4);
+        set2.add(5);
+
+        expect(rxMerged.value.leftOrThrow, <int>{1, 2, 3});
+
+        rxMerged.listen();
+
+        expect(rxMerged.value.leftOrThrow, <int>{1, 2, 3, 4, 5});
+
+        await set1.dispose();
+        await set2.dispose();
+        expect(rxMerged.disposed, true);
       });
     });
 
@@ -261,6 +312,21 @@ void main() {
 
         set.setState('custom');
         expect(set.length, null);
+      });
+    });
+
+    group('contains', () {
+      test('Should return false on custom state', () {
+        final RxStatefulSet<int, String> set = RxStatefulSet<int, String>(custom: 'custom');
+        expect(set.contains(1), false);
+      });
+
+      test('Should return true if the item is in the set', () {
+        final RxStatefulSet<int, String> set = RxStatefulSet<int, String>(initial: <int>{1, 2, 3});
+        expect(set.contains(1), true);
+        expect(set.contains(2), true);
+        expect(set.contains(3), true);
+        expect(set.contains(4), false);
       });
     });
 
@@ -506,6 +572,15 @@ void main() {
     });
 
     group('rxItem', () {
+      test('Should return the initial custom state', () {
+        final RxStatefulSet<int, String> rxSet = RxStatefulSet<int, String>(custom: 'custom');
+
+        final Observable<Either<int?, String>> rxItem = rxSet.rxItem((final int item) => item == 2);
+
+        rxItem.listen();
+        expect(rxItem.value.rightOrThrow, 'custom');
+      });
+
       test('should return the item by the predicate', () async {
         final TodoItem todoItem1 = TodoItem(id: '1', title: 'title 1', description: 'description 1');
         final TodoItem todoItem2 = TodoItem(id: '2', title: 'title 2', description: 'description 2');
