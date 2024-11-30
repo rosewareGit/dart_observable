@@ -130,9 +130,4 @@ class RxListImpl<E> extends RxCollectionBase<List<E>, ObservableListChange<E>>
       source: this,
     );
   }
-
-  void _updateData(final List<ObservableListElement<E>> data) {
-    _state.setData(data);
-    notify();
-  }
 }
