@@ -35,6 +35,8 @@ mixin BaseSwitchMapOperator<
     });
   }
 
+  void onIntermediateUpdated(final Result intermediate, final T2 value);
+
   Future<void> _cancelListener() async {
     await _sourceListener?.dispose();
     await _intermediateListener?.dispose();
@@ -56,7 +58,7 @@ mixin BaseSwitchMapOperator<
     _intermediateListener?.dispose();
     _intermediateListener = newIntermediate.listen(
       onChange: (final T2 value) {
-        this.value = value;
+        onIntermediateUpdated(newIntermediate, value);
       },
     );
   }

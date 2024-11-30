@@ -14,4 +14,17 @@ class StatefulMapSwitchMap<K, V, S, T> extends RxStatefulMapImpl<K, V, S>
     required this.mapper,
     super.factory,
   }) : super(<K, V>{});
+
+  @override
+  void onIntermediateUpdated(final ObservableStatefulMap<K, V, S> intermediate, final Either<Map<K, V>, S> value) {
+    final Either<ObservableMapChange<K, V>, S> change = intermediate.change;
+    change.fold(
+      onLeft: (final ObservableMapChange<K, V> change) {
+        applyMapUpdateAction(ObservableMapUpdateAction<K, V>.fromChange(change));
+      },
+      onRight: (final S state) {
+        applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(state));
+      },
+    );
+  }
 }

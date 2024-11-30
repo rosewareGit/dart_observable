@@ -582,23 +582,33 @@ void main() {
         expect(changes[3].updated[0]!.oldValue, 4);
         expect(changes[3].updated[0]!.newValue, 20);
 
-        rxSource[1] = 3;
-        expect(rxSource.value, <int>[3, 3, 5, 6, 7, 8, 9, 10, 11, 12]);
-        expect(filteredList.length, 4);
-        expect(filteredList.value, <int>[6, 8, 10, 12]);
-        expect(changes[4].removed[0], 20);
-
-        rxSource.removeAt(0);
-        expect(rxSource.value, <int>[3, 5, 6, 7, 8, 9, 10, 11, 12]);
-        expect(filteredList.length, 4);
-        expect(filteredList.value, <int>[6, 8, 10, 12]);
+        rxSource.insertAll(2, <int>[20, 20, 20, 20, 20]);
+        expect(rxSource.value, <int>[3, 20, 20, 20, 20, 20, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(filteredList.value, <int>[20, 20, 20, 20, 20, 20, 6, 8, 10, 12]);
         expect(changes.length, 5);
 
-        rxSource.removeAt(2);
-        expect(rxSource.value, <int>[3, 5, 7, 8, 9, 10, 11, 12]);
-        expect(filteredList.length, 3);
-        expect(filteredList.value, <int>[8, 10, 12]);
-        expect(changes[5].removed[0], 6);
+        rxSource[3] = 3;
+        expect(rxSource.value, <int>[3, 20, 20, 3, 20, 20, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(filteredList.value, <int>[20, 20, 20, 20, 20, 6, 8, 10, 12]);
+        expect(changes.length, 6);
+        expect(changes[5].removed[2], 20);
+
+        rxSource[3] = 10;
+        expect(rxSource.value, <int>[3, 20, 20, 10, 20, 20, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(filteredList.value, <int>[20, 20, 10, 20, 20, 20, 6, 8, 10, 12]);
+        expect(changes.length, 7);
+        expect(changes[6].added[2], 10);
+
+        rxSource.removeAt(0);
+        expect(rxSource.value, <int>[20, 20, 10, 20, 20, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(filteredList.value, <int>[20, 20, 10, 20, 20, 20, 6, 8, 10, 12]);
+        expect(changes.length, 7);
+
+        rxSource.removeAt(0);
+        expect(rxSource.value, <int>[20, 10, 20, 20, 20, 5, 6, 7, 8, 9, 10, 11, 12]);
+        expect(filteredList.value, <int>[20, 10, 20, 20, 20, 6, 8, 10, 12]);
+        expect(changes.length, 8);
+        expect(changes[7].removed[0], 20);
       });
     });
 

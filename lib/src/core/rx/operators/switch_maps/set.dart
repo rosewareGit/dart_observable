@@ -13,4 +13,10 @@ class SetSwitchMap<E, T> extends RxSetImpl<E> with BaseSwitchMapOperator<Observa
     required this.mapper,
     super.factory,
   });
+
+  @override
+  void onIntermediateUpdated(final ObservableSet<E> intermediate, final Set<E> value) {
+    final ObservableSetChange<E> change = intermediate.change;
+    applyAction(ObservableSetUpdateAction<E>.fromChange(change));
+  }
 }

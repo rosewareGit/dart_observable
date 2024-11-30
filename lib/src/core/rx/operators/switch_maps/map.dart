@@ -13,4 +13,10 @@ class MapSwitchMap<K, V, T> extends RxMapImpl<K, V> with BaseSwitchMapOperator<O
     required this.mapper,
     super.factory,
   });
+
+  @override
+  void onIntermediateUpdated(final ObservableMap<K, V> intermediate, final Map<K, V> value) {
+    final ObservableMapChange<K, V> change = intermediate.change;
+    applyAction(ObservableMapUpdateAction<K, V>.fromChange(change));
+  }
 }

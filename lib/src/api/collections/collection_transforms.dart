@@ -25,7 +25,7 @@ typedef StatefulListChangeUpdater<E, S, C, T> = void Function(
   ObservableStatefulList<E, S> current,
   T state,
   C change,
-  Emitter<StatefulListAction<E,S>> updater,
+  Emitter<StatefulListAction<E, S>> updater,
 );
 
 typedef StatefulMapChangeUpdater<K, V, S, C, T> = void Function(

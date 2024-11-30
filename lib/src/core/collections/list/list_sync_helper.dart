@@ -20,7 +20,7 @@ class ObservableListSyncHelper<E> {
     required final ObservableListChange<E> sourceChange,
   }) {
     final ObservableListChangeElements<E> elementChange = sourceChange as ObservableListChangeElements<E>;
-    final Map<int, ObservableListElement<E>> sourceAdded = elementChange.addedElements;
+    final List<ObservableListElement<E>> sourceAdded = elementChange.addedElements.values.toList();
     final Map<int, ObservableListElementChange<E>> sourceUpdated = elementChange.updatedElements;
 
     final _SyncChange<E> syncChange = _SyncChange<E>();
@@ -49,12 +49,18 @@ class ObservableListSyncHelper<E> {
     if (itemChanges.isNotEmpty) {
       for (int i = 0; i < itemChanges.length; i++) {
         final ObservableListElementChange<E> change = itemChanges[i];
-        _handleUpdate(
-          change: change,
-          comparator: comparator,
-          data: data,
-          syncChange: syncChange,
-        );
+        final ObservableListElement<E> element = change.element;
+        final int index = data.indexOf(element);
+        if (index == -1) {
+          sourceAdded.add(element);
+        } else {
+          _handleUpdate(
+            change: change,
+            comparator: comparator,
+            data: data,
+            syncChange: syncChange,
+          );
+        }
       }
     }
 
@@ -111,21 +117,19 @@ class ObservableListSyncHelper<E> {
   }
 
   void _handleAddItems({
-    required final Map<int, ObservableListElement<E>> sourceAdded,
+    required final List<ObservableListElement<E>> sourceAdded,
     required final List<ObservableListElement<E>> data,
     required final _SyncChange<E> syncChange,
     final bool Function(E item)? predicate,
     final Comparator<E>? comparator,
   }) {
-    final Map<int, ObservableListElement<E>> addItems;
+    final Iterable<ObservableListElement<E>> addItems;
     if (predicate == null) {
       addItems = sourceAdded;
     } else {
-      addItems = Map<int, ObservableListElement<E>>.fromEntries(
-        sourceAdded.entries.where((final MapEntry<int, ObservableListElement<E>> entry) {
-          return predicate(entry.value.value);
-        }),
-      );
+      addItems = sourceAdded.where((final ObservableListElement<E> element) {
+        return predicate(element.value);
+      });
     }
 
     if (addItems.isEmpty) {
@@ -134,7 +138,7 @@ class ObservableListSyncHelper<E> {
 
     if (comparator != null) {
       _handleAddItemsWithComparator(
-        addItems: addItems.values,
+        addItems: addItems,
         comparator: comparator,
         data: data,
         syncChange: syncChange,
@@ -142,9 +146,7 @@ class ObservableListSyncHelper<E> {
       return;
     }
 
-    for (final MapEntry<int, ObservableListElement<E>> entry in addItems.entries) {
-      final ObservableListElement<E> element = entry.value;
-
+    for (final ObservableListElement<E> element in addItems) {
       //find the first element that exists in this list and insert after it
       int index = -1;
       ObservableListElement<E> currentElement = element;

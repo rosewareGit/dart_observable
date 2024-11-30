@@ -18,7 +18,7 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
     }
 
     final Iterable<E> add = action.addItems;
-    final Set<int> remove = action.removeItems;
+    final Set<int> remove = action.removeAt;
     final Map<int, E> update = action.updateItems;
     final Map<int, Iterable<E>> insert = action.insertAt;
     final bool clear = action.clear;

@@ -13,4 +13,10 @@ class ListSwitchMap<E2, T> extends RxListImpl<E2> with BaseSwitchMapOperator<Obs
     required this.source,
     required this.mapper,
   });
+
+  @override
+  void onIntermediateUpdated(final ObservableList<E2> intermediate, final List<E2> value) {
+    final ObservableListChange<E2> change = intermediate.change;
+    applyAction(ObservableListUpdateAction<E2>.fromChange(change));
+  }
 }

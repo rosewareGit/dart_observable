@@ -124,12 +124,6 @@ class RxListImpl<E> extends RxCollectionBase<List<E>, ObservableListChange<E>>
   }
 
   @override
-  void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change) {
-    _change = change;
-    _updateData(data);
-  }
-
-  @override
   ObservableList<E> sorted(final Comparator<E> comparator) {
     return ObservableListSortedOperator<E>(
       comparator: comparator,

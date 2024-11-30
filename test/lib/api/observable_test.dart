@@ -454,32 +454,52 @@ void main() {
           rxEven.addAll(<String, int>{'a': 1, 'b': 2, 'c': 3});
 
           expect(result.length, 0, reason: 'Should not be updated as we are not listening');
-          result.listen();
+
+          Map<String, int>? lastValue;
+          result.listen(
+            onChange: (final Map<String, int> value) {
+              lastValue = value;
+            },
+          );
+
           expect(result.length, 3, reason: 'Should be updated as we are listening');
-          expect(result['a'], 1);
-          expect(result['b'], 2);
-          expect(result['c'], 3);
+          expect(result.value, <String, int>{'a': 1, 'b': 2, 'c': 3});
+          expect(lastValue, <String, int>{'a': 1, 'b': 2, 'c': 3});
 
           rxEven.addAll(<String, int>{'d': 4, 'e': 5, 'f': 6});
           expect(result.length, 6);
-          expect(result['d'], 4);
-          expect(result['e'], 5);
-          expect(result['f'], 6);
+          expect(result.value, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
+          expect(lastValue, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
 
           rxSource.value = 1;
           expect(result.length, 0);
+          expect(result.value, <String, int>{});
+          expect(lastValue, <String, int>{});
 
           rxOdd.addAll(<String, int>{'g': 7, 'h': 8, 'i': 9});
           expect(result.length, 3);
-          expect(result['g'], 7);
+          expect(result.value, <String, int>{'g': 7, 'h': 8, 'i': 9});
+          expect(lastValue, <String, int>{'g': 7, 'h': 8, 'i': 9});
 
           rxSource.value = 2;
           expect(result.length, 6);
-          expect(result['a'], 1);
+          expect(result.value, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
+          expect(lastValue, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
 
           rxEven.remove('a');
           expect(result.length, 5);
-          expect(result['a'], null);
+          expect(result.value, <String, int>{'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
+          expect(lastValue, <String, int>{'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6});
+
+          rxEven.value = <String, int>{'a': 1, 'b': 2, 'c': 3};
+          expect(result.length, 3);
+          expect(result.value, <String, int>{'a': 1, 'b': 2, 'c': 3});
+          expect(lastValue, <String, int>{'a': 1, 'b': 2, 'c': 3});
+
+          rxEven.add('d', 4);
+          expect(result.length, 4);
+          expect(result.value, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4});
+          expect(lastValue, <String, int>{'a': 1, 'b': 2, 'c': 3, 'd': 4});
 
           await rxSource.dispose();
           expect(result.disposed, true);

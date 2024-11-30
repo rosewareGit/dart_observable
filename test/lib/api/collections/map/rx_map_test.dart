@@ -72,18 +72,11 @@ void main() {
         expect(rxMap['b'], 3);
         expect(rxMap['c'], 1);
 
-        final ObservableMapChange<String, int>? change2 = rxMap.setData(<String, int>{
-          'a': 5,
-          'b': 3,
-          'c': 1,
-        });
+        final ObservableMapChange<String, int>? change2 = rxMap.setData(<String, int>{'a': 5, 'b': 3, 'c': 1});
 
         expect(change2, null);
 
-        final ObservableMapChange<String, int>? change3 = rxMap.setData(<String, int>{
-          'a': 1,
-          'b': 3,
-        });
+        final ObservableMapChange<String, int>? change3 = rxMap.setData(<String, int>{'a': 1, 'b': 3});
 
         expect(change3!.added.length, 0);
         expect(change3.removed.length, 1);

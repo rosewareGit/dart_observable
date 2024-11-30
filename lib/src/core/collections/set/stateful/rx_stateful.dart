@@ -48,14 +48,6 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
   }
 
   @override
-  set value(final Either<Set<E>, S> value) {
-    value.fold(
-      onLeft: setData,
-      onRight: setState,
-    );
-  }
-
-  @override
   Either<ObservableSetChange<E>, S> get change => _change;
 
   @override
@@ -88,6 +80,14 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
     return _value.fold(
       onLeft: (final Set<E> data) => Either<UnmodifiableSetView<E>, S>.left(UnmodifiableSetView<E>(data)),
       onRight: (final S state) => Either<UnmodifiableSetView<E>, S>.right(state),
+    );
+  }
+
+  @override
+  set value(final Either<Set<E>, S> value) {
+    value.fold(
+      onLeft: setData,
+      onRight: setState,
     );
   }
 

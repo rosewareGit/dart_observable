@@ -113,7 +113,7 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
   }
 
   Either<ObservableListChangeElements<E>, S>? applyAction(
-    final StatefulListAction<E,S> action,
+    final StatefulListAction<E, S> action,
   ) {
     final Either<RxListState<E>, S> currentState = _rxState.value;
 
@@ -161,7 +161,7 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
   @override
   ObservableListChangeElements<E>? applyListUpdateAction(final ObservableListUpdateAction<E> action) {
     return applyAction(
-      StatefulListAction<E,S>.left(action),
+      StatefulListAction<E, S>.left(action),
     )?.leftOrNull;
   }
 
@@ -247,16 +247,8 @@ class RxStatefulListImpl<E, S> extends RxCollectionStatefulBase<List<E>, Observa
   }
 
   @override
-  void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change) {
-    _change = Either<ObservableListChangeElements<E>, S>.left(change);
-    final RxListState<E> newState = RxListState<E>(data);
-    _rxState.value = Either<RxListState<E>, S>.left(newState);
-    super.value = Either<List<E>, S>.left(newState.listView);
-  }
-
-  @override
-  StatefulListChange<E,S>? setState(final S newState) {
-    return applyAction(StatefulListAction<E,S>.right(newState));
+  StatefulListChange<E, S>? setState(final S newState) {
+    return applyAction(StatefulListAction<E, S>.right(newState));
   }
 
   @override

@@ -153,10 +153,6 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
       return null;
     }
 
-    setDataWithChange(newItems, change);
-
-    return change;
+    return applyListUpdateAction(ObservableListUpdateAction<E>.fromChange(change));
   }
-
-  void setDataWithChange(final List<ObservableListElement<E>> data, final ObservableListChangeElements<E> change);
 }

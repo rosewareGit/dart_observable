@@ -70,10 +70,6 @@ mixin RxMapActionsImpl<K, V> implements RxMapActions<K, V> {
       return null;
     }
 
-    setDataWithChange(data, change);
-
-    return change;
+    return applyMapUpdateAction(ObservableMapUpdateAction<K, V>.fromChange(change));
   }
-
-  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change);
 }

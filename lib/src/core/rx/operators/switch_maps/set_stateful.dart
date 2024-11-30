@@ -14,4 +14,17 @@ class StatefulSetSwitchMap<E, S, T> extends RxStatefulSetImpl<E, S>
     required this.mapper,
     super.factory,
   }) : super(<E>{});
+
+  @override
+  void onIntermediateUpdated(final ObservableStatefulSet<E, S> intermediate, final Either<Set<E>, S> value) {
+    final Either<ObservableSetChange<E>, S> change = intermediate.change;
+    change.fold(
+      onLeft: (final ObservableSetChange<E> change) {
+        applySetUpdateAction(ObservableSetUpdateAction<E>.fromChange(change));
+      },
+      onRight: (final S state) {
+        applyAction(Either<ObservableSetUpdateAction<E>, S>.right(state));
+      },
+    );
+  }
 }

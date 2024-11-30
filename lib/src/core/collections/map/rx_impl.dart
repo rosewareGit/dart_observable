@@ -75,6 +75,11 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
   UnmodifiableMapView<K, V> get value => UnmodifiableMapView<K, V>(_value);
 
   @override
+  set value(final Map<K, V> value) {
+    setData(value);
+  }
+
+  @override
   Iterable<V> get values => _value.values;
 
   Map<K, V> get _value => super.value;
@@ -158,17 +163,6 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
       source: this,
       key: key,
     );
-  }
-
-  @override
-  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
-    _change = change;
-    super.value = data;
-  }
-
-  @override
-  set value(final Map<K, V> value) {
-    setData(value);
   }
 
   @override

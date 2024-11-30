@@ -277,12 +277,6 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
   }
 
   @override
-  void setDataWithChange(final Map<K, V> data, final ObservableMapChange<K, V> change) {
-    _change = Either<ObservableMapChange<K, V>, S>.left(change);
-    super.value = Either<Map<K, V>, S>.left(data);
-  }
-
-  @override
   Either<ObservableMapChange<K, V>, S>? setState(final S newState) {
     return applyAction(Either<ObservableMapUpdateAction<K, V>, S>.right(newState));
   }

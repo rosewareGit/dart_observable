@@ -84,28 +84,44 @@ void main() {
       });
 
       test('Should handle updates in source maps', () {
-        final RxMap<String, int> rxMap1 = RxMap<String, int>(<String, int>{
-          'a': 1,
-        });
-        final RxMap<String, int> rxMap2 = RxMap<String, int>(<String, int>{
-          'b': 2,
-        });
+        final RxMap<String, int> rxMap1 = RxMap<String, int>(<String, int>{'a': 1});
+        final RxMap<String, int> rxMap2 = RxMap<String, int>(<String, int>{'b': 2});
 
         final ObservableMap<String, int> merged = ObservableMap<String, int>.merged(
           collections: <ObservableMap<String, int>>[rxMap1, rxMap2],
         );
 
-        merged.listen();
+        Map<String, int>? lastState;
+        merged.listen(
+          onChange: (final Map<String, int> state) {
+            lastState = state;
+          },
+        );
 
         expect(merged.length, 2);
-        expect(merged['a'], 1);
-        expect(merged['b'], 2);
+        expect(merged.value, <String, int>{'a': 1, 'b': 2});
+        expect(lastState, <String, int>{'a': 1, 'b': 2});
 
         rxMap1['a'] = 3;
-        expect(merged['a'], 3);
+        expect(merged.value, <String, int>{'a': 3, 'b': 2});
+        expect(lastState, <String, int>{'a': 3, 'b': 2});
 
         rxMap2['b'] = 4;
-        expect(merged['b'], 4);
+        expect(merged.value, <String, int>{'a': 3, 'b': 4});
+        expect(lastState, <String, int>{'a': 3, 'b': 4});
+
+        rxMap1['c'] = 5;
+        expect(merged.value, <String, int>{'a': 3, 'b': 4, 'c': 5});
+        expect(lastState, <String, int>{'a': 3, 'b': 4, 'c': 5});
+
+        rxMap1.value = <String, int>{'a': 1, 'c': 2};
+        expect(merged.value, <String, int>{'a': 1, 'b': 4, 'c': 2});
+        expect(lastState, <String, int>{'a': 1, 'b': 4, 'c': 2});
+
+        rxMap1.value = <String, int>{'a': 1, 'c': 2, 'd': 5};
+        expect(rxMap2.value, <String, int>{'b': 4});
+        expect(merged.value, <String, int>{'a': 1, 'b': 4, 'c': 2, 'd': 5});
+        expect(lastState, <String, int>{'a': 1, 'b': 4, 'c': 2, 'd': 5});
       });
 
       test('Should handle removals in source maps', () {
