@@ -11,12 +11,6 @@ import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'rx_actions.dart';
 
-Map<K, V> Function(Map<K, V>? items) defaultMapFactory<K, V>() {
-  return (final Map<K, V>? items) {
-    return Map<K, V>.of(items ?? <K, V>{});
-  };
-}
-
 class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K, V>>
     with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V>
     implements RxMap<K, V> {
@@ -26,7 +20,7 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
     final Map<K, V>? initial,
     final Map<K, V> Function(Map<K, V>? items)? factory,
   }) : super(
-          (factory ?? defaultMapFactory<K, V>()).call(initial),
+          (factory?.call(initial) ?? initial ?? <K, V>{}),
         ) {
     _change = currentStateAsChange;
   }
@@ -48,9 +42,7 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
 
   @override
   ObservableMapChange<K, V> get currentStateAsChange {
-    return ObservableMapChange<K, V>(
-      added: _value,
-    );
+    return ObservableMapChange<K, V>(added: _value);
   }
 
   @override

@@ -8,12 +8,6 @@ import 'operators/map_item.dart';
 import 'operators/rx_item.dart';
 import 'rx_actions.dart';
 
-Set<E> Function(Iterable<E>? items) defaultSetFactory<E>() {
-  return (final Iterable<E>? items) {
-    return Set<E>.of(items ?? <E>{});
-  };
-}
-
 Set<E> Function(Iterable<E>? items) _splayTreeSetFactory<E>(final Comparator<E> compare) {
   return (final Iterable<E>? items) {
     return SplayTreeSet<E>.of(items ?? <E>{}, compare);
@@ -28,7 +22,7 @@ class RxSetImpl<E> extends RxCollectionBase<Set<E>, ObservableSetChange<E>>
   RxSetImpl({
     final Iterable<E>? initial,
     final Set<E> Function(Iterable<E>? items)? factory,
-  }) : super((factory ?? defaultSetFactory<E>()).call(initial)) {
+  }) : super(factory?.call(initial) ?? initial?.toSet() ?? <E>{}) {
     _change = currentStateAsChange;
   }
 

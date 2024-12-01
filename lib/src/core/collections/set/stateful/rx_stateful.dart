@@ -3,13 +3,18 @@ import 'dart:collection';
 import '../../../../../dart_observable.dart';
 import '../../_base_stateful.dart';
 import '../rx_actions.dart';
-import '../rx_impl.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
 import 'operators/filter_item_state.dart';
 import 'operators/map_item.dart';
 import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
+
+Set<E> Function(Iterable<E>? items) _defaultSetFactory<E>() {
+  return (final Iterable<E>? items) {
+    return Set<E>.of(items ?? <E>{});
+  };
+}
 
 class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, ObservableSetChange<E>, S>
     with RxSetActionsImpl<E>
@@ -22,9 +27,7 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
     final FactorySet<E>? factory,
   }) : this._(
           () {
-            final FactorySet<E> $factory = factory ?? defaultSetFactory<E>();
-            final Set<E> updatedSet = $factory(data);
-            return Either<Set<E>, S>.left(updatedSet);
+            return Either<Set<E>, S>.left(factory?.call(data) ?? data.toSet());
           }(),
           factory: factory,
         );
@@ -42,7 +45,7 @@ class RxStatefulSetImpl<E, S> extends RxCollectionStatefulBase<Set<E>, Observabl
   RxStatefulSetImpl._(
     final Either<Set<E>, S> state, {
     final FactorySet<E>? factory,
-  })  : _factory = factory ?? defaultSetFactory<E>(),
+  })  : _factory = factory ?? _defaultSetFactory<E>(),
         super(state) {
     _change = currentStateAsChange;
   }

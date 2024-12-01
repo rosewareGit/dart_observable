@@ -4,13 +4,18 @@ import '../../../../../dart_observable.dart';
 import '../../_base_stateful.dart';
 import '../map_update_action_handler.dart';
 import '../rx_actions.dart';
-import '../rx_impl.dart';
 import 'operators/change_factory.dart';
 import 'operators/filter_item.dart';
 import 'operators/filter_item_state.dart';
 import 'operators/map_item.dart';
 import 'operators/map_item_state.dart';
 import 'operators/rx_item.dart';
+
+Map<K, V> Function(Map<K, V>? items) _defaultMapFactory<K, V>() {
+  return (final Map<K, V>? items) {
+    return Map<K, V>.of(items ?? <K, V>{});
+  };
+}
 
 class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, ObservableMapChange<K, V>, S>
     with RxMapActionsImpl<K, V>, MapUpdateActionHandler<K, V>
@@ -23,9 +28,7 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
     final FactoryMap<K, V>? factory,
   }) : this._(
           () {
-            final FactoryMap<K, V> $factory = factory ?? defaultMapFactory<K, V>();
-            final Map<K, V> updatedMap = $factory(data);
-            return Either<Map<K, V>, S>.left(updatedMap);
+            return Either<Map<K, V>, S>.left(factory?.call(data) ?? data);
           }(),
           factory: factory,
         );
@@ -43,7 +46,7 @@ class RxStatefulMapImpl<K, V, S> extends RxCollectionStatefulBase<Map<K, V>, Obs
   RxStatefulMapImpl._(
     final Either<Map<K, V>, S> state, {
     final FactoryMap<K, V>? factory,
-  })  : _factory = factory ?? defaultMapFactory<K, V>(),
+  })  : _factory = factory ?? _defaultMapFactory<K, V>(),
         super(state) {
     _change = currentStateAsChange;
   }
