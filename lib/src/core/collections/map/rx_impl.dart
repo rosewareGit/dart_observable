@@ -1,7 +1,5 @@
 import 'dart:collection';
 
-import 'package:meta/meta.dart';
-
 import '../../../../dart_observable.dart';
 import '../_base.dart';
 import 'map_update_action_handler.dart';
@@ -81,7 +79,6 @@ class RxMapImpl<K, V> extends RxCollectionBase<Map<K, V>, ObservableMapChange<K,
     return _value[key];
   }
 
-  @protected
   ObservableMapChange<K, V>? applyAction(final ObservableMapUpdateAction<K, V> action) {
     final ObservableMapChange<K, V> change = applyActionAndComputeChange(
       data: _value,
