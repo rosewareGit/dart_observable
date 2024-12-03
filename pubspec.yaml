@@ -3,7 +3,6 @@ description: A state management library using the Observer pattern, optimized fo
 version: 1.0.0
 repository: https://github.com/rosewareGit/dart_observable/tree/main
 issue_tracker: https://github.com/rosewareGit/dart_observable/issues
-publish_to: 'none'
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
