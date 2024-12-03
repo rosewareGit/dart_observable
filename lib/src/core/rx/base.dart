@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import '../../../dart_observable.dart';
+import '../../api/log/debug_name_parser.dart';
 import 'factories/combine_latest_2.dart';
 import 'factories/combine_latest_3.dart';
 import 'factories/combine_latest_4.dart';
@@ -228,9 +229,6 @@ abstract class RxBase<T>
     }
 
     _hadListeners = true;
-    if (hadListeners == false) {
-      DartObservableGlobalMetrics().emitActive(this);
-    }
     return listener;
   }
 
@@ -320,35 +318,11 @@ abstract class RxBase<T>
       listener.notify(value);
     }
     onActive();
+    DartObservableGlobalMetrics().emitActive(this);
   }
 
-  // TODO: Make is optional/configurable
   void _initDebugName() {
-    final StackTrace stack = StackTrace.current;
-    final List<String> lines = stack.toString().split('\n');
-    String? caller;
-    if (lines.isEmpty) {
-      caller = '';
-    } else {
-      for (final String line in lines) {
-        if (line.contains('package:dart_observable/') == false) {
-          caller = line;
-          break;
-        }
-        if (line.contains('global_metrics.dart')) {
-          caller = line;
-          break;
-        }
-      }
-      if (caller == null) {
-        if (lines.length > 2) {
-          caller = lines[1];
-        } else {
-          caller = lines[0];
-        }
-      }
-    }
-    debugName = caller;
+    debugName = debugNameParser();
   }
 
   FutureOr<void> _listenerRemove(final ObservableListener<T> listener) {

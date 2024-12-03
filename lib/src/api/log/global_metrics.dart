@@ -1,6 +1,8 @@
 import '../../../dart_observable.dart';
 
 class DartObservableGlobalMetrics {
+  static bool _metricsEnabled = false;
+
   static final DartObservableGlobalMetrics _instance = DartObservableGlobalMetrics._();
 
   late final RxMap<String, List<DateTime>> _rxNotifies = RxMap<String, List<DateTime>>();
@@ -8,7 +10,8 @@ class DartObservableGlobalMetrics {
   late final RxMap<String, List<DateTime>> _rxActives = RxMap<String, List<DateTime>>();
   late final RxMap<String, List<DateTime>> _rxInactives = RxMap<String, List<DateTime>>();
 
-  final Set<String> _ignoredPaths = <String>{};
+  final List<String> _ignoreDebugNames = <String>[];
+  final List<String> _ignorePaths = <String>[];
 
   factory DartObservableGlobalMetrics() {
     return _instance;
@@ -31,8 +34,23 @@ class DartObservableGlobalMetrics {
     _rxInactives.clear();
   }
 
+  void disableMetricsFor(final List<Observable<dynamic>> sources) {
+    for (int i = 0; i < sources.length; ++i) {
+      final Observable<dynamic> source = sources[i];
+      final String debugName = source.debugName;
+      _ignoreDebugNames.add(debugName);
+    }
+  }
+
+  void disableMetricsForClass(final Object clazz) {
+    final String? filePath = _extractPathFromStack(clazz);
+    if (filePath != null) {
+      _ignorePaths.add(filePath);
+    }
+  }
+
   void emitActive(final Observable<dynamic> source) {
-    if (shouldIgnore(source)) {
+    if (_shouldIgnore(source)) {
       return;
     }
     final List<DateTime> current = _rxActives[source.debugName] ?? <DateTime>[];
@@ -40,7 +58,7 @@ class DartObservableGlobalMetrics {
   }
 
   void emitDispose(final Observable<dynamic> source) {
-    if (shouldIgnore(source)) {
+    if (_shouldIgnore(source)) {
       return;
     }
     final List<DateTime> current = _rxDisposes[source.debugName] ?? <DateTime>[];
@@ -48,7 +66,7 @@ class DartObservableGlobalMetrics {
   }
 
   void emitInactive(final Observable<dynamic> source) {
-    if (shouldIgnore(source)) {
+    if (_shouldIgnore(source)) {
       return;
     }
     final List<DateTime> current = _rxInactives[source.debugName] ?? <DateTime>[];
@@ -56,34 +74,50 @@ class DartObservableGlobalMetrics {
   }
 
   void emitNotify(final Observable<dynamic> source) {
-    if (shouldIgnore(source)) {
+    if (_shouldIgnore(source)) {
       return;
     }
     final List<DateTime> current = _rxNotifies[source.debugName] ?? <DateTime>[];
     _rxNotifies[source.debugName] = <DateTime>[...current, DateTime.now()];
   }
 
-  void enableMetrics() {
-    final StackTrace source = StackTrace.current;
-    final String sourceText = source.toString();
-    if (sourceText.contains('package:') == false) {
-      return;
+  void enableMetricsFor(final List<Observable<dynamic>> sources) {
+    for (int i = 0; i < sources.length; ++i) {
+      final Observable<dynamic> source = sources[i];
+      final String debugName = source.debugName;
+      _ignoreDebugNames.remove(debugName);
     }
-    // without line number
-    final String filePath = sourceText.split('package:')[1].split('.dart')[0];
-    _ignoredPaths.remove(filePath);
   }
 
-  void ignoreMetrics() {
-    final StackTrace source = StackTrace.current;
-    final String sourceText = source.toString();
-    if (sourceText.contains('package:') == false) {
-      return;
+  void enableMetricsForClass(final Object clazz) {
+    final String? path = _extractPathFromStack(clazz);
+    if (path != null) {
+      _ignorePaths.remove(path);
     }
+  }
+
+  String? _extractPathFromStack(final Object clazz) {
+    if (_isParsableStack() == false) {
+      return null;
+    }
+
+    final StackTrace stack = StackTrace.current;
+    final String className = clazz.runtimeType.toString();
+    final String sourceText = stack.toString();
+
     final List<String> lines = sourceText.split('\n');
     String? sourceLine;
     for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
+      if (line.contains(className)) {
+        sourceLine = line;
+        break;
+      }
+
+      if (line.contains('package') == false) {
+        continue;
+      }
+
       if (line.contains('global_metrics.dart')) {
         // internal usage
         continue;
@@ -91,22 +125,48 @@ class DartObservableGlobalMetrics {
       sourceLine = line;
       break;
     }
+
     if (sourceLine == null) {
-      return;
+      return null;
     }
     // without line number
-    final String filePath = sourceLine.split('package:')[1].split('.dart')[0];
-    _ignoredPaths.add(filePath);
+    return sourceLine.split('package')[1].split('.dart')[0];
   }
 
-  bool shouldIgnore(final Observable<dynamic> source) {
+  bool _isParsableStack() {
+    final String currentStack = StackTrace.current.toString();
+    return currentStack.contains('package');
+  }
+
+  bool _shouldIgnore(final Observable<dynamic> source) {
+    if (_metricsEnabled == false) {
+      return true;
+    }
+
+    final bool isParsableStack = _isParsableStack();
+    if (isParsableStack == false) {
+      return true;
+    }
+
     final String debugName = source.debugName;
-    for (final String ignoredPath in _ignoredPaths) {
-      if (debugName.contains(ignoredPath)) {
+    if (_ignoreDebugNames.contains(debugName)) {
+      return true;
+    }
+
+    for (final String ignore in _ignorePaths) {
+      if (debugName.contains(ignore)) {
         return true;
       }
     }
 
-    return debugName.contains('package:dart_observable/src/api/log/global_metrics.dart');
+    return debugName.contains('dart_observable/src/api/log/global_metrics.dart');
+  }
+
+  static void disableGlobalMetrics() {
+    _metricsEnabled = false;
+  }
+
+  static void enableGlobalMetrics() {
+    _metricsEnabled = true;
   }
 }
