@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import '../../../dart_observable.dart';
 import 'factories/combine_latest_2.dart';
 import 'factories/combine_latest_3.dart';
@@ -244,13 +242,7 @@ abstract class RxBase<T>
     DartObservableGlobalMetrics().emitNotify(this);
   }
 
-  @mustCallSuper
-  void onActive() {
-    final List<ObservableListener<T>> listeners = <ObservableListener<T>>[..._activeListeners];
-    for (final ObservableListener<T> listener in listeners) {
-      listener.notify(value);
-    }
-  }
+  void onActive() {}
 
   @override
   Disposable onActivityChanged({
@@ -267,8 +259,7 @@ abstract class RxBase<T>
     );
   }
 
-  @mustCallSuper
-  Future<void> onInactive() async {}
+  FutureOr<void> onInactive() {}
 
   void onInit() {}
 
@@ -324,6 +315,10 @@ abstract class RxBase<T>
   }
 
   void _dispatchActive() {
+    final List<ObservableListener<T>> listeners = <ObservableListener<T>>[..._activeListeners];
+    for (final ObservableListener<T> listener in listeners) {
+      listener.notify(value);
+    }
     onActive();
   }
 
