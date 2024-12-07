@@ -32,6 +32,5 @@ export 'src/api/types/bool.dart';
 export 'src/api/types/num/_nums.dart';
 export 'src/api/types/string.dart';
 export 'src/core/collections/map/sorted_map.dart';
-export 'src/core/listeners/observable_listener.dart';
 export 'src/core/rx/base.dart';
 export 'src/states/either.dart';

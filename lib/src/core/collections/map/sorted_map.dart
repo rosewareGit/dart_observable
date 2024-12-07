@@ -1,7 +1,6 @@
 class SortedMap<K, V> implements Map<K, V> {
   final Comparator<V> _comparator;
 
-  // final Map<K, V> _map;
   final Map<K, V> _map;
   final List<K> _sortedByKeys;
 
@@ -138,7 +137,6 @@ class SortedMap<K, V> implements Map<K, V> {
   List<V> toList({final bool growable = true}) {
     final List<V> list = <V>[];
     for (final K key in _sortedByKeys) {
-      // final K? key = _keyMap[value];
       final V? updatedItem = _map[key];
       if (updatedItem != null) {
         list.add(updatedItem);

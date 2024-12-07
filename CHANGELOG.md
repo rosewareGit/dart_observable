@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Not exposing the internal ObservableListener
+
 ## 1.0.2
 
 - Renamed metrics to logger.

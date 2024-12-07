@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../../dart_observable.dart';
 import '../../api/log/debug_name_parser.dart';
+import '../listeners/observable_listener.dart';
 import 'factories/combine_latest_2.dart';
 import 'factories/combine_latest_3.dart';
 import 'factories/combine_latest_4.dart';
