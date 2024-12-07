@@ -1,9 +1,9 @@
 import '../../../dart_observable.dart';
 
-class DartObservableGlobalMetrics {
-  static bool _metricsEnabled = false;
+class ObservableGlobalLogger {
+  static bool _loggingEnabled = false;
 
-  static final DartObservableGlobalMetrics _instance = DartObservableGlobalMetrics._();
+  static final ObservableGlobalLogger _instance = ObservableGlobalLogger._();
 
   late final RxMap<String, List<DateTime>> _rxNotifies = RxMap<String, List<DateTime>>();
   late final RxMap<String, List<DateTime>> _rxDisposes = RxMap<String, List<DateTime>>();
@@ -13,11 +13,11 @@ class DartObservableGlobalMetrics {
   final List<String> _ignoreDebugNames = <String>[];
   final List<String> _ignorePaths = <String>[];
 
-  factory DartObservableGlobalMetrics() {
+  factory ObservableGlobalLogger() {
     return _instance;
   }
 
-  DartObservableGlobalMetrics._();
+  ObservableGlobalLogger._();
 
   ObservableMap<String, List<DateTime>> get rxActives => _rxActives;
 
@@ -34,7 +34,7 @@ class DartObservableGlobalMetrics {
     _rxInactives.clear();
   }
 
-  void disableMetricsFor(final List<Observable<dynamic>> sources) {
+  void disableLoggingFor(final List<Observable<dynamic>> sources) {
     for (int i = 0; i < sources.length; ++i) {
       final Observable<dynamic> source = sources[i];
       final String debugName = source.debugName;
@@ -42,7 +42,7 @@ class DartObservableGlobalMetrics {
     }
   }
 
-  void disableMetricsForClass(final Object clazz) {
+  void disableLoggingForClass(final Object clazz) {
     final String? filePath = _extractPathFromStack(clazz);
     if (filePath != null) {
       _ignorePaths.add(filePath);
@@ -81,7 +81,7 @@ class DartObservableGlobalMetrics {
     _rxNotifies[source.debugName] = <DateTime>[...current, DateTime.now()];
   }
 
-  void enableMetricsFor(final List<Observable<dynamic>> sources) {
+  void enableLoggingFor(final List<Observable<dynamic>> sources) {
     for (int i = 0; i < sources.length; ++i) {
       final Observable<dynamic> source = sources[i];
       final String debugName = source.debugName;
@@ -89,7 +89,7 @@ class DartObservableGlobalMetrics {
     }
   }
 
-  void enableMetricsForClass(final Object clazz) {
+  void enableLoggingForClass(final Object clazz) {
     final String? path = _extractPathFromStack(clazz);
     if (path != null) {
       _ignorePaths.remove(path);
@@ -118,7 +118,7 @@ class DartObservableGlobalMetrics {
         continue;
       }
 
-      if (line.contains('global_metrics.dart')) {
+      if (line.contains('observable_global_logger.dart')) {
         // internal usage
         continue;
       }
@@ -139,7 +139,7 @@ class DartObservableGlobalMetrics {
   }
 
   bool _shouldIgnore(final Observable<dynamic> source) {
-    if (_metricsEnabled == false) {
+    if (_loggingEnabled == false) {
       return true;
     }
 
@@ -159,14 +159,14 @@ class DartObservableGlobalMetrics {
       }
     }
 
-    return debugName.contains('dart_observable/src/api/log/global_metrics.dart');
+    return debugName.contains('dart_observable/src/api/log/observable_global_logger.dart');
   }
 
-  static void disableGlobalMetrics() {
-    _metricsEnabled = false;
+  static void disableGlobalLogger() {
+    _loggingEnabled = false;
   }
 
-  static void enableGlobalMetrics() {
-    _metricsEnabled = true;
+  static void enableGlobalLogger() {
+    _loggingEnabled = true;
   }
 }

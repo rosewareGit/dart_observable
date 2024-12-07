@@ -1,6 +1,7 @@
 import '../../../../dart_observable.dart';
 import 'change_elements.dart';
 import 'list_element.dart';
+import 'list_sync_helper.dart';
 
 abstract interface class ObservableListUpdateActionHandler<E> {
   List<ObservableListElement<E>> get data;
@@ -117,7 +118,6 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
     if (clear) {
       for (int i = 0; i < data.length; i++) {
         final ObservableListElement<E> item = data[i];
-        item.unlink();
         change.removedElements[i] = ObservableListElementChange<E>(
           element: item,
           oldValue: item.value,
@@ -125,14 +125,27 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
         );
       }
       data.clear();
-    } else {
-      final List<int> sortedDescend = removedIndexes.toList()..sort((final int a, final int b) => b.compareTo(a));
+      return;
+    }
 
-      for (final int index in sortedDescend) {
-        if (index >= data.length) {
+    // Contains the start index of the group and the length of the group
+    final Map<int, int> groupsToRemove = groupConsecutiveItems(removedIndexes.toList());
+    final Iterable<int> keysReversed = groupsToRemove.keys.toList().reversed;
+
+    for (final int key in keysReversed) {
+      final int start = key;
+      final int? length = groupsToRemove[key];
+      if (length == null) {
+        continue;
+      }
+
+      for (int i = 0; i < length; i++) {
+        final int index = start + i;
+        if (index > data.length) {
           continue;
         }
-        final ObservableListElement<E> item = data.removeAt(index);
+
+        final ObservableListElement<E> item = data[index];
         item.unlink();
         change.removedElements[index] = ObservableListElementChange<E>(
           element: item,
@@ -140,6 +153,8 @@ mixin ObservableListUpdateActionHandlerImpl<E> implements ObservableListUpdateAc
           newValue: item.value,
         );
       }
+
+      data.removeRange(start, start + length);
     }
   }
 

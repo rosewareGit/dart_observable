@@ -36,6 +36,7 @@ abstract class RxBase<T>
   final Set<ObservableListener<T>> _activeListeners = <ObservableListener<T>>{};
   final Set<ObservableListener<T>> _inactiveListeners = <ObservableListener<T>>{};
   bool _hadListeners = false;
+  int _updateCount = 0;
 
   RxBase(
     final T value, {
@@ -79,6 +80,9 @@ abstract class RxBase<T>
   ObservableTransforms<T> get transformAs {
     return ObservableTransformsImpl<T>(this);
   }
+
+  @override
+  get updateCount => _updateCount;
 
   @override
   T get value {
@@ -205,7 +209,7 @@ abstract class RxBase<T>
     _activeListeners.clear();
     _inactiveListeners.clear();
 
-    DartObservableGlobalMetrics().emitDispose(this);
+    ObservableGlobalLogger().emitDispose(this);
   }
 
   @override
@@ -237,7 +241,8 @@ abstract class RxBase<T>
     for (final ObservableListener<T> listener in listeners) {
       listener.notify(value);
     }
-    DartObservableGlobalMetrics().emitNotify(this);
+    ObservableGlobalLogger().emitNotify(this);
+    _updateCount++;
   }
 
   void onActive() {}
@@ -318,7 +323,7 @@ abstract class RxBase<T>
       listener.notify(value);
     }
     onActive();
-    DartObservableGlobalMetrics().emitActive(this);
+    ObservableGlobalLogger().emitActive(this);
   }
 
   void _initDebugName() {
@@ -332,7 +337,7 @@ abstract class RxBase<T>
       for (final ObservableListener<T> listener in listeners) {
         listener.notify(value);
       }
-      DartObservableGlobalMetrics().emitInactive(this);
+      ObservableGlobalLogger().emitInactive(this);
       return onInactive();
     }
   }

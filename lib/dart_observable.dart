@@ -22,7 +22,7 @@ export 'src/api/collections/set/stateful/stateful_set.dart';
 export 'src/api/collections/set/update_action.dart';
 export 'src/api/disposable.dart';
 export 'src/api/errors/completed_error.dart';
-export 'src/api/log/global_metrics.dart';
+export 'src/api/log/observable_global_logger.dart';
 export 'src/api/observable.dart';
 export 'src/api/observable_n.dart';
 export 'src/api/operators/switch_maps.dart';

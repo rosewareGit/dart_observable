@@ -62,6 +62,9 @@ abstract interface class Observable<T> {
   /// Each observable has a unique identifier that assigned at creation.
   String get debugName;
 
+  /// Returns the number of update events emitted by the [Observable].
+  int get updateCount;
+
   /// Returns whether the [Observable] has been disposed.
   bool get disposed;
 

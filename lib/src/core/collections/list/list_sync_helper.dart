@@ -218,14 +218,27 @@ class ObservableListSyncHelper<E> {
     required final _SyncChange<E> syncChange,
   }) {
     final List<ObservableListElement<E>> currentData = data;
+    final Set<int> indexesToRemove = <int>{};
 
     for (final ObservableListElementChange<E> change in elementsToRemove) {
       final ObservableListElement<E> element = change.element;
       final int index = currentData.indexOf(element);
       if (index != -1) {
         syncChange.removedElements[index] = change;
-        currentData.removeAt(index);
+        indexesToRemove.add(index);
       }
+    }
+
+    final Map<int, int> groupsToRemove = groupConsecutiveItems(indexesToRemove.toList());
+    final Iterable<int> keysReversed = groupsToRemove.keys.toList().reversed;
+
+    for (final int key in keysReversed) {
+      final int start = key;
+      final int? length = groupsToRemove[key];
+      if (length == null) {
+        continue;
+      }
+      data.removeRange(start, start + length);
     }
   }
 
@@ -261,4 +274,32 @@ class _SyncChange<E> {
   final Map<int, ObservableListElement<E>> addedElements = <int, ObservableListElement<E>>{};
   final Map<int, ObservableListElementChange<E>> removedElements = <int, ObservableListElementChange<E>>{};
   final Map<int, ObservableListElementChange<E>> updatedElements = <int, ObservableListElementChange<E>>{};
+}
+
+Map<int, int> groupConsecutiveItems(final List<int> numbers) {
+  if (numbers.isEmpty) {
+    return <int, int>{};
+  }
+
+  // Sort the list to ensure proper grouping
+  numbers.sort();
+
+  final Map<int, int> result = <int, int>{};
+  int start = numbers[0];
+  int count = 1;
+
+  for (int i = 1; i < numbers.length; i++) {
+    if (numbers[i] == numbers[i - 1] + 1) {
+      count++;
+    } else {
+      result[start] = count;
+      start = numbers[i];
+      count = 1;
+    }
+  }
+
+  // Add the last group to the result
+  result[start] = count;
+
+  return result;
 }

@@ -15,7 +15,7 @@ String debugNameParser() {
         break;
       }
 
-      if (line.contains('global_metrics')) {
+      if (line.contains('observable_global_logger')) {
         caller = line;
         break;
       }

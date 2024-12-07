@@ -40,9 +40,7 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
     }
 
     return applyListUpdateAction(
-      ObservableListUpdateAction<E>(
-        removeAtPositions: <int>{for (int i = 0; i < items.length; i++) i},
-      ),
+      ObservableListUpdateAction<E>(clear: true),
     );
   }
 
@@ -102,6 +100,31 @@ mixin RxListActionsImpl<E> implements RxListActions<E> {
 
     return applyListUpdateAction(
       ObservableListUpdateAction<E>(removeAtPositions: <int>{index}),
+    );
+  }
+
+  @override
+  ObservableListChange<E>? removeIndexes(final Iterable<int> indexes) {
+    final List<ObservableListElement<E>> items = data;
+    if (items.isEmpty) {
+      onEmptyData();
+      return null;
+    }
+
+    final Set<int> removed = <int>{};
+    for (final int index in indexes) {
+      if (index < 0 || index >= items.length) {
+        continue;
+      }
+      removed.add(index);
+    }
+
+    if (removed.isEmpty) {
+      return null;
+    }
+
+    return applyListUpdateAction(
+      ObservableListUpdateAction<E>(removeAtPositions: removed),
     );
   }
 
