@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Fixed SortedMap keys not respecting the order
+
 ## 1.0.4
 
 - Updated README.md

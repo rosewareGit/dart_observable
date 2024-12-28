@@ -33,7 +33,7 @@ class SortedMap<K, V> implements Map<K, V> {
   bool get isNotEmpty => _map.isNotEmpty;
 
   @override
-  Iterable<K> get keys => _map.keys;
+  Iterable<K> get keys => _sortedByKeys;
 
   @override
   int get length => _map.length;
@@ -89,7 +89,7 @@ class SortedMap<K, V> implements Map<K, V> {
 
   @override
   void forEach(final void Function(K key, V value) action) {
-    for (final MapEntry<K, V> entry in _map.entries) {
+    for (final MapEntry<K, V> entry in entries) {
       action(entry.key, entry.value);
     }
   }

@@ -42,6 +42,15 @@ void main() {
       });
     });
 
+    group('keys', () {
+      test('Should return the sorted keys of the map', () {
+        final SortedMap<int, String?> sortedMap = createMap();
+
+        final List<int> keys = sortedMap.keys.toList();
+        expect(keys, <int>[3, 2, 1]);
+      });
+    });
+
     group('update', () {
       test('Should update the value of the specified key', () {
         final SortedMap<int, String?> sortedMap = createMap();
