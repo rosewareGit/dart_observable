@@ -7,7 +7,7 @@ typedef FactoryMap<K, V> = Map<K, V> Function(Map<K, V>? items);
 typedef FactorySet<T> = Set<T> Function(Iterable<T>? items);
 typedef FutureWorker = FutureOr<void> Function();
 
-abstract interface class Observable<T> {
+abstract interface class Observable<T> implements Disposable {
   /// Creates a new [Observable] from the [observables].
   /// On any update from any of the [observables], the [combiner] function is called to update the value.
   ///  - [combiner] should return the value in sync.
@@ -128,6 +128,7 @@ abstract interface class Observable<T> {
   /// Dispose the [Observable], releasing all resources.
   /// The [Observable] will no longer emit values.
   /// A disposed [Observable] cannot be reused.
+  @override
   Future<void> dispose();
 
   /// Creates a new [Observable] that emits the value if the [predicate] returns `true`.

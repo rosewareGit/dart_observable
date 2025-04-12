@@ -1,3 +1,8 @@
+## 1.0.6
+
+- Added Disposable interface to Observable
+- Fixed Set filter
+
 ## 1.0.5
 
 - Fixed SortedMap keys not respecting the order

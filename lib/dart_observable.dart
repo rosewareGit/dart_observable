@@ -33,4 +33,6 @@ export 'src/api/types/num/_nums.dart';
 export 'src/api/types/string.dart';
 export 'src/core/collections/map/sorted_map.dart';
 export 'src/core/rx/base.dart';
+export 'src/extension_future_or.dart';
+export 'src/optional.dart';
 export 'src/states/either.dart';

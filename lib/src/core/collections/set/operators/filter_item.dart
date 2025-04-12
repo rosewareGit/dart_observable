@@ -22,7 +22,10 @@ class ObservableSetFilterOperator<E> extends SetChangeTransform<E, ObservableSet
     final Emitter<ObservableSetUpdateAction<E>> updater,
     final bool Function(E item) predicate,
   ) {
-    final Set<E> removed = change.removed;
+    final Set<E> removed = <E>{
+      ...change.removed,
+      ...change.added.where((final E item) => predicate(item) == false),
+    };
     final Set<E> added = change.added.where(predicate).toSet();
 
     updater(
