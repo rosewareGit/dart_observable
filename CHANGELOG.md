@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Implements Rx interface on collections
+
 ## 1.0.6
 
 - Added Disposable interface to Observable

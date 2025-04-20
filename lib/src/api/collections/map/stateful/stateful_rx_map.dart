@@ -2,7 +2,8 @@ import '../../../../../dart_observable.dart';
 import '../../../../core/collections/map/stateful/rx_stateful.dart';
 import '../rx_actions.dart';
 
-abstract interface class RxStatefulMap<K, V, S> implements ObservableStatefulMap<K, V, S>, RxMapActions<K, V> {
+abstract interface class RxStatefulMap<K, V, S>
+    implements ObservableStatefulMap<K, V, S>, Rx<Either<Map<K, V>, S>>, RxMapActions<K, V> {
   factory RxStatefulMap({
     final S? custom,
     final Map<K, V>? initial,
@@ -30,8 +31,6 @@ abstract interface class RxStatefulMap<K, V, S> implements ObservableStatefulMap
       factory: factory,
     );
   }
-
-  set value(final Either<Map<K, V>, S> value);
 
   Either<ObservableMapChange<K, V>, S>? setState(final S newState);
 }
